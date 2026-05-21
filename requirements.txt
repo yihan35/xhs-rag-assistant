@@ -1,0 +1,22 @@
+# ── 爬虫层 ─────────────────────────────────────────────────────────
+playwright>=1.44.0          # Playwright 浏览器自动化（安装后需 playwright install chromium）
+requests>=2.31.0            # HTTP 请求（备用）
+browser-cookie3>=0.19.1     # 从系统浏览器读取 Cookie（get_my_cookies.py 用）
+
+# ── AI 能力层 ───────────────────────────────────────────────────────
+zhipuai>=2.1.0              # 智谱 API：embedding-3 / glm-5.1 / glm-4.6v
+openai>=1.30.0              # OpenAI Whisper-1 视频转录（无视频可不配置）
+
+# ── 存储层 ─────────────────────────────────────────────────────────
+chromadb>=0.5.0             # 向量数据库（含内置 SQLite，勿与 SQLite 路径冲突）
+
+# ── 网络代理兼容 ────────────────────────────────────────────────────
+httpx[socks]>=0.27.0        # SOCKS 代理支持（macOS 有系统代理时必须）
+
+# ── Web 后端 ────────────────────────────────────────────────────────
+fastapi>=0.111.0            # Web 框架
+uvicorn[standard]>=0.29.0   # ASGI 服务器
+python-dotenv>=1.0.0        # .env 文件加载（llm_config.py 依赖）
+
+# ── 系统依赖（不在 pip 内，需单独安装）─────────────────────────────
+# ffmpeg：视频转录用，macOS 安装：brew install ffmpeg

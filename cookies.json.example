@@ -1,0 +1,7 @@
+{
+  "a1":          "你的 a1 值（必填）",
+  "web_session": "你的 web_session 值（必填）",
+  "webId":       "你的 webId 值（必填）",
+  "acw_tc":      "可选，Akamai 反爬 cookie",
+  "gid":         "可选，全局设备 ID"
+}

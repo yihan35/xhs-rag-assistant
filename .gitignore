@@ -1,0 +1,49 @@
+# 数据文件（不提交到 git）
+data/notes.db
+data/chroma_db/
+data/cookies.json
+data/debug_state.json
+data/notes_debug.html
+data/*.pid
+data/*.log
+
+# 保留目录结构
+!data/.gitkeep
+
+# 环境变量（包含 API key）
+.env
+
+# 旧版根目录运行产物（兼容忽略）
+/cookies.json
+/debug_state.json
+
+# Python
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# 前端构建产物
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# 测试备份文件
+data/notes.db.bak
+
+# 浏览器 profile（本地状态）
+# ~/.xhs_playwright_profile 在家目录，不在项目里，无需忽略
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Local agent/tool settings
+.claude/settings.local.json
