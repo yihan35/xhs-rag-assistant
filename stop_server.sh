@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 停止后端（FastAPI）+ 前端（Vite）
+# 停止服务：后端（FastAPI）+ 前端（Vite）
 
 set -euo pipefail
 
@@ -36,6 +36,7 @@ stop_by_pidfile() {
   fi
 }
 
+echo "▶ 停止服务..."
 stop_by_pidfile "后端" "$PID_FILE"
 stop_by_pidfile "前端" "$FRONTEND_PID_FILE"
 

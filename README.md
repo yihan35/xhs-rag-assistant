@@ -2,6 +2,8 @@
 
 把小红书收藏夹变成可对话的私人知识库。支持**语义检索**和 **AI 综合问答**双模式。
 
+![KnoNote 页面展示](figure/frame.png)
+
 ---
 
 ## 仓库结构
@@ -15,8 +17,8 @@ xhs-rag-assistant/
 │
 ├── main.py           # 后端 FastAPI 入口（负责人：莫仕玉）← 本文档
 ├── sync_xhs.sh       # 小红书收藏同步入口（执行 crawler/ingest.py）
-├── start_server.sh   # 启动 FastAPI 后端服务
-├── stop_server.sh    # 停止 FastAPI 后端服务
+├── start_server.sh   # 启动前后端服务
+├── stop_server.sh    # 停止前后端服务
 ├── tools/            # 开发调试工具
 │
 ├── data/             # 运行时数据（不进 git）← data/README.md
@@ -26,7 +28,6 @@ xhs-rag-assistant/
 │   ├── server.pid    # 后端服务 PID（启动后生成）
 │   └── server.log    # 后端服务日志（启动后生成）
 │
-├── .env              # API Key（不进 git，参考 .env.example）
 ├── .env.example      # Key 模板
 ├── cookies.json.example # Cookie 文件模板
 └── requirements.txt  # Python 依赖
@@ -68,19 +69,32 @@ cp .env.example .env
 
 ### 3. 登录小红书
 
-先在 Chrome 登录 [小红书网页版](https://www.xiaohongshu.com)。同步脚本会自动读取 Chrome Cookie；也可以手动运行 `python -m crawler.get_my_cookies` 生成 `data/cookies.json`。
+先在 Chrome 登录 [小红书网页版](https://www.xiaohongshu.com)。
 
-### 4. 同步收藏夹
+### 4. 启动服务
 
 ```bash
-./sync_xhs.sh
-# 如果自动识别 user_id 失败，可显式指定：
-# XHS_USER_ID=你的用户ID ./sync_xhs.sh
+./start_server.sh
 ```
 
-脚本会输出开始时间、结束时间、总耗时、发现收藏数、爬取成功数、新增/更新/跳过/失败数、归档数，以及 SQLite/ChromaDB 当前统计。同步时会把已经取消收藏的历史笔记标记为归档，并从 ChromaDB 删除对应向量；这些内容会保留在 SQLite 中供开发排查，但不会参与后续检索。同步结束后会自动执行 `python tools/export_notes_debug.py`，生成 `data/notes_debug.html`，方便开发人员查看正文、OCR、图片描述、收藏状态和 ChromaDB document。
+脚本会同时启动 FastAPI 后端和 Vite 前端：
 
-### 5. 导出开发调试页面（可选）
+- 前端页面：`http://localhost:5173`
+- 后端 API：`http://127.0.0.1:8000`
+- 后端日志：`data/server.log`
+- 前端日志：`data/frontend.log`
+
+打开前端页面后，点击页面上的同步按钮即可同步收藏夹。
+
+### 5. 停止服务
+
+```bash
+./stop_server.sh
+```
+
+脚本会停止后端和前端，并兜底释放 `8000` 与 `5173` 端口。
+
+### 开发调试页面（可选）
 
 ```bash
 python tools/export_notes_debug.py
@@ -92,35 +106,6 @@ python tools/export_notes_debug.py
 - SQLite `content_parts`：正文、图片 OCR、图片描述、视频转录的结构化拆分。
 - ChromaDB `document`：当前向量库里实际保存的文本。
 - SQLite `content` 与 ChromaDB `document` 是否一致。
-
-可选参数：
-
-```bash
-python tools/export_notes_debug.py \
-  --user-id 640c4bcc000000002a0088a8 \
-  --output data/notes_debug.html
-```
-
-### 6. 启动后端
-
-```bash
-./start_server.sh
-```
-
-后端默认运行在 `http://127.0.0.1:8000`，PID 写入 `data/server.pid`，日志写入 `data/server.log`。
-
-停止后端：
-
-```bash
-./stop_server.sh
-```
-
-### 7. 启动前端
-
-```bash
-cd frontend && npm run dev
-# 访问 http://localhost:5173
-```
 
 ---
 
