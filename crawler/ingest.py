@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import os
+import random
 import sys
 import time
 from pathlib import Path
@@ -39,6 +40,12 @@ logger = logging.getLogger(__name__)
 
 COOKIES_FILE = str(PROJECT_ROOT / "data" / "cookies.json")
 MY_USER_ID = os.getenv("XHS_USER_ID", "")
+
+# ── 爬取速率控制 ──────────────────────────────────────────────────
+# 每条笔记爬取成功后的随机等待区间（秒）
+# 收到风控警告时建议调大，例如 (8, 15)
+CRAWL_DELAY_MIN = float(os.getenv("CRAWL_DELAY_MIN", "5"))
+CRAWL_DELAY_MAX = float(os.getenv("CRAWL_DELAY_MAX", "10"))
 
 DB_PATH = str(PROJECT_ROOT / "data" / "notes.db")
 CHROMA_PATH = str(PROJECT_ROOT / "data" / "chroma_db")
@@ -151,6 +158,11 @@ def main() -> int:
                     new_count += 1
                 else:
                     updated_count += 1
+
+                # 随机延迟，避免请求过于密集触发小红书风控
+                delay = random.uniform(CRAWL_DELAY_MIN, CRAWL_DELAY_MAX)
+                logger.info(f"  等待 {delay:.1f}s 后继续...")
+                time.sleep(delay)
 
             after = store.stats()
 
