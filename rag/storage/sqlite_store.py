@@ -40,7 +40,20 @@ CREATE TABLE IF NOT EXISTS notes (
     content_changed_at TEXT   NOT NULL DEFAULT '',     -- 本地检测到内容变化的时间
     PRIMARY KEY (note_id, user_id)
 );
+
+-- FTS5 全文检索虚拟表（BM25 混合检索）
+-- 使用 trigram tokenizer：将文本切成三字符滑窗，天然支持中文及任意子串匹配，
+-- 无需中文分词库，对品牌名（SK-II）、地名、人名等精确实体检索效果好。
+-- note_id / user_id 标为 UNINDEXED（存储但不建 trigram 索引），供 JOIN 过滤使用
+CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
+    note_id UNINDEXED,
+    user_id UNINDEXED,
+    title,
+    content,
+    tokenize='trigram'
+);
 """
+
 
 
 class SQLiteStore:
@@ -54,6 +67,7 @@ class SQLiteStore:
 
         self.conn.executescript(_SCHEMA)
         self._add_missing_columns()
+        self._sync_fts_index()
         self.conn.commit()
         logger.debug(f"SQLite 已连接：{db_path}")
 
@@ -126,6 +140,22 @@ class SQLiteStore:
             if col not in existing:
                 self.conn.execute(f"ALTER TABLE notes ADD COLUMN {col} {defn}")
                 logger.info(f"SQLite schema 已增加 {col} 字段")
+
+    def _sync_fts_index(self) -> None:
+        """
+        幂等地将 notes 表中尚未同步到 notes_fts 的记录补录进去。
+        用于存量数据迁移：首次建 FTS 表时或 FTS 表与主表不一致时调用。
+        """
+        self.conn.execute("""
+            INSERT INTO notes_fts(note_id, user_id, title, content)
+            SELECT n.note_id, n.user_id, n.title, n.content
+            FROM notes n
+            WHERE NOT EXISTS (
+                SELECT 1 FROM notes_fts f
+                WHERE f.note_id = n.note_id AND f.user_id = n.user_id
+            )
+        """)
+        logger.debug("FTS 索引同步完成")
 
     # ── 写入 ──────────────────────────────────────────────────────
 
@@ -205,10 +235,23 @@ class SQLiteStore:
                 content_changed_at,
             ),
         )
+        # 显式同步 FTS 索引（INSERT OR REPLACE 不触发 DELETE trigger，需手动维护）
+        self._upsert_fts(note["note_id"], user_id, note.get("title", ""), note.get("content", ""))
         self.conn.commit()
         is_new = existing is None
         logger.debug(f"[{note['note_id']}] SQLite {'INSERT' if is_new else 'UPDATE'}")
         return is_new
+
+    def _upsert_fts(self, note_id: str, user_id: str, title: str, content: str) -> None:
+        """删除旧 FTS 记录再插入新记录，确保 FTS 与 notes 表同步。"""
+        self.conn.execute(
+            "DELETE FROM notes_fts WHERE note_id = ? AND user_id = ?",
+            (note_id, user_id),
+        )
+        self.conn.execute(
+            "INSERT INTO notes_fts(note_id, user_id, title, content) VALUES (?, ?, ?, ?)",
+            (note_id, user_id, title, content),
+        )
 
     def mark_indexed(self, note_id: str, user_id: str) -> None:
         """将 indexed 置为 1，表示已写入 ChromaDB。user_id 必填，防止跨用户误更新。"""
@@ -267,6 +310,12 @@ class SQLiteStore:
             """,
             (archived_at, user_id, *archived_ids),
         )
+        # 归档的笔记从 FTS 删除，不再参与关键词检索
+        for nid in archived_ids:
+            self.conn.execute(
+                "DELETE FROM notes_fts WHERE note_id = ? AND user_id = ?",
+                (nid, user_id),
+            )
         self.conn.commit()
         logger.info(f"已归档 {len(archived_ids)} 条已取消收藏的笔记")
         return archived_ids
@@ -368,6 +417,100 @@ class SQLiteStore:
         return self.conn.execute(
             "SELECT COUNT(*) FROM notes WHERE content_changed_at != '' AND is_collected = 1"
         ).fetchone()[0]
+
+    def fts_search(
+        self,
+        query: str,
+        user_id: str = "",
+        n_results: int = 10,
+    ) -> list[dict]:
+        """
+        BM25 全文检索（SQLite FTS5）。
+
+        返回 list[dict]，每条含：
+            note_id   str
+            title     str
+            bm25      float  BM25 分数（FTS5 返回的负值，越小越相关；此处取绝对值）
+
+        注：仅返回 is_collected=1 的笔记（通过 JOIN notes 过滤）。
+        query 为空或 FTS 表不存在时返回 []。
+        """
+        if not query or not query.strip():
+            return []
+
+        try:
+            fts_query = self._build_fts_query(query)
+            if fts_query is None:
+                # 所有词均 < 3 字符，trigram 无法处理，静默降级
+                logger.debug(f"[fts_search] query 词项均过短，跳过 FTS：{repr(query)}")
+                return []
+            if user_id:
+                rows = self.conn.execute(
+                    f"""
+                    SELECT f.note_id, f.title, bm25(notes_fts) AS score
+                    FROM notes_fts f
+                    JOIN notes n ON n.note_id = f.note_id AND n.user_id = f.user_id
+                    WHERE notes_fts MATCH ? AND f.user_id = ? AND n.is_collected = 1
+                    ORDER BY score
+                    LIMIT ?
+                    """,
+                    (fts_query, user_id, n_results),
+                ).fetchall()
+            else:
+                rows = self.conn.execute(
+                    f"""
+                    SELECT f.note_id, f.title, bm25(notes_fts) AS score
+                    FROM notes_fts f
+                    JOIN notes n ON n.note_id = f.note_id AND n.user_id = f.user_id
+                    WHERE notes_fts MATCH ? AND n.is_collected = 1
+                    ORDER BY score
+                    LIMIT ?
+                    """,
+                    (fts_query, n_results),
+                ).fetchall()
+
+            return [
+                {
+                    "note_id": row[0],
+                    "title":   row[1],
+                    "bm25":    abs(row[2]),  # 转正值，越大越相关
+                }
+                for row in rows
+            ]
+        except Exception as e:
+            logger.warning(f"[fts_search] FTS 检索失败，降级跳过：{e}")
+            return []
+
+    @staticmethod
+    def _build_fts_query(query: str) -> str | None:
+        """
+        将用户 query 转换为 FTS5 trigram MATCH 表达式。
+
+        trigram tokenizer 对每个词建立三字符滑窗索引，要求单个词项 >= 3 字符。
+        多词 query 拆分为各词独立的 AND 条件（`"词1" "词2"`），每词用双引号包裹。
+
+        对于长度 < 3 字符的词（如两字中文词"京都"）：
+          - 若这是 query 中唯一的词 → 返回 None，让调用方跳过 FTS（降级为纯向量）
+          - 若与其他 >= 3 字符的词共存 → 跳过该短词，仅用长词召回
+
+        返回：
+            str   有效的 FTS5 MATCH 表达式
+            None  无法构建有效 query（调用方应返回 []）
+        """
+        # 去掉 FTS5 保留运算符，保留连字符（SK-II 等品牌名）和空格
+        clean = query.replace('"', ' ').replace("'", ' ').replace('*', ' ').strip()
+        if not clean:
+            return None
+
+        words = clean.split()
+        # 过滤掉 < 3 字符的词（trigram 最短要求）
+        long_words = [w for w in words if len(w) >= 3]
+
+        if not long_words:
+            return None  # 全部是短词，降级为向量检索
+
+        # 每个词用双引号包裹（转义特殊字符，作为子串短语搜索）
+        return " ".join(f'"{w}"' for w in long_words)
 
     # ── 内部工具 ──────────────────────────────────────────────────
 

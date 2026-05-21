@@ -89,46 +89,116 @@ class NoteStore:
         n_results: int = 5,
     ) -> list[dict]:
         """
-        语义检索，返回最相关的笔记列表。
+        混合检索（向量语义 + BM25 关键词），用 RRF 合并两路结果。
+
+        RRF 公式：score(d) = Σ 1/(k + rank_i(d))，k=60（标准值）。
+        同一笔记在两路均命中时得分叠加，只在一路命中时得分较低但仍保留。
+
         user_id 非空时只搜索该用户的收藏。
         ChromaDB 检索后，批量查 SQLite 补充 note_url 和 cover_url。
         """
         if self.chroma is None:
             raise RuntimeError("ChromaDB 未初始化，无法语义检索")
-        hits = self.chroma.search(query, user_id=user_id, n_results=n_results)
+
+        # 多召回一些候选，RRF 合并后再截断到 n_results
+        fetch_k = max(n_results * 2, 20)
+
+        # 路1：向量语义检索
+        vec_hits = self.chroma.search(query, user_id=user_id, n_results=fetch_k)
+
+        # 路2：BM25 全文检索
+        bm25_hits = self.sqlite.fts_search(query, user_id=user_id, n_results=fetch_k)
+
+        # RRF 合并
+        hits = self._rrf_merge(vec_hits, bm25_hits, top_k=n_results)
+
         if not hits:
             return hits
 
-        # 批量回查 SQLite，补充 note_url / cover_url
+        # 批量回查 SQLite，补充 note_url / cover_url / content
         note_ids = [h["note_id"] for h in hits]
         placeholders = ",".join("?" * len(note_ids))
         if user_id:
             rows = self.sqlite.conn.execute(
-                f"SELECT note_id, note_url, cover_url FROM notes "
+                f"SELECT note_id, note_url, cover_url, content, title FROM notes "
                 f"WHERE note_id IN ({placeholders}) AND user_id = ? AND is_collected = 1",
                 (*note_ids, user_id),
             ).fetchall()
         else:
             rows = self.sqlite.conn.execute(
-                f"SELECT note_id, note_url, cover_url FROM notes "
+                f"SELECT note_id, note_url, cover_url, content, title FROM notes "
                 f"WHERE note_id IN ({placeholders}) AND is_collected = 1",
                 note_ids,
             ).fetchall()
 
-        url_map = {
-            r["note_id"]: {"note_url": r["note_url"], "cover_url": r["cover_url"]}
+        meta_map = {
+            r["note_id"]: {
+                "note_url":  r["note_url"],
+                "cover_url": r["cover_url"],
+                "content":   r["content"],
+                "title":     r["title"],
+            }
             for r in rows
         }
         active_hits = []
         for hit in hits:
-            extra = url_map.get(hit["note_id"], {})
-            if not extra:
+            meta = meta_map.get(hit["note_id"], {})
+            if not meta:
                 continue
-            hit["note_url"]  = extra.get("note_url",  "")
-            hit["cover_url"] = extra.get("cover_url", "")
+            hit["note_url"]  = meta.get("note_url",  "")
+            hit["cover_url"] = meta.get("cover_url", "")
+            # 向量检索已携带 content；BM25-only 命中的笔记从 SQLite 补充
+            if not hit.get("content"):
+                hit["content"] = meta.get("content", "")
+            if not hit.get("title"):
+                hit["title"] = meta.get("title", "")
             active_hits.append(hit)
 
         return active_hits
+
+    @staticmethod
+    def _rrf_merge(
+        vec_hits: list[dict],
+        bm25_hits: list[dict],
+        top_k: int,
+        k: int = 60,
+    ) -> list[dict]:
+        """
+        Reciprocal Rank Fusion：合并向量检索和 BM25 两路结果。
+
+        参数：
+            vec_hits   向量检索结果（list[dict]，含 note_id / content / title / distance）
+            bm25_hits  BM25 检索结果（list[dict]，含 note_id / title / bm25）
+            top_k      最终返回条数
+            k          RRF 平滑参数，默认 60（学术标准值）
+
+        返回：
+            list[dict]，每条含 note_id / content / title / distance / rrf_score，
+            按 rrf_score 降序排列，取前 top_k 条。
+        """
+        scores: dict[str, float] = {}
+        # 保留各路命中的原始字段，优先取向量检索的（含 content）
+        note_data: dict[str, dict] = {}
+
+        for rank, hit in enumerate(vec_hits, start=1):
+            nid = hit["note_id"]
+            scores[nid] = scores.get(nid, 0.0) + 1.0 / (k + rank)
+            note_data.setdefault(nid, hit)
+
+        for rank, hit in enumerate(bm25_hits, start=1):
+            nid = hit["note_id"]
+            scores[nid] = scores.get(nid, 0.0) + 1.0 / (k + rank)
+            note_data.setdefault(nid, hit)
+
+        sorted_ids = sorted(scores, key=lambda nid: scores[nid], reverse=True)[:top_k]
+
+        result = []
+        for nid in sorted_ids:
+            entry = dict(note_data[nid])
+            entry["rrf_score"] = scores[nid]
+            result.append(entry)
+
+        return result
 
     def notes(self, user_id: str = "") -> list[dict]:
         """从 SQLite 返回元数据列表（供前端展示）。"""

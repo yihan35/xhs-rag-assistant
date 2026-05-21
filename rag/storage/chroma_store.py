@@ -74,15 +74,23 @@ class ChromaStore:
         """
         将笔记 content 向量化后写入集合（insert or update by note_id）。
         content 为空时跳过。
+
+        embedding 文本结构：将标题重复两次置于正文之前，使标题在语义向量中
+        获得更高权重，避免 OCR/转录噪声稀释标题关键词的语义。
+        格式："{title}\n{title}\n\n{content}"
         """
         content = content.strip()
         if not content:
             logger.warning(f"[{note_id}] content 为空，跳过 ChromaDB 写入")
             return
 
+        # 标题加权：标题重复两次 + 正文，提升标题词在 embedding 中的权重
+        title_clean = (title or "").strip()
+        document = f"{title_clean}\n{title_clean}\n\n{content}" if title_clean else content
+
         self.collection.upsert(
             ids=[note_id],
-            documents=[content],
+            documents=[document],
             metadatas=[{
                 "note_id": note_id,
                 "user_id": user_id,
