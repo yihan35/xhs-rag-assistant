@@ -11,7 +11,7 @@
 #   ./reindex.sh            # 重建所有用户
 #   ./reindex.sh <user_id>  # 只重建指定用户
 
-set -euo pipefail
+set -eo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
@@ -44,14 +44,17 @@ fi
 
 # ── 确定目标用户 ──────────────────────────────────────────────────
 
+USER_IDS=()
+
 if [[ $# -ge 1 ]]; then
-  USER_IDS=("$1")
+  USER_IDS+=("$1")
   info "仅重建指定用户：${USER_IDS[0]}"
 else
-  IFS=$'\n' read -r -a USER_IDS <<< "$(
-    sqlite3 "$DB_PATH" \
-      "SELECT DISTINCT user_id FROM notes WHERE is_collected=1 AND user_id != '' ORDER BY user_id;"
-  )"
+  while IFS= read -r uid; do
+    [[ -n "$uid" ]] && USER_IDS+=("$uid")
+  done < <(sqlite3 "$DB_PATH" \
+    "SELECT DISTINCT user_id FROM notes WHERE is_collected=1 AND user_id != '' ORDER BY user_id;")
+
   if [[ ${#USER_IDS[@]} -eq 0 ]]; then
     warn "数据库中没有已收藏的笔记，无需重建"
     exit 0
@@ -67,7 +70,8 @@ echo ""
 
 # ── 确认操作 ──────────────────────────────────────────────────────
 
-warn "此操作将清空 ChromaDB（$CHROMA_PATH）并重新向量化所有笔记"
+warn "此操作将清空 ChromaDB 并重新向量化所有笔记"
+warn "ChromaDB 路径：$CHROMA_PATH"
 warn "过程中 RAG 检索不可用，建议在服务停止后执行"
 echo ""
 read -r -p "确认继续？[y/N] " confirm
