@@ -48,10 +48,10 @@ if [[ $# -ge 1 ]]; then
   USER_IDS=("$1")
   info "仅重建指定用户：${USER_IDS[0]}"
 else
-  mapfile -t USER_IDS < <(
+  IFS=$'\n' read -r -a USER_IDS <<< "$(
     sqlite3 "$DB_PATH" \
       "SELECT DISTINCT user_id FROM notes WHERE is_collected=1 AND user_id != '' ORDER BY user_id;"
-  )
+  )"
   if [[ ${#USER_IDS[@]} -eq 0 ]]; then
     warn "数据库中没有已收藏的笔记，无需重建"
     exit 0
