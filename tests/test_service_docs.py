@@ -10,6 +10,7 @@ def test_readme_documents_service_start_stop_and_showcase_image():
     assert "![KnoNote 页面展示](figure/frame.png)" in readme
     assert "### 4. 启动服务" in readme
     assert "### 5. 停止服务" in readme
+    assert "打开前端页面后，点击同步按钮同步收藏内容。" in readme
     assert "### 4. 同步收藏夹" not in readme
     assert "### 6. 启动后端" not in readme
     assert "### 7. 启动前端" not in readme

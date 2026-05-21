@@ -84,7 +84,7 @@ cp .env.example .env
 - 后端日志：`data/server.log`
 - 前端日志：`data/frontend.log`
 
-打开前端页面后，点击页面上的同步按钮即可同步收藏夹。
+打开前端页面后，点击同步按钮同步收藏内容。
 
 ### 5. 停止服务
 
