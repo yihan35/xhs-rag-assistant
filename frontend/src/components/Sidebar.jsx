@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Sparkles, BookMarked, ChevronLeft, RefreshCw, FileText, Film } from 'lucide-react'
+import { Plus, Trash2, Sparkles, BookMarked, ChevronLeft, RefreshCw, FileText, Film, Tag } from 'lucide-react'
 import { fetchCategories } from '../hooks/useApi'
 
 export default function Sidebar({
@@ -16,6 +16,8 @@ export default function Sidebar({
   syncState  = 'idle',
   syncError  = '',
   userId,
+  onClassify,
+  classifyState = 'idle',
 }) {
   const [showNotes, setShowNotes] = useState(false)
   const [categories, setCategories] = useState([])
@@ -68,6 +70,8 @@ export default function Sidebar({
               setActiveCategory(cat)
               onRefreshNotes(cat)
             }}
+            onClassify={onClassify}
+            classifyState={classifyState}
           />
         ) : (
           <SessionsView
@@ -284,7 +288,10 @@ function SessionItem({ session, active, onSelect, onDelete }) {
 
 /* ── 收藏列表视图 ─────────────────────────────────────────────── */
 
-function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange }) {
+function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange, onClassify, classifyState }) {
+  const isClassifying = classifyState === 'running'
+  const classifyDone   = classifyState === 'done'
+
   return (
     <>
       {/* 顶栏 */}
@@ -298,9 +305,22 @@ function NotesView({ notes, loading, onBack, onRefresh, categories, activeCatego
         </button>
         <span className="text-sm font-medium text-gray-700">我的收藏</span>
         <button
+          onClick={onClassify}
+          disabled={isClassifying}
+          title="AI 智能分类"
+          className={`ml-auto px-2 py-0.5 rounded-md text-[10px] font-medium border
+                      transition-all duration-150 disabled:cursor-not-allowed
+                      ${classifyDone
+                        ? 'border-green-300 text-green-600 bg-green-50'
+                        : 'border-xhs-red/40 text-xhs-red bg-transparent hover:bg-xhs-rose hover:border-xhs-red/60'
+                      }`}
+        >
+          <Tag size={10} className={isClassifying ? 'animate-pulse' : ''} />
+        </button>
+        <button
           onClick={onRefresh}
           disabled={loading}
-          className="ml-auto text-gray-400 hover:text-xhs-red transition-colors disabled:opacity-40"
+          className="text-gray-400 hover:text-xhs-red transition-colors disabled:opacity-40"
           title="刷新"
         >
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />

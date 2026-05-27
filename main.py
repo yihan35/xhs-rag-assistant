@@ -281,6 +281,81 @@ _sync_state: dict = {
     "last_sync": None,   # 最近一次成功完成的 ISO 时间
 }
 
+# ── 分类状态（进程级单例） ──────────────────────────────────────────
+
+_classify_lock  = threading.Lock()
+_classify_state: dict = {
+    "running":   False,
+    "error":     None,
+    "last_run":  None,
+}
+
+
+class ClassifyRequest(BaseModel):
+    user_id: str = Field(..., min_length=1, description="小红书用户 ID")
+
+
+@app.post("/api/classify", summary="触发 AI 智能分类（异步，后台执行）")
+def start_classify(req: ClassifyRequest):
+    """
+    对未分类的笔记执行 AI 分类，后台子进程执行，接口立即返回。
+    通过 GET /api/classify/status 轮询进度。
+    """
+    with _classify_lock:
+        if _classify_state["running"]:
+            raise HTTPException(status_code=409, detail="分类任务已在运行中，请稍候")
+        _classify_state["running"] = True
+        _classify_state["error"]   = None
+
+    env = os.environ.copy()
+    log_path = os.path.join(_PROJECT_ROOT, "data", "sync.log")
+
+    def _run_classify():
+        try:
+            with open(log_path, "a", encoding="utf-8", buffering=1) as log_file:
+                log_file.write(
+                    f"\n{'=' * 56}\n"
+                    f"手动触发 AI 分类：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    f"{'=' * 56}\n"
+                )
+                log_file.flush()
+                result = subprocess.run(
+                    [sys.executable, "-m", "rag.classifier", "--user_id", req.user_id],
+                    cwd=_PROJECT_ROOT,
+                    env=env,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+            if result.returncode == 0:
+                _classify_state["last_run"] = datetime.now(timezone.utc).isoformat()
+                logger.info(f"手动分类完成，user_id={req.user_id}")
+            else:
+                try:
+                    with open(log_path, encoding="utf-8") as f:
+                        tail = f.read()[-500:].strip()
+                except Exception:
+                    tail = ""
+                _classify_state["error"] = tail or f"退出码 {result.returncode}"
+                logger.error(f"手动分类失败（code={result.returncode}）")
+        except Exception as exc:
+            _classify_state["error"] = str(exc)
+            logger.error(f"分类子进程异常：{exc}")
+        finally:
+            _classify_state["running"] = False
+
+    threading.Thread(target=_run_classify, daemon=True).start()
+    return {"status": "started"}
+
+
+@app.get("/api/classify/status", summary="查询分类任务状态")
+def get_classify_status():
+    return {
+        "running":  _classify_state["running"],
+        "error":    _classify_state["error"],
+        "last_run": _classify_state["last_run"],
+    }
+
 
 class SyncRequest(BaseModel):
     user_id: str = Field(default="", description="小红书用户 ID，留空则由 ingest 自动检测")

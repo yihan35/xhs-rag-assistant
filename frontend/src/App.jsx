@@ -3,7 +3,7 @@ import { Settings, PanelLeftClose, PanelLeft } from 'lucide-react'
 import Sidebar from './components/Sidebar.jsx'
 import ChatArea from './components/ChatArea.jsx'
 import SettingsModal from './components/SettingsModal.jsx'
-import { useNotes, useSync } from './hooks/useApi.js'
+import { useNotes, useSync, useClassify } from './hooks/useApi.js'
 import { useSessions } from './hooks/useSessions.js'
 
 const DEFAULT_USER_ID = '640c4bcc000000002a0088a8'
@@ -16,6 +16,7 @@ export default function App() {
 
   const { notes, loading: notesLoading, stats, fetchNotes, category, setCategory } = useNotes(userId)
   const { startSync, syncState, syncError } = useSync(() => fetchNotes(userId))
+  const { startClassify, classifyState } = useClassify(() => fetchNotes(userId))
   const {
     sessions,
     currentId,
@@ -60,6 +61,8 @@ export default function App() {
           syncState={syncState}
           syncError={syncError}
           userId={userId}
+          onClassify={() => startClassify(userId)}
+          classifyState={classifyState}
         />
       </div>
 

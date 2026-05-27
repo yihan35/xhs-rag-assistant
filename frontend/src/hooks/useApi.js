@@ -100,6 +100,68 @@ export function useSync(onDone) {
   return { startSync, syncState: state, syncError: errorMsg }
 }
 
+/**
+ * 智能分类 hook
+ *
+ * state: 'idle' | 'running' | 'done' | 'error'
+ * startClassify(userId) — 触发分类；完成后自动回调 onDone
+ */
+export function useClassify(onDone) {
+  const [state,    setState]    = useState('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+  const pollRef = useRef(null)
+
+  useEffect(() => () => clearInterval(pollRef.current), [])
+
+  const startClassify = useCallback(async (userId) => {
+    if (!userId || state === 'running') return
+    setState('running')
+    setErrorMsg('')
+
+    try {
+      const res = await fetch('/api/classify', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ user_id: userId }),
+      })
+      if (!res.ok && res.status !== 409) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || `启动失败 (${res.status})`)
+      }
+
+      pollRef.current = setInterval(async () => {
+        try {
+          const sr   = await fetch('/api/classify/status')
+          const data = await sr.json()
+          if (!data.running) {
+            clearInterval(pollRef.current)
+            if (data.error) {
+              setErrorMsg(data.error)
+              setState('error')
+              setTimeout(() => setState('idle'), 3000)
+            } else {
+              setState('done')
+              onDone?.()
+              setTimeout(() => setState('idle'), 2000)
+            }
+          }
+        } catch {
+          clearInterval(pollRef.current)
+          setErrorMsg('网络错误')
+          setState('error')
+          setTimeout(() => setState('idle'), 3000)
+        }
+      }, 2000)
+    } catch (e) {
+      setErrorMsg(e.message)
+      setState('error')
+      setTimeout(() => setState('idle'), 3000)
+    }
+  }, [state, onDone])
+
+  return { startClassify, classifyState: state, classifyError: errorMsg }
+}
+
 /** search 模式：JSON 响应 */
 export async function queryApi({ query, userId, mode, sessionId, topK = 6 }) {
   const res = await fetch(`${BASE}/api/query`, {
