@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Trash2, Sparkles, BookMarked, ChevronLeft, RefreshCw, FileText, Film } from 'lucide-react'
+import { fetchCategories } from '../hooks/useApi'
 
 export default function Sidebar({
   sessions,
@@ -14,8 +15,18 @@ export default function Sidebar({
   onSync,
   syncState  = 'idle',
   syncError  = '',
+  userId,
 }) {
   const [showNotes, setShowNotes] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [activeCategory, setActiveCategory] = useState('')
+
+  // 加载分类列表（当打开收藏视图或笔记总数变化时）
+  useEffect(() => {
+    if (userId && showNotes) {
+      fetchCategories(userId).then(setCategories)
+    }
+  }, [userId, showNotes, stats?.sqlite_total])
 
   return (
     <aside className="flex flex-col h-full bg-white border-r border-pink-100 relative overflow-hidden">
@@ -51,6 +62,12 @@ export default function Sidebar({
             loading={notesLoading}
             onBack={() => setShowNotes(false)}
             onRefresh={onRefreshNotes}
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={(cat) => {
+              setActiveCategory(cat)
+              onRefreshNotes(cat)
+            }}
           />
         ) : (
           <SessionsView
@@ -267,7 +284,7 @@ function SessionItem({ session, active, onSelect, onDelete }) {
 
 /* ── 收藏列表视图 ─────────────────────────────────────────────── */
 
-function NotesView({ notes, loading, onBack, onRefresh }) {
+function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange }) {
   return (
     <>
       {/* 顶栏 */}
@@ -289,6 +306,40 @@ function NotesView({ notes, loading, onBack, onRefresh }) {
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
+
+      {/* 分类筛选栏 */}
+      {categories.length > 0 && (
+        <div className="flex-shrink-0 px-3 pb-2 overflow-x-auto no-scrollbar">
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => onCategoryChange('')}
+              className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium
+                          transition-all duration-150
+                          ${activeCategory === ''
+                            ? 'bg-xhs-red text-white'
+                            : 'bg-pink-50 text-gray-500 hover:bg-pink-100 hover:text-gray-700'
+                          }`}
+            >
+              全部
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat.name}
+                onClick={() => onCategoryChange(cat.name)}
+                className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium
+                            transition-all duration-150
+                            ${activeCategory === cat.name
+                              ? 'bg-xhs-red text-white'
+                              : 'bg-pink-50 text-gray-500 hover:bg-pink-100 hover:text-gray-700'
+                            }`}
+              >
+                {cat.name}
+                <span className="ml-1 opacity-70">{cat.count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 笔记列表 */}
       <div className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5">
@@ -338,6 +389,12 @@ function CompactNoteItem({ note }) {
         <p className="text-xs font-medium text-gray-700 line-clamp-2 leading-snug group-hover:text-xhs-red transition-colors">
           {note.title || '无标题'}
         </p>
+        {note.category && (
+          <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium
+                           bg-xhs-rose text-xhs-red">
+            {note.category}
+          </span>
+        )}
         <div className="flex items-center gap-1 mt-1">
           {note.content_changed_at && (
             <span
