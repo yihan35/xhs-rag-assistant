@@ -441,5 +441,11 @@ class SQLiteStore:
                 row[field] = {} if field == "content_parts" else []
         return row
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()
+
     def close(self) -> None:
         self.conn.close()
