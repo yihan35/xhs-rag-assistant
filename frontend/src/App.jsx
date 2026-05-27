@@ -14,7 +14,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
 
-  const { notes, loading: notesLoading, stats, fetchNotes } = useNotes(userId)
+  const { notes, loading: notesLoading, stats, fetchNotes, category, setCategory } = useNotes(userId)
   const { startSync, syncState, syncError } = useSync(() => fetchNotes(userId))
   const {
     sessions,
@@ -27,8 +27,8 @@ export default function App() {
   } = useSessions()
 
   useEffect(() => {
-    if (userId) fetchNotes(userId)
-  }, [userId])
+    if (userId) fetchNotes(userId, category)
+  }, [userId, category])
 
   const handleSaveUserId = useCallback(uid => {
     localStorage.setItem(LS_KEY, uid)
@@ -55,10 +55,11 @@ export default function App() {
           notes={notes}
           notesLoading={notesLoading}
           stats={stats}
-          onRefreshNotes={() => fetchNotes(userId)}
+          onRefreshNotes={(cat) => { setCategory(cat || ''); fetchNotes(userId, cat || '') }}
           onSync={() => startSync(userId)}
           syncState={syncState}
           syncError={syncError}
+          userId={userId}
         />
       </div>
 
