@@ -121,6 +121,7 @@ class SQLiteStore:
             ("content_hash",       "TEXT    NOT NULL DEFAULT ''"),
             ("note_published_at",  "TEXT    NOT NULL DEFAULT ''"),
             ("content_changed_at", "TEXT    NOT NULL DEFAULT ''"),
+            ("category",           "TEXT    NOT NULL DEFAULT ''"),
         ]
         for col, defn in additions:
             if col not in existing:
@@ -149,7 +150,7 @@ class SQLiteStore:
 
         existing = self.conn.execute(
             """
-            SELECT indexed, content_hash, content_changed_at
+            SELECT indexed, content_hash, content_changed_at, category
             FROM notes
             WHERE note_id = ? AND user_id = ?
             """,
@@ -161,9 +162,11 @@ class SQLiteStore:
 
         if existing is None:
             # 新记录
-            old_indexed       = 0
+            old_indexed        = 0
             content_changed_at = ""
+            old_category       = ""
         else:
+            old_category = existing["category"] or ""
             old_hash = existing["content_hash"] or ""
             if old_hash and old_hash != new_hash:
                 # 内容发生变化：重置 indexed，记录变化时间，后续触发重新向量化
@@ -181,8 +184,9 @@ class SQLiteStore:
             INSERT OR REPLACE INTO notes
               (note_id, user_id, title, content, content_parts, tags, cover_url, image_urls,
                note_url, likes, note_type, crawled_at, indexed,
-               is_collected, archived_at, content_hash, note_published_at, content_changed_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               is_collected, archived_at, content_hash, note_published_at, content_changed_at,
+               category)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 note["note_id"],
@@ -203,6 +207,7 @@ class SQLiteStore:
                 new_hash,
                 note.get("note_published_at", ""),
                 content_changed_at,
+                old_category,
             ),
         )
         self.conn.commit()
@@ -271,6 +276,14 @@ class SQLiteStore:
         logger.info(f"已归档 {len(archived_ids)} 条已取消收藏的笔记")
         return archived_ids
 
+    def set_category(self, note_id: str, user_id: str, category: str) -> None:
+        """写回分类结果。"""
+        self.conn.execute(
+            "UPDATE notes SET category = ? WHERE note_id = ? AND user_id = ?",
+            (category, note_id, user_id),
+        )
+        self.conn.commit()
+
     # ── 查询 ──────────────────────────────────────────────────────
 
     def exists(self, note_id: str, user_id: str = "") -> bool:
@@ -318,17 +331,49 @@ class SQLiteStore:
             ).fetchall()
         return [self._deserialize(dict(r)) for r in rows]
 
-    def all_notes(self, user_id: str = "", include_archived: bool = False) -> list[dict]:
-        """返回当前收藏笔记；include_archived=True 时包含历史归档。"""
-        archived_filter = "" if include_archived else " AND is_collected = 1"
+    def get_unclassified(self, user_id: str = "", limit: int = 100) -> list[dict]:
+        """返回 category 为空且已收藏的笔记，供分类子进程使用。"""
         if user_id:
             rows = self.conn.execute(
-                f"SELECT * FROM notes WHERE user_id = ?{archived_filter} ORDER BY crawled_at DESC",
-                (user_id,),
+                """
+                SELECT note_id, title, content, tags, user_id
+                FROM notes
+                WHERE category = '' AND is_collected = 1 AND user_id = ?
+                ORDER BY crawled_at DESC
+                LIMIT ?
+                """,
+                (user_id, limit),
             ).fetchall()
         else:
             rows = self.conn.execute(
-                f"SELECT * FROM notes WHERE 1=1{archived_filter} ORDER BY crawled_at DESC"
+                """
+                SELECT note_id, title, content, tags, user_id
+                FROM notes
+                WHERE category = '' AND is_collected = 1
+                ORDER BY crawled_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        return [self._deserialize(dict(r)) for r in rows]
+
+    def all_notes(self, user_id: str = "", include_archived: bool = False, category: str = "") -> list[dict]:
+        """返回当前收藏笔记；include_archived=True 时包含历史归档。"""
+        archived_filter = "" if include_archived else " AND is_collected = 1"
+        category_filter = " AND category = ?" if category else ""
+        if user_id:
+            params = (user_id,)
+            if category:
+                params = (user_id, category)
+            rows = self.conn.execute(
+                f"SELECT * FROM notes WHERE user_id = ?{archived_filter}{category_filter} ORDER BY crawled_at DESC",
+                params,
+            ).fetchall()
+        else:
+            params = (category,) if category else ()
+            rows = self.conn.execute(
+                f"SELECT * FROM notes WHERE 1=1{archived_filter}{category_filter} ORDER BY crawled_at DESC",
+                params,
             ).fetchall()
         return [self._deserialize(dict(r)) for r in rows]
 
@@ -368,6 +413,20 @@ class SQLiteStore:
         return self.conn.execute(
             "SELECT COUNT(*) FROM notes WHERE content_changed_at != '' AND is_collected = 1"
         ).fetchone()[0]
+
+    def get_categories(self, user_id: str) -> list[dict]:
+        """返回某用户的分类列表（去重计数），按数量降序排列。"""
+        rows = self.conn.execute(
+            """
+            SELECT category, COUNT(*) as cnt
+            FROM notes
+            WHERE user_id = ? AND is_collected = 1 AND category != ''
+            GROUP BY category
+            ORDER BY cnt DESC
+            """,
+            (user_id,),
+        ).fetchall()
+        return [{"name": row["category"], "count": row["cnt"]} for row in rows]
 
     # ── 内部工具 ──────────────────────────────────────────────────
 
