@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Plus, Trash2, Sparkles, BookMarked, ChevronLeft, RefreshCw, FileText, Film, Tag } from 'lucide-react'
-import { fetchCategories } from '../hooks/useApi'
+import { fetchCategories, updateNoteCategory } from '../hooks/useApi'
 
 export default function Sidebar({
   sessions,
@@ -72,6 +72,7 @@ export default function Sidebar({
             }}
             onClassify={onClassify}
             classifyState={classifyState}
+            userId={userId}
           />
         ) : (
           <SessionsView
@@ -288,9 +289,18 @@ function SessionItem({ session, active, onSelect, onDelete }) {
 
 /* ── 收藏列表视图 ─────────────────────────────────────────────── */
 
-function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange, onClassify, classifyState }) {
+function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange, onClassify, classifyState, userId }) {
   const isClassifying = classifyState === 'running'
   const classifyDone   = classifyState === 'done'
+
+  const handleUpdateCategory = async (noteId, category) => {
+    try {
+      await updateNoteCategory(noteId, userId, category)
+      onRefresh()
+    } catch (e) {
+      console.error('update category error:', e)
+    }
+  }
 
   return (
     <>
@@ -375,7 +385,7 @@ function NotesView({ notes, loading, onBack, onRefresh, categories, activeCatego
           </div>
         ) : (
           notes.map(note => (
-            <CompactNoteItem key={note.note_id} note={note} />
+            <CompactNoteItem key={note.note_id} note={note} categories={categories} onUpdateCategory={handleUpdateCategory} />
           ))
         )}
       </div>
@@ -383,9 +393,31 @@ function NotesView({ notes, loading, onBack, onRefresh, categories, activeCatego
   )
 }
 
-function CompactNoteItem({ note }) {
+function CompactNoteItem({ note, categories, onUpdateCategory }) {
   const hasCover = note.cover_url?.startsWith('http')
   const isVideo  = note.note_type === 'video'
+  const [editing, setEditing] = useState(false)
+  const [customCat, setCustomCat] = useState('')
+
+  const handleSelect = (cat) => {
+    setEditing(false)
+    if (cat && cat !== note.category) {
+      onUpdateCategory?.(note.note_id, cat)
+    }
+  }
+
+  const handleCustomSubmit = (e) => {
+    if (e.key === 'Enter' && customCat.trim()) {
+      handleSelect(customCat.trim())
+      setCustomCat('')
+    }
+    if (e.key === 'Escape') {
+      setEditing(false)
+      setCustomCat('')
+    }
+  }
+
+  const availableCats = (categories || []).map(c => c.name).filter(c => c !== note.category)
 
   return (
     <a
@@ -409,12 +441,59 @@ function CompactNoteItem({ note }) {
         <p className="text-xs font-medium text-gray-700 line-clamp-2 leading-snug group-hover:text-xhs-red transition-colors">
           {note.title || '无标题'}
         </p>
-        {note.category && (
-          <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium
-                           bg-xhs-rose text-xhs-red">
-            {note.category}
-          </span>
-        )}
+        <div className="relative mt-0.5">
+          {note.category ? (
+            <>
+              <button
+                onClick={() => setEditing(!editing)}
+                className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium
+                           bg-xhs-rose text-xhs-red hover:bg-xhs-red hover:text-white
+                           transition-colors cursor-pointer"
+                title="点击修改分类"
+              >
+                {note.category}
+              </button>
+              {editing && (
+                <div className="absolute left-0 top-full mt-1 z-20 bg-white border border-pink-100
+                                rounded-lg shadow-lg py-1 min-w-[100px]">
+                  {/* 预设分类 */}
+                  {availableCats.length > 0 && (
+                    <>
+                      {availableCats.slice(0, 8).map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => handleSelect(cat)}
+                          className="block w-full text-left px-3 py-1.5 text-[11px] text-gray-600
+                                     hover:bg-pink-50 hover:text-xhs-red transition-colors"
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                      <div className="border-t border-pink-50 my-0.5" />
+                    </>
+                  )}
+                  {/* 自定义输入 */}
+                  <input
+                    type="text"
+                    placeholder="自定义分类..."
+                    value={customCat}
+                    onChange={e => setCustomCat(e.target.value)}
+                    onKeyDown={handleCustomSubmit}
+                    className="w-full px-3 py-1.5 text-[11px] text-gray-600 outline-none
+                               placeholder-gray-300 focus:bg-pink-50"
+                    maxLength={10}
+                    autoFocus
+                  />
+                </div>
+              )}
+            </>
+          ) : (
+            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium
+                             bg-gray-100 text-gray-400">
+              未分类
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1 mt-1">
           {note.content_changed_at && (
             <span
