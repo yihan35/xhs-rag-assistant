@@ -97,6 +97,71 @@ export function useSync(onDone) {
   return { startSync, syncState: state, syncError: errorMsg }
 }
 
+export function useFavoriteUpdates(userId, { intervalMs = 60000, onNewUpdates } = {}) {
+  const [updates, setUpdates] = useState([])
+  const [loading, setLoading] = useState(false)
+  const notifiedRef = useRef(new Set())
+
+  const fetchUpdates = useCallback(async (uid = userId) => {
+    if (!uid) return []
+    setLoading(true)
+    try {
+      const res = await fetch(`${BASE}/api/updates?user_id=${encodeURIComponent(uid)}`)
+      if (!res.ok) return []
+      const data = await res.json()
+      const nextUpdates = data.notes || []
+      const newItems = nextUpdates.filter(note => {
+        const version = note.content_hash || note.content_changed_at || ''
+        const key = `${note.note_id}:${version}`
+        if (notifiedRef.current.has(key)) return false
+        notifiedRef.current.add(key)
+        return true
+      })
+      if (newItems.length > 0) onNewUpdates?.(newItems)
+      setUpdates(nextUpdates)
+      return nextUpdates
+    } catch (e) {
+      console.error('fetchFavoriteUpdates error:', e)
+      return []
+    } finally {
+      setLoading(false)
+    }
+  }, [userId, onNewUpdates])
+
+  const markSeen = useCallback(async (noteId = null, uid = userId) => {
+    if (!uid) return
+    try {
+      const res = await fetch(`${BASE}/api/updates/seen`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: uid, note_id: noteId }),
+      })
+      if (!res.ok) return
+      setUpdates(current => (
+        noteId ? current.filter(note => note.note_id !== noteId) : []
+      ))
+    } catch (e) {
+      console.error('markFavoriteUpdateSeen error:', e)
+    }
+  }, [userId])
+
+  useEffect(() => {
+    if (!userId) return undefined
+    fetchUpdates(userId)
+    const timer = setInterval(() => fetchUpdates(userId), intervalMs)
+    return () => clearInterval(timer)
+  }, [userId, intervalMs, fetchUpdates])
+
+  return {
+    updates,
+    updatedNoteIds: new Set(updates.map(note => note.note_id)),
+    updateCount: updates.length,
+    loading,
+    fetchUpdates,
+    markSeen,
+  }
+}
+
 /** search 模式：JSON 响应 */
 export async function queryApi({ query, userId, mode, sessionId, topK = 6 }) {
   const res = await fetch(`${BASE}/api/query`, {

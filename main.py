@@ -94,6 +94,11 @@ class QueryResponse(BaseModel):
     total:   int
 
 
+class UpdateSeenRequest(BaseModel):
+    user_id: str = Field(..., min_length=1, description="小红书用户 ID")
+    note_id: str | None = Field(default=None, description="留空则标记全部更新为已读")
+
+
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # ── Session 存储（进程级单例，复用 notes.db） ─────────────────────
@@ -211,6 +216,17 @@ def list_updates(
         for note in updated
     ]
     return {"total": len(result), "notes": result}
+
+
+@app.post("/api/updates/seen", summary="标记收藏帖子更新提醒为已读")
+def mark_updates_seen(req: UpdateSeenRequest):
+    """
+    将一个或全部收藏帖子更新提醒标记为已读。
+    前端可在用户点击更新提醒或进入帖子详情后调用此接口。
+    """
+    with metadata_store() as store:
+        updated = store.mark_updates_seen(user_id=req.user_id, note_id=req.note_id)
+    return {"updated": updated}
 
 
 @app.get("/api/notes", summary="用户笔记列表")

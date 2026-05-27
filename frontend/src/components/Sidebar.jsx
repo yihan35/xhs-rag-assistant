@@ -10,8 +10,10 @@ export default function Sidebar({
   notes,
   notesLoading,
   stats,
+  updateCount = 0,
   onRefreshNotes,
   onSync,
+  onMarkNoteSeen,
   syncState  = 'idle',
   syncError  = '',
 }) {
@@ -35,6 +37,7 @@ export default function Sidebar({
         <div className="mt-3">
           <SyncStatus
             stats={stats}
+            updateCount={updateCount}
             onRefresh={onRefreshNotes}
             onSync={onSync}
             syncState={syncState}
@@ -51,6 +54,7 @@ export default function Sidebar({
             loading={notesLoading}
             onBack={() => setShowNotes(false)}
             onRefresh={onRefreshNotes}
+            onMarkNoteSeen={onMarkNoteSeen}
           />
         ) : (
           <SessionsView
@@ -74,10 +78,10 @@ export default function Sidebar({
             <BookMarked size={15} className="text-xhs-pink" />
             <span>我的收藏</span>
             <div className="ml-auto flex items-center gap-1.5">
-              {stats?.updated_count > 0 && (
+              {updateCount > 0 && (
                 <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1
                                  rounded-full bg-amber-400 text-white text-[10px] font-bold">
-                  {stats.updated_count}
+                  {updateCount}
                 </span>
               )}
               {stats?.sqlite_total > 0 && (
@@ -128,7 +132,7 @@ function SyncButton({ syncState, onSync }) {
   )
 }
 
-function SyncStatus({ stats, onRefresh, onSync, syncState, syncError }) {
+function SyncStatus({ stats, updateCount = 0, onRefresh, onSync, syncState, syncError }) {
   const isRunning = syncState === 'running'
 
   // 同步中：整行替换为进度提示
@@ -152,8 +156,6 @@ function SyncStatus({ stats, onRefresh, onSync, syncState, syncError }) {
   }
 
   const n            = stats.sqlite_total ?? 0
-  const updatedCount = stats.updated_count ?? 0
-
   return (
     <div className="flex flex-col gap-1">
       {/* 主状态行 */}
@@ -173,10 +175,10 @@ function SyncStatus({ stats, onRefresh, onSync, syncState, syncError }) {
       </div>
 
       {/* 更新提醒行 */}
-      {updatedCount > 0 && (
+      {updateCount > 0 && (
         <div className="flex items-center gap-1.5 text-xs text-amber-500">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span>{updatedCount} 篇内容有更新</span>
+          <span>{updateCount} 篇内容有更新</span>
         </div>
       )}
 
@@ -267,7 +269,7 @@ function SessionItem({ session, active, onSelect, onDelete }) {
 
 /* ── 收藏列表视图 ─────────────────────────────────────────────── */
 
-function NotesView({ notes, loading, onBack, onRefresh }) {
+function NotesView({ notes, loading, onBack, onRefresh, onMarkNoteSeen }) {
   return (
     <>
       {/* 顶栏 */}
@@ -304,7 +306,7 @@ function NotesView({ notes, loading, onBack, onRefresh }) {
           </div>
         ) : (
           notes.map(note => (
-            <CompactNoteItem key={note.note_id} note={note} />
+            <CompactNoteItem key={note.note_id} note={note} onMarkSeen={onMarkNoteSeen} />
           ))
         )}
       </div>
@@ -312,7 +314,7 @@ function NotesView({ notes, loading, onBack, onRefresh }) {
   )
 }
 
-function CompactNoteItem({ note }) {
+function CompactNoteItem({ note, onMarkSeen }) {
   const hasCover = note.cover_url?.startsWith('http')
   const isVideo  = note.note_type === 'video'
 
@@ -322,7 +324,10 @@ function CompactNoteItem({ note }) {
       target="_blank"
       rel="noopener noreferrer"
       className="flex gap-2.5 p-2.5 rounded-xl hover:bg-pink-50 transition-colors group"
-      onClick={e => { if (!note.note_url) e.preventDefault() }}
+      onClick={e => {
+        if (!note.note_url) e.preventDefault()
+        if (note.has_unread_update) onMarkSeen?.(note.note_id)
+      }}
     >
       <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-pink-100">
         {hasCover ? (
@@ -339,14 +344,17 @@ function CompactNoteItem({ note }) {
           {note.title || '无标题'}
         </p>
         <div className="flex items-center gap-1 mt-1">
-          {note.content_changed_at && (
+          {note.has_unread_update && (
             <span
               className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"
               title={`内容已更新：${new Date(note.content_changed_at).toLocaleDateString('zh-CN')}`}
             />
           )}
-          {note.indexed === 1 && !note.content_changed_at && (
+          {note.indexed === 1 && !note.has_unread_update && (
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400" title="已向量化" />
+          )}
+          {note.has_unread_update && (
+            <span className="text-[10px] font-medium text-amber-500">已更新</span>
           )}
         </div>
       </div>

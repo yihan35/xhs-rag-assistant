@@ -148,6 +148,10 @@ class NoteStore:
         """返回内容已变化的笔记列表（content_changed_at 非空）。"""
         return self.sqlite.get_updated(user_id=user_id)
 
+    def mark_updates_seen(self, user_id: str, note_id: str | None = None) -> int:
+        """Mark one updated note, or all updated notes, as seen for the user."""
+        return self.sqlite.mark_updates_seen(user_id=user_id, note_id=note_id)
+
     # ── 统计 ──────────────────────────────────────────────────────
 
     def stats(self) -> dict:

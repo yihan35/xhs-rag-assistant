@@ -1,0 +1,1371 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KnoNote Notes Debug</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f7f8;
+      --panel: #ffffff;
+      --border: #e6e8eb;
+      --muted: #69717d;
+      --text: #1f2933;
+      --good: #0f8a5f;
+      --warn: #b7791f;
+      --bad: #c53030;
+      --code: #f3f5f7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 18px 28px;
+      background: rgba(255,255,255,.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+    h1 { margin: 0; font-size: 20px; }
+    .summary { margin-top: 4px; color: var(--muted); font-size: 13px; }
+    main { max-width: 1180px; margin: 0 auto; padding: 22px; }
+    .banner {
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .error { color: var(--bad); border-color: #fed7d7; background: #fff5f5; }
+    article {
+      margin-bottom: 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+    .card-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    h2 { margin: 0; font-size: 17px; }
+    .meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      word-break: break-all;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .ok { color: var(--good); background: #f0fff8; border-color: #b7ebd4; }
+    .mismatch { color: var(--bad); background: #fff5f5; border-color: #fed7d7; }
+    .missing { color: var(--warn); background: #fffaf0; border-color: #fbd38d; }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    section { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    section:last-child { border-bottom: 0; }
+    h3 { margin: 0 0 8px; font-size: 13px; color: #3b4450; }
+    pre {
+      margin: 0;
+      padding: 12px;
+      min-height: 36px;
+      overflow: auto;
+      border-radius: 6px;
+      background: var(--code);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .empty { color: var(--muted); }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .image-part { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>KnoNote Notes Debug</h1>
+    <div class="summary">开发调试视图：SQLite content / content_parts 与 ChromaDB document 对比，共 7 条笔记。</div>
+  </header>
+  <main>
+    
+    
+<article>
+  <div class="card-head">
+    <div>
+      <h2>回报率最高的两支防晒（618必囤！！！）</h2>
+      <div class="meta">note_id: 69fc190f000000003503bdfe · user_id: 640c4bcc000000002a0088a8 · <a href="https://www.xiaohongshu.com/explore/69fc190f000000003503bdfe?xsec_token=ABa3nOqGjONkPxc3iNXT4poEKOMAxriqyypFwQ9ZTc8HM=&amp;xsec_source=pc_collect" target="_blank" rel="noreferrer">原文链接</a></div>
+    </div>
+    <span class="badge ok">SQLite content 与 ChromaDB document 一致</span>
+  </div>
+  <div class="stats">
+    <span>indexed：是</span>
+    <span>收藏状态：当前收藏</span>
+    <span>归档时间：无</span>
+    <span>content 字数：980</span>
+    <span>Chroma document 字数：980</span>
+    <span>图片数：1</span>
+    <span>OCR 段数：2</span>
+    <span>图片描述段数：2</span>
+    <span>视频转录：无</span>
+  </div>
+  <section>
+    <h3>原始正文 body</h3>
+    <pre>纠结不知道买什么防晒的直接看过来，我前前后后试过好多款防晒，最后只留下这两支，肤感巨好，日常出门随便涂都合适！！！
+#蜜丝婷防晒
+前段时间去云南旅游，那边高原紫外线真的超强。整天在外逛景点、拍照暴晒，回到酒店照镜子真的惊到，脸居然一点没晒黑，也没有泛红起皮！
+它添加了烟酰胺+超肽VC，不光能硬核防晒，坚持用下来脸上晒斑都淡了不少，真正做到一边防晒一边养肤。
+我爱的还是它的上脸肤感，质地跟清爽乳液一样，一点不厚重不糊脸。成膜速度很快，不假白、不泛油光，后续化妆上底妆也特别服帖，完全不会搓泥。这个价位能用到这种质感，真的很省心。
+#兰蔻小白管
+肤感真的绝到说不出话。。细腻到不像防晒，倒像是在给脸喂营养。
+早上赶时间的时候，随便抹两下就能出门，好气色就这么轻松get！
+润而不油，涂完脸摸起来滑溜溜的，成膜之后是半哑光的妆效，带妆一天都清清爽爽，连口罩蹭过都不泛油光！！
+#mistine防晒 #蜜丝婷防晒 #户外防晒 #蜜丝婷小黄帽防晒 #通勤防晒</pre>
+  </section>
+  <section>
+    <h3>图片 OCR / 描述</h3>
+    <div class="image-part">
+  <div class="meta">图片 1: https://sns-webpic-qc.xhscdn.com/202605262038/ebec6768d0a0a994999425b9833d4a54/notes_pre_post/1040g3k8320aatee3lc005p9bmsaal72kdjshep0!nd_dft_wgth_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA</pre>
+  <h3>图片描述</h3>
+  <pre>一只手拿着两瓶防晒产品，左侧为MISTINE AQUA防晒霜，右侧为UV EXPERT YOUTH SHIELD AQUA GEL防晒霜，背景可见其他护肤品及布料。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 2: http://sns-webpic-qc.xhscdn.com/202605262038/ebec6768d0a0a994999425b9833d4a54/notes_pre_post/1040g3k8320aatee3lc005p9bmsaal72kdjshep0!nd_dft_wgth_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA</pre>
+  <h3>图片描述</h3>
+  <pre>一只手拿着两瓶防晒霜，左侧为MISTINE品牌的Aqua系列防晒，右侧为UV Expert品牌的Aqua Gel系列防晒，背景可见其他护肤品和布料。</pre>
+</div>
+  </section>
+  <section>
+    <h3>视频转录</h3>
+    <pre class="empty">空</pre>
+  </section>
+  <section>
+    <h3>最终写入向量库的 content</h3>
+    <pre>纠结不知道买什么防晒的直接看过来，我前前后后试过好多款防晒，最后只留下这两支，肤感巨好，日常出门随便涂都合适！！！
+#蜜丝婷防晒
+前段时间去云南旅游，那边高原紫外线真的超强。整天在外逛景点、拍照暴晒，回到酒店照镜子真的惊到，脸居然一点没晒黑，也没有泛红起皮！
+它添加了烟酰胺+超肽VC，不光能硬核防晒，坚持用下来脸上晒斑都淡了不少，真正做到一边防晒一边养肤。
+我爱的还是它的上脸肤感，质地跟清爽乳液一样，一点不厚重不糊脸。成膜速度很快，不假白、不泛油光，后续化妆上底妆也特别服帖，完全不会搓泥。这个价位能用到这种质感，真的很省心。
+#兰蔻小白管
+肤感真的绝到说不出话。。细腻到不像防晒，倒像是在给脸喂营养。
+早上赶时间的时候，随便抹两下就能出门，好气色就这么轻松get！
+润而不油，涂完脸摸起来滑溜溜的，成膜之后是半哑光的妆效，带妆一天都清清爽爽，连口罩蹭过都不泛油光！！
+#mistine防晒 #蜜丝婷防晒 #户外防晒 #蜜丝婷小黄帽防晒 #通勤防晒
+[图片文字]: MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA
+[图片描述]: 一只手拿着两瓶防晒产品，左侧为MISTINE AQUA防晒霜，右侧为UV EXPERT YOUTH SHIELD AQUA GEL防晒霜，背景可见其他护肤品及布料。
+[图片文字]: MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA
+[图片描述]: 一只手拿着两瓶防晒霜，左侧为MISTINE品牌的Aqua系列防晒，右侧为UV Expert品牌的Aqua Gel系列防晒，背景可见其他护肤品和布料。</pre>
+  </section>
+  <section>
+    <h3>ChromaDB document</h3>
+    <pre>纠结不知道买什么防晒的直接看过来，我前前后后试过好多款防晒，最后只留下这两支，肤感巨好，日常出门随便涂都合适！！！
+#蜜丝婷防晒
+前段时间去云南旅游，那边高原紫外线真的超强。整天在外逛景点、拍照暴晒，回到酒店照镜子真的惊到，脸居然一点没晒黑，也没有泛红起皮！
+它添加了烟酰胺+超肽VC，不光能硬核防晒，坚持用下来脸上晒斑都淡了不少，真正做到一边防晒一边养肤。
+我爱的还是它的上脸肤感，质地跟清爽乳液一样，一点不厚重不糊脸。成膜速度很快，不假白、不泛油光，后续化妆上底妆也特别服帖，完全不会搓泥。这个价位能用到这种质感，真的很省心。
+#兰蔻小白管
+肤感真的绝到说不出话。。细腻到不像防晒，倒像是在给脸喂营养。
+早上赶时间的时候，随便抹两下就能出门，好气色就这么轻松get！
+润而不油，涂完脸摸起来滑溜溜的，成膜之后是半哑光的妆效，带妆一天都清清爽爽，连口罩蹭过都不泛油光！！
+#mistine防晒 #蜜丝婷防晒 #户外防晒 #蜜丝婷小黄帽防晒 #通勤防晒
+[图片文字]: MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA
+[图片描述]: 一只手拿着两瓶防晒产品，左侧为MISTINE AQUA防晒霜，右侧为UV EXPERT YOUTH SHIELD AQUA GEL防晒霜，背景可见其他护肤品及布料。
+[图片文字]: MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA
+[图片描述]: 一只手拿着两瓶防晒霜，左侧为MISTINE品牌的Aqua系列防晒，右侧为UV Expert品牌的Aqua Gel系列防晒，背景可见其他护肤品和布料。</pre>
+  </section>
+  <section>
+    <h3>content_parts JSON</h3>
+    <pre>{
+  &quot;body&quot;: &quot;纠结不知道买什么防晒的直接看过来，我前前后后试过好多款防晒，最后只留下这两支，肤感巨好，日常出门随便涂都合适！！！\n#蜜丝婷防晒\n前段时间去云南旅游，那边高原紫外线真的超强。整天在外逛景点、拍照暴晒，回到酒店照镜子真的惊到，脸居然一点没晒黑，也没有泛红起皮！\n它添加了烟酰胺+超肽VC，不光能硬核防晒，坚持用下来脸上晒斑都淡了不少，真正做到一边防晒一边养肤。\n我爱的还是它的上脸肤感，质地跟清爽乳液一样，一点不厚重不糊脸。成膜速度很快，不假白、不泛油光，后续化妆上底妆也特别服帖，完全不会搓泥。这个价位能用到这种质感，真的很省心。\n#兰蔻小白管\n肤感真的绝到说不出话。。细腻到不像防晒，倒像是在给脸喂营养。\n早上赶时间的时候，随便抹两下就能出门，好气色就这么轻松get！\n润而不油，涂完脸摸起来滑溜溜的，成膜之后是半哑光的妆效，带妆一天都清清爽爽，连口罩蹭过都不泛油光！！\n#mistine防晒 #蜜丝婷防晒 #户外防晒 #蜜丝婷小黄帽防晒 #通勤防晒&quot;,
+  &quot;images&quot;: [
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262038/ebec6768d0a0a994999425b9833d4a54/notes_pre_post/1040g3k8320aatee3lc005p9bmsaal72kdjshep0!nd_dft_wgth_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA&quot;,
+      &quot;description&quot;: &quot;一只手拿着两瓶防晒产品，左侧为MISTINE AQUA防晒霜，右侧为UV EXPERT YOUTH SHIELD AQUA GEL防晒霜，背景可见其他护肤品及布料。&quot;,
+      &quot;raw&quot;: &quot;[文字]: MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA [描述]: 一只手拿着两瓶防晒产品，左侧为MISTINE AQUA防晒霜，右侧为UV EXPERT YOUTH SHIELD AQUA GEL防晒霜，背景可见其他护肤品及布料。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;http://sns-webpic-qc.xhscdn.com/202605262038/ebec6768d0a0a994999425b9833d4a54/notes_pre_post/1040g3k8320aatee3lc005p9bmsaal72kdjshep0!nd_dft_wgth_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA&quot;,
+      &quot;description&quot;: &quot;一只手拿着两瓶防晒霜，左侧为MISTINE品牌的Aqua系列防晒，右侧为UV Expert品牌的Aqua Gel系列防晒，背景可见其他护肤品和布料。&quot;,
+      &quot;raw&quot;: &quot;[文字]: MISTINE、AQUA、50+SPF、BRIGHT&amp;LIGHT、DAILY PROTECTION、FACE SUNSCREEN PRO、SUITABLE FOR SENSITIVE SKIN、UV EXPERT、YOUTH SHIELD、AQUA GEL、SPF 50 PA++++、EXTERNAL AGGRESSORS、UVB - UVA - XL UVA [描述]: 一只手拿着两瓶防晒霜，左侧为MISTINE品牌的Aqua系列防晒，右侧为UV Expert品牌的Aqua Gel系列防晒，背景可见其他护肤品和布料。&quot;
+    }
+  ],
+  &quot;video_transcript&quot;: &quot;&quot;
+}</pre>
+  </section>
+</article>
+
+
+<article>
+  <div class="card-head">
+    <div>
+      <h2>双十一必囤的日用和旅行专用防晒</h2>
+      <div class="meta">note_id: 68dcdf9400000000030202f5 · user_id: 640c4bcc000000002a0088a8 · <a href="https://www.xiaohongshu.com/explore/68dcdf9400000000030202f5?xsec_token=AB6XCDb7XEN8fapeQymQwLtgshj3AhwxERyYBIN8wFR2w=&amp;xsec_source=pc_collect" target="_blank" rel="noreferrer">原文链接</a></div>
+    </div>
+    <span class="badge ok">SQLite content 与 ChromaDB document 一致</span>
+  </div>
+  <div class="stats">
+    <span>indexed：是</span>
+    <span>收藏状态：当前收藏</span>
+    <span>归档时间：无</span>
+    <span>content 字数：908</span>
+    <span>Chroma document 字数：908</span>
+    <span>图片数：3</span>
+    <span>OCR 段数：4</span>
+    <span>图片描述段数：4</span>
+    <span>视频转录：无</span>
+  </div>
+  <section>
+    <h3>原始正文 body</h3>
+    <pre>资生堂蓝胖子
+旅行必备防晒，当之无愧的🐮，跟朋友去海边，涂了的地方完全没有变黑，没涂防晒的地方直接晒到蜕皮。
+挤出来呈液状。我用下来感觉比较偏干，图3图4是成膜后的效果，可以看到它的油膜感不重，更适合油皮
+欧莱雅小金管
+性价比拉满的一款日常防晒，防晒效果很好，只要不是阳光暴晒，用它足够了。挤出来是面霜质地，成膜后还是比较油的，我作为偏干皮，很爱这种油膜感，所以常常也把它当作妆前，上底妆不会卡粉，这也是我最喜欢的一点
+安耐晒
+也是一款超牛的防晒，出游旅行必备，挤出来呈液状。跟资生堂不同的在于，它用下来比资生堂刺激，我本身是敏感肌，脸部用安耐晒会过敏，所以我一般将资生堂做为脸部防晒，安耐晒作为身体防晒。我本身不喜欢身上涂抹油膜感重的东西，所以日常出门我不会做身体防晒，只有去海边需要暴晒才会使用身体防晒。
+总结：欧莱雅小金管日常用，资生堂蓝胖子（脸部用）和安耐晒（身体用）有暴晒的旅行用。
+#好用的防晒推荐 #军训防晒霜 #干皮防晒 #防晒乳 #敏感肌防晒 #防晒霜分享 #旅行防晒 #双十一囤货</pre>
+  </section>
+  <section>
+    <h3>图片 OCR / 描述</h3>
+    <div class="image-part">
+  <div class="meta">图片 1: https://sns-webpic-qc.xhscdn.com/202605262038/d1bfcfb4e03bc9c2f8892764df77402d/notes_pre_post/1040g3k831n3bst5umma05njc62q096s011qtqs8!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>资生堂蓝胖子、欧莱雅小金管、安耐晒</pre>
+  <h3>图片描述</h3>
+  <pre>手背展示资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品的试色，背景为木质桌面，桌面上有粉色和蓝色的物品。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 2: https://sns-webpic-qc.xhscdn.com/202605262038/c6ef9d1dbcd4626ec8def052b03eecd7/notes_pre_post/1040g3k831n3bst5ummag5njc62q096s07i52lf0!nd_prv_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>欧莱雅 小金管、资生堂 蓝胖子、安耐晒、SHISEIDO、50+、LOREAL PARIS、UV PERFECT 多重防护、50+ PA+++、ANESSA、perfect UV sunscreen skincare milk、SPF50</pre>
+  <h3>图片描述</h3>
+  <pre>图片展示了资生堂蓝胖子、欧莱雅小金管、安耐晒三款防晒产品，置于浅色背景上，每款产品旁标注了对应名称，产品上印有品牌及防晒参数等信息。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 3: https://sns-webpic-qc.xhscdn.com/202605262038/e51e2f38e00011fa9f5d0e79c388a5fe/notes_pre_post/1040g3k831n3bst5umm905njc62q096s0t7p1q5g!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>资生堂 蓝胖子、欧莱雅 小金管、安耐晒</pre>
+  <h3>图片描述</h3>
+  <pre>一只手背上涂抹了资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品，展示其质地。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 4: https://sns-webpic-qc.xhscdn.com/202605262038/28417e5b9959dd5d7f9e4ca76eb64fc2/notes_pre_post/1040g3k831n3bst5umm9g5njc62q096s046e2qf0!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>资生堂 蓝胖子、欧莱雅 小金管、安耐晒</pre>
+  <h3>图片描述</h3>
+  <pre>一只手的手背展示三种护肤（或防晒）产品的涂抹效果，分别标注为资生堂蓝胖子、欧莱雅小金管、安耐晒，背景为木质桌面。</pre>
+</div>
+  </section>
+  <section>
+    <h3>视频转录</h3>
+    <pre class="empty">空</pre>
+  </section>
+  <section>
+    <h3>最终写入向量库的 content</h3>
+    <pre>资生堂蓝胖子
+旅行必备防晒，当之无愧的🐮，跟朋友去海边，涂了的地方完全没有变黑，没涂防晒的地方直接晒到蜕皮。
+挤出来呈液状。我用下来感觉比较偏干，图3图4是成膜后的效果，可以看到它的油膜感不重，更适合油皮
+欧莱雅小金管
+性价比拉满的一款日常防晒，防晒效果很好，只要不是阳光暴晒，用它足够了。挤出来是面霜质地，成膜后还是比较油的，我作为偏干皮，很爱这种油膜感，所以常常也把它当作妆前，上底妆不会卡粉，这也是我最喜欢的一点
+安耐晒
+也是一款超牛的防晒，出游旅行必备，挤出来呈液状。跟资生堂不同的在于，它用下来比资生堂刺激，我本身是敏感肌，脸部用安耐晒会过敏，所以我一般将资生堂做为脸部防晒，安耐晒作为身体防晒。我本身不喜欢身上涂抹油膜感重的东西，所以日常出门我不会做身体防晒，只有去海边需要暴晒才会使用身体防晒。
+总结：欧莱雅小金管日常用，资生堂蓝胖子（脸部用）和安耐晒（身体用）有暴晒的旅行用。
+#好用的防晒推荐 #军训防晒霜 #干皮防晒 #防晒乳 #敏感肌防晒 #防晒霜分享 #旅行防晒 #双十一囤货
+[图片文字]: 资生堂蓝胖子、欧莱雅小金管、安耐晒
+[图片描述]: 手背展示资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品的试色，背景为木质桌面，桌面上有粉色和蓝色的物品。
+[图片文字]: 欧莱雅 小金管、资生堂 蓝胖子、安耐晒、SHISEIDO、50+、LOREAL PARIS、UV PERFECT 多重防护、50+ PA+++、ANESSA、perfect UV sunscreen skincare milk、SPF50
+[图片描述]: 图片展示了资生堂蓝胖子、欧莱雅小金管、安耐晒三款防晒产品，置于浅色背景上，每款产品旁标注了对应名称，产品上印有品牌及防晒参数等信息。
+[图片文字]: 资生堂 蓝胖子、欧莱雅 小金管、安耐晒
+[图片描述]: 一只手背上涂抹了资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品，展示其质地。
+[图片文字]: 资生堂 蓝胖子、欧莱雅 小金管、安耐晒
+[图片描述]: 一只手的手背展示三种护肤（或防晒）产品的涂抹效果，分别标注为资生堂蓝胖子、欧莱雅小金管、安耐晒，背景为木质桌面。</pre>
+  </section>
+  <section>
+    <h3>ChromaDB document</h3>
+    <pre>资生堂蓝胖子
+旅行必备防晒，当之无愧的🐮，跟朋友去海边，涂了的地方完全没有变黑，没涂防晒的地方直接晒到蜕皮。
+挤出来呈液状。我用下来感觉比较偏干，图3图4是成膜后的效果，可以看到它的油膜感不重，更适合油皮
+欧莱雅小金管
+性价比拉满的一款日常防晒，防晒效果很好，只要不是阳光暴晒，用它足够了。挤出来是面霜质地，成膜后还是比较油的，我作为偏干皮，很爱这种油膜感，所以常常也把它当作妆前，上底妆不会卡粉，这也是我最喜欢的一点
+安耐晒
+也是一款超牛的防晒，出游旅行必备，挤出来呈液状。跟资生堂不同的在于，它用下来比资生堂刺激，我本身是敏感肌，脸部用安耐晒会过敏，所以我一般将资生堂做为脸部防晒，安耐晒作为身体防晒。我本身不喜欢身上涂抹油膜感重的东西，所以日常出门我不会做身体防晒，只有去海边需要暴晒才会使用身体防晒。
+总结：欧莱雅小金管日常用，资生堂蓝胖子（脸部用）和安耐晒（身体用）有暴晒的旅行用。
+#好用的防晒推荐 #军训防晒霜 #干皮防晒 #防晒乳 #敏感肌防晒 #防晒霜分享 #旅行防晒 #双十一囤货
+[图片文字]: 资生堂蓝胖子、欧莱雅小金管、安耐晒
+[图片描述]: 手背展示资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品的试色，背景为木质桌面，桌面上有粉色和蓝色的物品。
+[图片文字]: 欧莱雅 小金管、资生堂 蓝胖子、安耐晒、SHISEIDO、50+、LOREAL PARIS、UV PERFECT 多重防护、50+ PA+++、ANESSA、perfect UV sunscreen skincare milk、SPF50
+[图片描述]: 图片展示了资生堂蓝胖子、欧莱雅小金管、安耐晒三款防晒产品，置于浅色背景上，每款产品旁标注了对应名称，产品上印有品牌及防晒参数等信息。
+[图片文字]: 资生堂 蓝胖子、欧莱雅 小金管、安耐晒
+[图片描述]: 一只手背上涂抹了资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品，展示其质地。
+[图片文字]: 资生堂 蓝胖子、欧莱雅 小金管、安耐晒
+[图片描述]: 一只手的手背展示三种护肤（或防晒）产品的涂抹效果，分别标注为资生堂蓝胖子、欧莱雅小金管、安耐晒，背景为木质桌面。</pre>
+  </section>
+  <section>
+    <h3>content_parts JSON</h3>
+    <pre>{
+  &quot;body&quot;: &quot;资生堂蓝胖子\n旅行必备防晒，当之无愧的🐮，跟朋友去海边，涂了的地方完全没有变黑，没涂防晒的地方直接晒到蜕皮。\n挤出来呈液状。我用下来感觉比较偏干，图3图4是成膜后的效果，可以看到它的油膜感不重，更适合油皮\n欧莱雅小金管\n性价比拉满的一款日常防晒，防晒效果很好，只要不是阳光暴晒，用它足够了。挤出来是面霜质地，成膜后还是比较油的，我作为偏干皮，很爱这种油膜感，所以常常也把它当作妆前，上底妆不会卡粉，这也是我最喜欢的一点\n安耐晒\n也是一款超牛的防晒，出游旅行必备，挤出来呈液状。跟资生堂不同的在于，它用下来比资生堂刺激，我本身是敏感肌，脸部用安耐晒会过敏，所以我一般将资生堂做为脸部防晒，安耐晒作为身体防晒。我本身不喜欢身上涂抹油膜感重的东西，所以日常出门我不会做身体防晒，只有去海边需要暴晒才会使用身体防晒。\n总结：欧莱雅小金管日常用，资生堂蓝胖子（脸部用）和安耐晒（身体用）有暴晒的旅行用。\n#好用的防晒推荐 #军训防晒霜 #干皮防晒 #防晒乳 #敏感肌防晒 #防晒霜分享 #旅行防晒 #双十一囤货&quot;,
+  &quot;images&quot;: [
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262038/d1bfcfb4e03bc9c2f8892764df77402d/notes_pre_post/1040g3k831n3bst5umma05njc62q096s011qtqs8!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;资生堂蓝胖子、欧莱雅小金管、安耐晒&quot;,
+      &quot;description&quot;: &quot;手背展示资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品的试色，背景为木质桌面，桌面上有粉色和蓝色的物品。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 资生堂蓝胖子、欧莱雅小金管、安耐晒 [描述]: 手背展示资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品的试色，背景为木质桌面，桌面上有粉色和蓝色的物品。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262038/c6ef9d1dbcd4626ec8def052b03eecd7/notes_pre_post/1040g3k831n3bst5ummag5njc62q096s07i52lf0!nd_prv_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;欧莱雅 小金管、资生堂 蓝胖子、安耐晒、SHISEIDO、50+、LOREAL PARIS、UV PERFECT 多重防护、50+ PA+++、ANESSA、perfect UV sunscreen skincare milk、SPF50&quot;,
+      &quot;description&quot;: &quot;图片展示了资生堂蓝胖子、欧莱雅小金管、安耐晒三款防晒产品，置于浅色背景上，每款产品旁标注了对应名称，产品上印有品牌及防晒参数等信息。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 欧莱雅 小金管、资生堂 蓝胖子、安耐晒、SHISEIDO、50+、LOREAL PARIS、UV PERFECT 多重防护、50+ PA+++、ANESSA、perfect UV sunscreen skincare milk、SPF50\n[描述]: 图片展示了资生堂蓝胖子、欧莱雅小金管、安耐晒三款防晒产品，置于浅色背景上，每款产品旁标注了对应名称，产品上印有品牌及防晒参数等信息。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262038/e51e2f38e00011fa9f5d0e79c388a5fe/notes_pre_post/1040g3k831n3bst5umm905njc62q096s0t7p1q5g!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;资生堂 蓝胖子、欧莱雅 小金管、安耐晒&quot;,
+      &quot;description&quot;: &quot;一只手背上涂抹了资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品，展示其质地。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 资生堂 蓝胖子、欧莱雅 小金管、安耐晒 [描述]: 一只手背上涂抹了资生堂蓝胖子、欧莱雅小金管、安耐晒三种防晒产品，展示其质地。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262038/28417e5b9959dd5d7f9e4ca76eb64fc2/notes_pre_post/1040g3k831n3bst5umm9g5njc62q096s046e2qf0!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;资生堂 蓝胖子、欧莱雅 小金管、安耐晒&quot;,
+      &quot;description&quot;: &quot;一只手的手背展示三种护肤（或防晒）产品的涂抹效果，分别标注为资生堂蓝胖子、欧莱雅小金管、安耐晒，背景为木质桌面。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 资生堂 蓝胖子、欧莱雅 小金管、安耐晒 [描述]: 一只手的手背展示三种护肤（或防晒）产品的涂抹效果，分别标注为资生堂蓝胖子、欧莱雅小金管、安耐晒，背景为木质桌面。&quot;
+    }
+  ],
+  &quot;video_transcript&quot;: &quot;&quot;
+}</pre>
+  </section>
+</article>
+
+
+<article>
+  <div class="card-head">
+    <div>
+      <h2>成都待了6年，亲测不绕路四日游路线！</h2>
+      <div class="meta">note_id: 69525ed3000000001e020ea0 · user_id: 640c4bcc000000002a0088a8 · <a href="https://www.xiaohongshu.com/explore/69525ed3000000001e020ea0?xsec_token=ABMiO5svfAxyD37bRVEpXvNYpdBkCeE3yk_vsRoQzn_cI=&amp;xsec_source=pc_collect" target="_blank" rel="noreferrer">原文链接</a></div>
+    </div>
+    <span class="badge ok">SQLite content 与 ChromaDB document 一致</span>
+  </div>
+  <div class="stats">
+    <span>indexed：是</span>
+    <span>收藏状态：当前收藏</span>
+    <span>归档时间：无</span>
+    <span>content 字数：2116</span>
+    <span>Chroma document 字数：2116</span>
+    <span>图片数：5</span>
+    <span>OCR 段数：6</span>
+    <span>图片描述段数：6</span>
+    <span>视频转录：无</span>
+  </div>
+  <section>
+    <h3>原始正文 body</h3>
+    <pre>上大学的时候是我第一次来成都，到现在大学毕业，已经在成都待了6年了，成都大大小小的景点基本都去过了，根据个人经验总结了一下成都四日游畅玩不绕路游玩路线！需要的朋友自取！亲测不绕路！
+-
+成都四日游路线：
+📍day1：春熙路→太古里→大慈寺→九眼桥→望平街
+📍day2：熊猫基地→文殊院→东郊记忆→奎星楼街→宽窄巷子
+📍day3：成都博物馆→青羊宫→杜甫草堂→武侯祠→锦里古街
+📍day4：熊猫谷→仰天窝广场→灌县古城→都江堰→南桥
+-
+成都可以吃的美食
+👉春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉
+	
+👉宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面
+	
+👉文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭
+	
+👉建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子
+	
+👉玉林街：王妈手撕烤兔、黄嬢甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉
+	
+👉望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫
+#成都旅游 #游玩攻略 #旅游攻略 #本地人做的攻略 #成都四日游 #成都旅游攻略 #岳富贵 #跟着本地人玩就就对了 #旅游不踩坑 #公园城市幸福成都</pre>
+  </section>
+  <section>
+    <h3>图片 OCR / 描述</h3>
+    <div class="image-part">
+  <div class="meta">图片 1: https://sns-webpic-qc.xhscdn.com/202605262037/062e6e2c181af704c5aec098df45045f/notes_pre_post/1040g3k031qm4a4tuno305ppuutu21e91akm4qg8!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>成都可以吃的美食
+春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉
+宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面
+文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭
+建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子
+玉林街：王妈手撕烤兔、黄孃甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉
+望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫</pre>
+  <h3>图片描述</h3>
+  <pre>图片呈现成都各街道的特色美食推荐，按街道分类列出对应美食，下方配有火锅、甜品、火锅等美食图片，展现成都美食地图类内容。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 2: https://sns-webpic-qc.xhscdn.com/202605262037/7666e7df2e8c17f188b3b54c09de4ee9/notes_pre_post/1040g3k031qm4a4tuno6g5ppuutu21e917cqcjl0!nd_prv_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>DAY1、DAY2、春熙路、步行5分钟、太古里、步行5分钟、大慈寺、步行15分钟、望平街、骑行12分钟、九眼桥、熊猫基地、公交49分钟、文殊院、打车29分钟、东郊记忆、地铁43分钟、宽窄巷子、步行8分钟、奎星楼街</pre>
+  <h3>图片描述</h3>
+  <pre>图片展示了两天（DAY1和DAY2）的旅游行程，分别列出每天游览的地点及各地点间的交通方式和所需时间，DAY1包含春熙路、太古里、大慈寺、望平街、九眼桥，DAY2包含熊猫基地、文殊院、东郊记忆、宽窄巷子、奎星楼街，整体为旅游行程规划图。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 3: https://sns-webpic-qc.xhscdn.com/202605262037/c6fcc94b163a075d77d7af537a196b18/notes_pre_post/1040g3k031qm4a4tuno405ppuutu21e91j3tf9cg!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>DAY3、成都博物馆、地铁21分钟、青羊宫、步行15分钟、杜甫草堂、骑行19分钟、武侯祠、步行8分钟、锦里古街；DAY4、熊猫谷、打车16分钟、仰天窝广场、步行10分钟、灌县古城、步行8分钟、都江堰、步行6分钟、南桥</pre>
+  <h3>图片描述</h3>
+  <pre>图片展示了成都及周边两天的旅游行程安排，通过箭头串联各景点，标注了每个景点的交通方式及所需时间，呈现DAY3和DAY4的游览路线。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 4: https://sns-webpic-qc.xhscdn.com/202605262037/9364d5f00ae79d5aa35281c91d9c9477/notes_pre_post/1040g3k031qm4a4tuno605ppuutu21e91hn3301o!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>成都夜景打卡、SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街</pre>
+  <h3>图片描述</h3>
+  <pre>图片以六宫格形式呈现成都六个夜景打卡地点（SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街）的夜景，每个地点配有对应名称标签。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 5: https://sns-webpic-qc.xhscdn.com/202605262037/f3d460adc7f3ec91a104fed9a7472656/notes_pre_post/1040g3k031qm4a4tuno505ppuutu21e91ssv5pv8!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>成都可以逛的夜市、抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市（及各夜市内招牌文字如“無琴夜”“烧烤生蚝”“粤式烧烤粥”“凉面酸辣粉馄饨”“凉面酸”“袁记钵钵鸡”“魅力犀浦 点亮 都夜生活”等）</pre>
+  <h3>图片描述</h3>
+  <pre>图片展示了成都六个夜市（抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市）的夜景，每个夜市以文字标注名称，呈现夜市的热闹场景，包含各类摊位、霓虹招牌和人群，体现夜市的繁华氛围。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 6: https://sns-webpic-qc.xhscdn.com/202605262037/0b1ea162e799070bed4ff046a25d144d/notes_pre_post/1040g3k031qm4a4tuno205ppuutu21e91c3f36m8!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>备忘录 成都景点情况 提前预约 熊猫基地（55r）：08:00-18：00 三星堆博物馆（72r）：08:30-18:00 武侯祠（50r）：09：00-17:00 成都博物馆（free）：09：00-17:00 杜甫草堂（50r）：08:00-18:00 熊猫谷（50r）：08:00-18:00 青城山（前山80r/后山20r）：08:30-17:00 都江堰（80r）：08:00-18:00 金沙遗址（70r）：09:00-18:00 成都动物园（20r）：08:00-17:00 四川博物馆（free）：09:00-17:00 无需预约 春熙路（free）：全天开放 东郊记忆（free）：全天开放 抚琴夜市（free）：全天开放 人民公园（free）：全天开放 文殊院（free）：08:00-17:00 宽窄巷子（free）：全天开放 建设路（free）：10:00-22:00</pre>
+  <h3>图片描述</h3>
+  <pre>图片是一份成都景点情况的备忘录，将景点分为“提前预约”和“无需预约”两类，列出各景点的名称、票价（或标注“free”表示免费）及开放时间。</pre>
+</div>
+  </section>
+  <section>
+    <h3>视频转录</h3>
+    <pre class="empty">空</pre>
+  </section>
+  <section>
+    <h3>最终写入向量库的 content</h3>
+    <pre>上大学的时候是我第一次来成都，到现在大学毕业，已经在成都待了6年了，成都大大小小的景点基本都去过了，根据个人经验总结了一下成都四日游畅玩不绕路游玩路线！需要的朋友自取！亲测不绕路！
+-
+成都四日游路线：
+📍day1：春熙路→太古里→大慈寺→九眼桥→望平街
+📍day2：熊猫基地→文殊院→东郊记忆→奎星楼街→宽窄巷子
+📍day3：成都博物馆→青羊宫→杜甫草堂→武侯祠→锦里古街
+📍day4：熊猫谷→仰天窝广场→灌县古城→都江堰→南桥
+-
+成都可以吃的美食
+👉春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉
+	
+👉宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面
+	
+👉文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭
+	
+👉建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子
+	
+👉玉林街：王妈手撕烤兔、黄嬢甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉
+	
+👉望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫
+#成都旅游 #游玩攻略 #旅游攻略 #本地人做的攻略 #成都四日游 #成都旅游攻略 #岳富贵 #跟着本地人玩就就对了 #旅游不踩坑 #公园城市幸福成都
+[图片文字]: 成都可以吃的美食
+春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉
+宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面
+文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭
+建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子
+玉林街：王妈手撕烤兔、黄孃甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉
+望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫
+[图片描述]: 图片呈现成都各街道的特色美食推荐，按街道分类列出对应美食，下方配有火锅、甜品、火锅等美食图片，展现成都美食地图类内容。
+[图片文字]: DAY1、DAY2、春熙路、步行5分钟、太古里、步行5分钟、大慈寺、步行15分钟、望平街、骑行12分钟、九眼桥、熊猫基地、公交49分钟、文殊院、打车29分钟、东郊记忆、地铁43分钟、宽窄巷子、步行8分钟、奎星楼街
+[图片描述]: 图片展示了两天（DAY1和DAY2）的旅游行程，分别列出每天游览的地点及各地点间的交通方式和所需时间，DAY1包含春熙路、太古里、大慈寺、望平街、九眼桥，DAY2包含熊猫基地、文殊院、东郊记忆、宽窄巷子、奎星楼街，整体为旅游行程规划图。
+[图片文字]: DAY3、成都博物馆、地铁21分钟、青羊宫、步行15分钟、杜甫草堂、骑行19分钟、武侯祠、步行8分钟、锦里古街；DAY4、熊猫谷、打车16分钟、仰天窝广场、步行10分钟、灌县古城、步行8分钟、都江堰、步行6分钟、南桥
+[图片描述]: 图片展示了成都及周边两天的旅游行程安排，通过箭头串联各景点，标注了每个景点的交通方式及所需时间，呈现DAY3和DAY4的游览路线。
+[图片文字]: 成都夜景打卡、SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街
+[图片描述]: 图片以六宫格形式呈现成都六个夜景打卡地点（SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街）的夜景，每个地点配有对应名称标签。
+[图片文字]: 成都可以逛的夜市、抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市（及各夜市内招牌文字如“無琴夜”“烧烤生蚝”“粤式烧烤粥”“凉面酸辣粉馄饨”“凉面酸”“袁记钵钵鸡”“魅力犀浦 点亮 都夜生活”等）
+[图片描述]: 图片展示了成都六个夜市（抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市）的夜景，每个夜市以文字标注名称，呈现夜市的热闹场景，包含各类摊位、霓虹招牌和人群，体现夜市的繁华氛围。
+[图片文字]: 备忘录 成都景点情况 提前预约 熊猫基地（55r）：08:00-18：00 三星堆博物馆（72r）：08:30-18:00 武侯祠（50r）：09：00-17:00 成都博物馆（free）：09：00-17:00 杜甫草堂（50r）：08:00-18:00 熊猫谷（50r）：08:00-18:00 青城山（前山80r/后山20r）：08:30-17:00 都江堰（80r）：08:00-18:00 金沙遗址（70r）：09:00-18:00 成都动物园（20r）：08:00-17:00 四川博物馆（free）：09:00-17:00 无需预约 春熙路（free）：全天开放 东郊记忆（free）：全天开放 抚琴夜市（free）：全天开放 人民公园（free）：全天开放 文殊院（free）：08:00-17:00 宽窄巷子（free）：全天开放 建设路（free）：10:00-22:00
+[图片描述]: 图片是一份成都景点情况的备忘录，将景点分为“提前预约”和“无需预约”两类，列出各景点的名称、票价（或标注“free”表示免费）及开放时间。</pre>
+  </section>
+  <section>
+    <h3>ChromaDB document</h3>
+    <pre>上大学的时候是我第一次来成都，到现在大学毕业，已经在成都待了6年了，成都大大小小的景点基本都去过了，根据个人经验总结了一下成都四日游畅玩不绕路游玩路线！需要的朋友自取！亲测不绕路！
+-
+成都四日游路线：
+📍day1：春熙路→太古里→大慈寺→九眼桥→望平街
+📍day2：熊猫基地→文殊院→东郊记忆→奎星楼街→宽窄巷子
+📍day3：成都博物馆→青羊宫→杜甫草堂→武侯祠→锦里古街
+📍day4：熊猫谷→仰天窝广场→灌县古城→都江堰→南桥
+-
+成都可以吃的美食
+👉春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉
+	
+👉宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面
+	
+👉文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭
+	
+👉建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子
+	
+👉玉林街：王妈手撕烤兔、黄嬢甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉
+	
+👉望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫
+#成都旅游 #游玩攻略 #旅游攻略 #本地人做的攻略 #成都四日游 #成都旅游攻略 #岳富贵 #跟着本地人玩就就对了 #旅游不踩坑 #公园城市幸福成都
+[图片文字]: 成都可以吃的美食
+春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉
+宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面
+文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭
+建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子
+玉林街：王妈手撕烤兔、黄孃甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉
+望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫
+[图片描述]: 图片呈现成都各街道的特色美食推荐，按街道分类列出对应美食，下方配有火锅、甜品、火锅等美食图片，展现成都美食地图类内容。
+[图片文字]: DAY1、DAY2、春熙路、步行5分钟、太古里、步行5分钟、大慈寺、步行15分钟、望平街、骑行12分钟、九眼桥、熊猫基地、公交49分钟、文殊院、打车29分钟、东郊记忆、地铁43分钟、宽窄巷子、步行8分钟、奎星楼街
+[图片描述]: 图片展示了两天（DAY1和DAY2）的旅游行程，分别列出每天游览的地点及各地点间的交通方式和所需时间，DAY1包含春熙路、太古里、大慈寺、望平街、九眼桥，DAY2包含熊猫基地、文殊院、东郊记忆、宽窄巷子、奎星楼街，整体为旅游行程规划图。
+[图片文字]: DAY3、成都博物馆、地铁21分钟、青羊宫、步行15分钟、杜甫草堂、骑行19分钟、武侯祠、步行8分钟、锦里古街；DAY4、熊猫谷、打车16分钟、仰天窝广场、步行10分钟、灌县古城、步行8分钟、都江堰、步行6分钟、南桥
+[图片描述]: 图片展示了成都及周边两天的旅游行程安排，通过箭头串联各景点，标注了每个景点的交通方式及所需时间，呈现DAY3和DAY4的游览路线。
+[图片文字]: 成都夜景打卡、SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街
+[图片描述]: 图片以六宫格形式呈现成都六个夜景打卡地点（SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街）的夜景，每个地点配有对应名称标签。
+[图片文字]: 成都可以逛的夜市、抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市（及各夜市内招牌文字如“無琴夜”“烧烤生蚝”“粤式烧烤粥”“凉面酸辣粉馄饨”“凉面酸”“袁记钵钵鸡”“魅力犀浦 点亮 都夜生活”等）
+[图片描述]: 图片展示了成都六个夜市（抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市）的夜景，每个夜市以文字标注名称，呈现夜市的热闹场景，包含各类摊位、霓虹招牌和人群，体现夜市的繁华氛围。
+[图片文字]: 备忘录 成都景点情况 提前预约 熊猫基地（55r）：08:00-18：00 三星堆博物馆（72r）：08:30-18:00 武侯祠（50r）：09：00-17:00 成都博物馆（free）：09：00-17:00 杜甫草堂（50r）：08:00-18:00 熊猫谷（50r）：08:00-18:00 青城山（前山80r/后山20r）：08:30-17:00 都江堰（80r）：08:00-18:00 金沙遗址（70r）：09:00-18:00 成都动物园（20r）：08:00-17:00 四川博物馆（free）：09:00-17:00 无需预约 春熙路（free）：全天开放 东郊记忆（free）：全天开放 抚琴夜市（free）：全天开放 人民公园（free）：全天开放 文殊院（free）：08:00-17:00 宽窄巷子（free）：全天开放 建设路（free）：10:00-22:00
+[图片描述]: 图片是一份成都景点情况的备忘录，将景点分为“提前预约”和“无需预约”两类，列出各景点的名称、票价（或标注“free”表示免费）及开放时间。</pre>
+  </section>
+  <section>
+    <h3>content_parts JSON</h3>
+    <pre>{
+  &quot;body&quot;: &quot;上大学的时候是我第一次来成都，到现在大学毕业，已经在成都待了6年了，成都大大小小的景点基本都去过了，根据个人经验总结了一下成都四日游畅玩不绕路游玩路线！需要的朋友自取！亲测不绕路！\n-\n成都四日游路线：\n📍day1：春熙路→太古里→大慈寺→九眼桥→望平街\n📍day2：熊猫基地→文殊院→东郊记忆→奎星楼街→宽窄巷子\n📍day3：成都博物馆→青羊宫→杜甫草堂→武侯祠→锦里古街\n📍day4：熊猫谷→仰天窝广场→灌县古城→都江堰→南桥\n-\n成都可以吃的美食\n👉春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉\n\t\n👉宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面\n\t\n👉文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭\n\t\n👉建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子\n\t\n👉玉林街：王妈手撕烤兔、黄嬢甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉\n\t\n👉望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫\n#成都旅游 #游玩攻略 #旅游攻略 #本地人做的攻略 #成都四日游 #成都旅游攻略 #岳富贵 #跟着本地人玩就就对了 #旅游不踩坑 #公园城市幸福成都&quot;,
+  &quot;images&quot;: [
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/062e6e2c181af704c5aec098df45045f/notes_pre_post/1040g3k031qm4a4tuno305ppuutu21e91akm4qg8!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;成都可以吃的美食\n春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉\n宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面\n文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭\n建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子\n玉林街：王妈手撕烤兔、黄孃甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉\n望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫&quot;,
+      &quot;description&quot;: &quot;图片呈现成都各街道的特色美食推荐，按街道分类列出对应美食，下方配有火锅、甜品、火锅等美食图片，展现成都美食地图类内容。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 成都可以吃的美食\n春熙路：岳富贵老火锅、翠孃孃老火锅、西月城谭豆花、叶婆婆钵钵鸡、乐山胖哥跷脚牛肉\n宽窄巷子：鹏鹏妈老火锅、邓记新一代糖油果子、冒椒火辣、易老大蛋烘糕、纯阳馆鱼香排骨面\n文殊院：宫廷糕点、闻酥园、严太婆锅盔、谭德食素面、龙抄手、孔干饭\n建设路：徐亮胖哥烤蹄、周签签锅巴土豆、烤无双苕皮、鬼包子\n玉林街：王妈手撕烤兔、黄孃甜不辣、罗姐竹笋芋儿鸡、沈堂甜水面、沥泉冰粉、汪醪糟、陈七牛腩粉\n望平街：山面包、伍妹冒烤鸭、八二小区抄手、甘食记肥肠粉、秤盘麻辣烫\n[描述]: 图片呈现成都各街道的特色美食推荐，按街道分类列出对应美食，下方配有火锅、甜品、火锅等美食图片，展现成都美食地图类内容。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/7666e7df2e8c17f188b3b54c09de4ee9/notes_pre_post/1040g3k031qm4a4tuno6g5ppuutu21e917cqcjl0!nd_prv_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;DAY1、DAY2、春熙路、步行5分钟、太古里、步行5分钟、大慈寺、步行15分钟、望平街、骑行12分钟、九眼桥、熊猫基地、公交49分钟、文殊院、打车29分钟、东郊记忆、地铁43分钟、宽窄巷子、步行8分钟、奎星楼街&quot;,
+      &quot;description&quot;: &quot;图片展示了两天（DAY1和DAY2）的旅游行程，分别列出每天游览的地点及各地点间的交通方式和所需时间，DAY1包含春熙路、太古里、大慈寺、望平街、九眼桥，DAY2包含熊猫基地、文殊院、东郊记忆、宽窄巷子、奎星楼街，整体为旅游行程规划图。&quot;,
+      &quot;raw&quot;: &quot;[文字]: DAY1、DAY2、春熙路、步行5分钟、太古里、步行5分钟、大慈寺、步行15分钟、望平街、骑行12分钟、九眼桥、熊猫基地、公交49分钟、文殊院、打车29分钟、东郊记忆、地铁43分钟、宽窄巷子、步行8分钟、奎星楼街\n[描述]: 图片展示了两天（DAY1和DAY2）的旅游行程，分别列出每天游览的地点及各地点间的交通方式和所需时间，DAY1包含春熙路、太古里、大慈寺、望平街、九眼桥，DAY2包含熊猫基地、文殊院、东郊记忆、宽窄巷子、奎星楼街，整体为旅游行程规划图。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/c6fcc94b163a075d77d7af537a196b18/notes_pre_post/1040g3k031qm4a4tuno405ppuutu21e91j3tf9cg!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;DAY3、成都博物馆、地铁21分钟、青羊宫、步行15分钟、杜甫草堂、骑行19分钟、武侯祠、步行8分钟、锦里古街；DAY4、熊猫谷、打车16分钟、仰天窝广场、步行10分钟、灌县古城、步行8分钟、都江堰、步行6分钟、南桥&quot;,
+      &quot;description&quot;: &quot;图片展示了成都及周边两天的旅游行程安排，通过箭头串联各景点，标注了每个景点的交通方式及所需时间，呈现DAY3和DAY4的游览路线。&quot;,
+      &quot;raw&quot;: &quot;[文字]: DAY3、成都博物馆、地铁21分钟、青羊宫、步行15分钟、杜甫草堂、骑行19分钟、武侯祠、步行8分钟、锦里古街；DAY4、熊猫谷、打车16分钟、仰天窝广场、步行10分钟、灌县古城、步行8分钟、都江堰、步行6分钟、南桥 [描述]: 图片展示了成都及周边两天的旅游行程安排，通过箭头串联各景点，标注了每个景点的交通方式及所需时间，呈现DAY3和DAY4的游览路线。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/9364d5f00ae79d5aa35281c91d9c9477/notes_pre_post/1040g3k031qm4a4tuno605ppuutu21e91hn3301o!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;成都夜景打卡、SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街&quot;,
+      &quot;description&quot;: &quot;图片以六宫格形式呈现成都六个夜景打卡地点（SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街）的夜景，每个地点配有对应名称标签。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 成都夜景打卡、SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街 [描述]: 图片以六宫格形式呈现成都六个夜景打卡地点（SKP生机之塔、双子塔、玉林路、安顺廊桥、锦里古街、铁像寺水街）的夜景，每个地点配有对应名称标签。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/f3d460adc7f3ec91a104fed9a7472656/notes_pre_post/1040g3k031qm4a4tuno505ppuutu21e91ssv5pv8!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;成都可以逛的夜市、抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市（及各夜市内招牌文字如“無琴夜”“烧烤生蚝”“粤式烧烤粥”“凉面酸辣粉馄饨”“凉面酸”“袁记钵钵鸡”“魅力犀浦 点亮 都夜生活”等）&quot;,
+      &quot;description&quot;: &quot;图片展示了成都六个夜市（抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市）的夜景，每个夜市以文字标注名称，呈现夜市的热闹场景，包含各类摊位、霓虹招牌和人群，体现夜市的繁华氛围。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 成都可以逛的夜市、抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市（及各夜市内招牌文字如“無琴夜”“烧烤生蚝”“粤式烧烤粥”“凉面酸辣粉馄饨”“凉面酸”“袁记钵钵鸡”“魅力犀浦 点亮 都夜生活”等） [描述]: 图片展示了成都六个夜市（抚琴夜市、柳浪湾夜市、大源夜市、常乐夜市、犀浦夜市、三河场夜市）的夜景，每个夜市以文字标注名称，呈现夜市的热闹场景，包含各类摊位、霓虹招牌和人群，体现夜市的繁华氛围。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/0b1ea162e799070bed4ff046a25d144d/notes_pre_post/1040g3k031qm4a4tuno205ppuutu21e91c3f36m8!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;备忘录 成都景点情况 提前预约 熊猫基地（55r）：08:00-18：00 三星堆博物馆（72r）：08:30-18:00 武侯祠（50r）：09：00-17:00 成都博物馆（free）：09：00-17:00 杜甫草堂（50r）：08:00-18:00 熊猫谷（50r）：08:00-18:00 青城山（前山80r/后山20r）：08:30-17:00 都江堰（80r）：08:00-18:00 金沙遗址（70r）：09:00-18:00 成都动物园（20r）：08:00-17:00 四川博物馆（free）：09:00-17:00 无需预约 春熙路（free）：全天开放 东郊记忆（free）：全天开放 抚琴夜市（free）：全天开放 人民公园（free）：全天开放 文殊院（free）：08:00-17:00 宽窄巷子（free）：全天开放 建设路（free）：10:00-22:00&quot;,
+      &quot;description&quot;: &quot;图片是一份成都景点情况的备忘录，将景点分为“提前预约”和“无需预约”两类，列出各景点的名称、票价（或标注“free”表示免费）及开放时间。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 备忘录 成都景点情况 提前预约 熊猫基地（55r）：08:00-18：00 三星堆博物馆（72r）：08:30-18:00 武侯祠（50r）：09：00-17:00 成都博物馆（free）：09：00-17:00 杜甫草堂（50r）：08:00-18:00 熊猫谷（50r）：08:00-18:00 青城山（前山80r/后山20r）：08:30-17:00 都江堰（80r）：08:00-18:00 金沙遗址（70r）：09:00-18:00 成都动物园（20r）：08:00-17:00 四川博物馆（free）：09:00-17:00 无需预约 春熙路（free）：全天开放 东郊记忆（free）：全天开放 抚琴夜市（free）：全天开放 人民公园（free）：全天开放 文殊院（free）：08:00-17:00 宽窄巷子（free）：全天开放 建设路（free）：10:00-22:00 [描述]: 图片是一份成都景点情况的备忘录，将景点分为“提前预约”和“无需预约”两类，列出各景点的名称、票价（或标注“free”表示免费）及开放时间。&quot;
+    }
+  ],
+  &quot;video_transcript&quot;: &quot;&quot;
+}</pre>
+  </section>
+</article>
+
+
+<article>
+  <div class="card-head">
+    <div>
+      <h2>成都→青城山前山→都江堰一日游攻略</h2>
+      <div class="meta">note_id: 698b283a000000001503afae · user_id: 640c4bcc000000002a0088a8 · <a href="https://www.xiaohongshu.com/explore/698b283a000000001503afae?xsec_token=ABJcFTmlS4YIIL_yXWVKgwgG0a9p-ZkVZ0o_LUk8dfTC0=&amp;xsec_source=pc_collect" target="_blank" rel="noreferrer">原文链接</a></div>
+    </div>
+    <span class="badge ok">SQLite content 与 ChromaDB document 一致</span>
+  </div>
+  <div class="stats">
+    <span>indexed：是</span>
+    <span>收藏状态：当前收藏</span>
+    <span>归档时间：无</span>
+    <span>content 字数：2012</span>
+    <span>Chroma document 字数：2012</span>
+    <span>图片数：5</span>
+    <span>OCR 段数：6</span>
+    <span>图片描述段数：6</span>
+    <span>视频转录：无</span>
+  </div>
+  <section>
+    <h3>原始正文 body</h3>
+    <pre>详细避坑指南：
+	
+春熙路出发→地铁2号线（35分钟）→犀浦站
+站内换乘1分钟就能到，提前10分钟检票，开车前2分钟停止检票
+	
+犀浦站→高铁（30分钟）→青城山站→景区观光车（10分钟）→山门
+出高铁站直走过马路，有景区的观光车售票处（官方车满车立即走，非满车10分钟一趟，其他黑车时间无保障）
+PS：售票处旁边有吃早饭的地方，出门比较早的话可以下了高铁再吃；售票处对面有家肯德基，10点钟开始点餐，时间赶趟的可以带点干粮上山）
+	
+索道上山，走路下山（约5个小时）
+山门→爬山30分钟→索道→老君阁（山顶）上山路约2个小时→下山（约2小时，有段路比较陡，不太好下）→五洞天（西游记打卡点）→山门（约1小时，坐景区观光车回高铁站）
+	
+📍以上青城山结束
+以下是都江堰
+	
+青城山站→轻轨45分钟（高铁站东边100米，有个高架样的，上扶梯，班次很多，不用等）→八角庙站→步行10分钟→离堆公园站→旅游班车15分钟（就停在路边，很显眼）→都江堰6号门（体力不够推荐从最高点往下走）
+	
+秦堰楼→下山→安澜桥→过桥→鱼嘴（爬不动了推荐在这里搭景区观光车出门）→安澜桥→松茂古道（有段上山下山路）→宣威门（安澜桥到出景区大概有1个小时左右）
+	
+都江堰游玩结束
+	
+宣威门出来是段小吃街，很一般，但是可以歇个脚，吃完饭出来，到南桥（蓝眼泪）（说实话很一般不值得看）
+	
+南桥→步行20分钟→离堆公园站→犀浦（回成都）
+	
+📍回程的票一定要提前买！如果决定要去都江堰，从出青城山就要买了，基本上下午三点左右晚上六七点的票就没了，推荐18：55的班次，时间完全够
+#城市特种兵 #青城山攻略 #青城山前山 #都江堰景区</pre>
+  </section>
+  <section>
+    <h3>图片 OCR / 描述</h3>
+    <div class="image-part">
+  <div class="meta">图片 1: https://sns-webpic-qc.xhscdn.com/202605262037/7b50226c4b47cda34bc81bd9460d4ff5/1040g00831sdgthplls0g5n1bhcmhdq2ssj3c330!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>都江堰景区 旅游攻略 旅游公交专线推荐精典游览线路（避免回头路） 省时 省力 省钱 进景区制高点→秦堰楼→二王庙→安澜索桥 鱼嘴→飞沙堰→宝瓶口→离堆公园→景区出口 三分看 七分听 人文景区 都江堰景区北门停车场 2 都江堰景区出入口 都江堰景区出入口 都江堰景区东门出入口 李冰纪念馆（东门） 都江堰景区出入口 都江堰景区南门出入口 都江堰游客中心 都江堰景区出入口 都江堰景区出入口 我的当前位置 旅游公交专线价目表 旅游公交专线综合服务 38元/人（单程车+人工讲解+耳麦） 离堆高铁站—秦堰楼 10元/人（单程车送达服务） 离堆高铁站—离堆公园 5元/人（单程车送达服务） 离堆高铁站—熊猫谷 10元/人（单程车送达服务） 旅游公交专线提供综合服务如下：38元/人 1、离堆高铁站送达景区秦堰楼约4 - 5公里。2、随车讲解服务约15分钟 3、景区内金牌讲解服务约70分钟。4、引导带过线路，避免走冤枉路。5、提供无声景区人声耳麦佩戴服务。</pre>
+  <h3>图片描述</h3>
+  <pre>这是一张都江堰景区的旅游攻略指示牌，包含游览路线推荐、景区地图（标注景点与出入口）、旅游公交专线价目表及服务说明，还有“三分看 七分听 人文景区”的提示，以及当前位置和景区出入口的标注（有黄色圈画）。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 2: https://sns-webpic-qc.xhscdn.com/202605262037/fd437fc02404b60d58b0d2d5df03a41c/1040g00831sdgthplls4g5n1bhcmhdq2sg131l8o!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>（无）</pre>
+  <h3>图片描述</h3>
+  <pre>画面展现了一座临水的传统中式建筑群，建筑屋檐下灯笼点缀，建筑前聚集众多人群，水面呈现蓝绿色，背景可见远山与树木，整体氛围兼具古韵与热闹。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 3: http://sns-webpic-qc.xhscdn.com/202605262037/fd437fc02404b60d58b0d2d5df03a41c/1040g00831sdgthplls4g5n1bhcmhdq2sg131l8o!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>（无明显可见文字）</pre>
+  <h3>图片描述</h3>
+  <pre>夜晚的河边中式建筑，建筑下有湍急的河流，建筑上挂着灯笼，许多人在建筑和河边活动，背景有山峦。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 4: https://sns-webpic-qc.xhscdn.com/202605262037/07cd46081ca9ad0ef4002dc40b3712c5/1040g00831sdgthplls405n1bhcmhdq2svieuh70!nd_dft_wgth_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>青城山前山景区全景图
+Panorama of Mount Qingcheng Scenic Area Front Range
+图 例 Legend
+（图例含“你的位置”“主要景点”“次要点”“卫生间”“索道”等符号说明，及距离信息：前五洞天 - 天师洞300m、前五洞天 - 朝阳洞1300m、前五洞天 - 老山门2000m、前五洞天 - 老君阁2500m、前五洞天 - 上清宫2500m、前五洞天 - 索道上站3000m）
+咨询、投诉、救援电话:96526 028 - 87288104
+Enquiries, Complaints and Emergency: 96526 028 - 87288104
+文明与山水同在，和谐与风景共存
+Help to Protect the Environment</pre>
+  <h3>图片描述</h3>
+  <pre>这是一张青城山前山景区的全景导览图，呈现景区地图、景点分布、图例说明、景点间距离、联系方式及环保提示，图上用黄色箭头和圆圈标注了特定区域。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 5: https://sns-webpic-qc.xhscdn.com/202605262037/67df3527ff4417d36262eee6b57c55a6/1040g00831sdgthplls3g5n1bhcmhdq2sfuofc5g!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>五洞天；天然城郭龙幡阵；府以青冥樯橹居福地</pre>
+  <h3>图片描述</h3>
+  <pre>红色门洞建筑，上方牌匾书“五洞天”，两侧有竖排对联，一背背包持登山杖的人站在门口摆姿势，背景为山间石阶小路及树木。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 6: https://sns-webpic-qc.xhscdn.com/202605262037/1c5bb191f17878da1cc7e27447a078c3/1040g00831sdgthplls1g5n1bhcmhdq2s4etkdm8!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>轻轨在此</pre>
+  <h3>图片描述</h3>
+  <pre>图片呈现一座轻轨站建筑，包含楼梯、扶梯等设施，下方有车辆、行人及遮阳棚，上方文字标注“轻轨在此”。</pre>
+</div>
+  </section>
+  <section>
+    <h3>视频转录</h3>
+    <pre class="empty">空</pre>
+  </section>
+  <section>
+    <h3>最终写入向量库的 content</h3>
+    <pre>详细避坑指南：
+	
+春熙路出发→地铁2号线（35分钟）→犀浦站
+站内换乘1分钟就能到，提前10分钟检票，开车前2分钟停止检票
+	
+犀浦站→高铁（30分钟）→青城山站→景区观光车（10分钟）→山门
+出高铁站直走过马路，有景区的观光车售票处（官方车满车立即走，非满车10分钟一趟，其他黑车时间无保障）
+PS：售票处旁边有吃早饭的地方，出门比较早的话可以下了高铁再吃；售票处对面有家肯德基，10点钟开始点餐，时间赶趟的可以带点干粮上山）
+	
+索道上山，走路下山（约5个小时）
+山门→爬山30分钟→索道→老君阁（山顶）上山路约2个小时→下山（约2小时，有段路比较陡，不太好下）→五洞天（西游记打卡点）→山门（约1小时，坐景区观光车回高铁站）
+	
+📍以上青城山结束
+以下是都江堰
+	
+青城山站→轻轨45分钟（高铁站东边100米，有个高架样的，上扶梯，班次很多，不用等）→八角庙站→步行10分钟→离堆公园站→旅游班车15分钟（就停在路边，很显眼）→都江堰6号门（体力不够推荐从最高点往下走）
+	
+秦堰楼→下山→安澜桥→过桥→鱼嘴（爬不动了推荐在这里搭景区观光车出门）→安澜桥→松茂古道（有段上山下山路）→宣威门（安澜桥到出景区大概有1个小时左右）
+	
+都江堰游玩结束
+	
+宣威门出来是段小吃街，很一般，但是可以歇个脚，吃完饭出来，到南桥（蓝眼泪）（说实话很一般不值得看）
+	
+南桥→步行20分钟→离堆公园站→犀浦（回成都）
+	
+📍回程的票一定要提前买！如果决定要去都江堰，从出青城山就要买了，基本上下午三点左右晚上六七点的票就没了，推荐18：55的班次，时间完全够
+#城市特种兵 #青城山攻略 #青城山前山 #都江堰景区
+[图片文字]: 都江堰景区 旅游攻略 旅游公交专线推荐精典游览线路（避免回头路） 省时 省力 省钱 进景区制高点→秦堰楼→二王庙→安澜索桥 鱼嘴→飞沙堰→宝瓶口→离堆公园→景区出口 三分看 七分听 人文景区 都江堰景区北门停车场 2 都江堰景区出入口 都江堰景区出入口 都江堰景区东门出入口 李冰纪念馆（东门） 都江堰景区出入口 都江堰景区南门出入口 都江堰游客中心 都江堰景区出入口 都江堰景区出入口 我的当前位置 旅游公交专线价目表 旅游公交专线综合服务 38元/人（单程车+人工讲解+耳麦） 离堆高铁站—秦堰楼 10元/人（单程车送达服务） 离堆高铁站—离堆公园 5元/人（单程车送达服务） 离堆高铁站—熊猫谷 10元/人（单程车送达服务） 旅游公交专线提供综合服务如下：38元/人 1、离堆高铁站送达景区秦堰楼约4 - 5公里。2、随车讲解服务约15分钟 3、景区内金牌讲解服务约70分钟。4、引导带过线路，避免走冤枉路。5、提供无声景区人声耳麦佩戴服务。
+[图片描述]: 这是一张都江堰景区的旅游攻略指示牌，包含游览路线推荐、景区地图（标注景点与出入口）、旅游公交专线价目表及服务说明，还有“三分看 七分听 人文景区”的提示，以及当前位置和景区出入口的标注（有黄色圈画）。
+[图片文字]: （无）
+[图片描述]: 画面展现了一座临水的传统中式建筑群，建筑屋檐下灯笼点缀，建筑前聚集众多人群，水面呈现蓝绿色，背景可见远山与树木，整体氛围兼具古韵与热闹。
+[图片文字]: （无明显可见文字）
+[图片描述]: 夜晚的河边中式建筑，建筑下有湍急的河流，建筑上挂着灯笼，许多人在建筑和河边活动，背景有山峦。
+[图片文字]: 青城山前山景区全景图
+Panorama of Mount Qingcheng Scenic Area Front Range
+图 例 Legend
+（图例含“你的位置”“主要景点”“次要点”“卫生间”“索道”等符号说明，及距离信息：前五洞天 - 天师洞300m、前五洞天 - 朝阳洞1300m、前五洞天 - 老山门2000m、前五洞天 - 老君阁2500m、前五洞天 - 上清宫2500m、前五洞天 - 索道上站3000m）
+咨询、投诉、救援电话:96526 028 - 87288104
+Enquiries, Complaints and Emergency: 96526 028 - 87288104
+文明与山水同在，和谐与风景共存
+Help to Protect the Environment
+[图片描述]: 这是一张青城山前山景区的全景导览图，呈现景区地图、景点分布、图例说明、景点间距离、联系方式及环保提示，图上用黄色箭头和圆圈标注了特定区域。
+[图片文字]: 五洞天；天然城郭龙幡阵；府以青冥樯橹居福地
+[图片描述]: 红色门洞建筑，上方牌匾书“五洞天”，两侧有竖排对联，一背背包持登山杖的人站在门口摆姿势，背景为山间石阶小路及树木。
+[图片文字]: 轻轨在此
+[图片描述]: 图片呈现一座轻轨站建筑，包含楼梯、扶梯等设施，下方有车辆、行人及遮阳棚，上方文字标注“轻轨在此”。</pre>
+  </section>
+  <section>
+    <h3>ChromaDB document</h3>
+    <pre>详细避坑指南：
+	
+春熙路出发→地铁2号线（35分钟）→犀浦站
+站内换乘1分钟就能到，提前10分钟检票，开车前2分钟停止检票
+	
+犀浦站→高铁（30分钟）→青城山站→景区观光车（10分钟）→山门
+出高铁站直走过马路，有景区的观光车售票处（官方车满车立即走，非满车10分钟一趟，其他黑车时间无保障）
+PS：售票处旁边有吃早饭的地方，出门比较早的话可以下了高铁再吃；售票处对面有家肯德基，10点钟开始点餐，时间赶趟的可以带点干粮上山）
+	
+索道上山，走路下山（约5个小时）
+山门→爬山30分钟→索道→老君阁（山顶）上山路约2个小时→下山（约2小时，有段路比较陡，不太好下）→五洞天（西游记打卡点）→山门（约1小时，坐景区观光车回高铁站）
+	
+📍以上青城山结束
+以下是都江堰
+	
+青城山站→轻轨45分钟（高铁站东边100米，有个高架样的，上扶梯，班次很多，不用等）→八角庙站→步行10分钟→离堆公园站→旅游班车15分钟（就停在路边，很显眼）→都江堰6号门（体力不够推荐从最高点往下走）
+	
+秦堰楼→下山→安澜桥→过桥→鱼嘴（爬不动了推荐在这里搭景区观光车出门）→安澜桥→松茂古道（有段上山下山路）→宣威门（安澜桥到出景区大概有1个小时左右）
+	
+都江堰游玩结束
+	
+宣威门出来是段小吃街，很一般，但是可以歇个脚，吃完饭出来，到南桥（蓝眼泪）（说实话很一般不值得看）
+	
+南桥→步行20分钟→离堆公园站→犀浦（回成都）
+	
+📍回程的票一定要提前买！如果决定要去都江堰，从出青城山就要买了，基本上下午三点左右晚上六七点的票就没了，推荐18：55的班次，时间完全够
+#城市特种兵 #青城山攻略 #青城山前山 #都江堰景区
+[图片文字]: 都江堰景区 旅游攻略 旅游公交专线推荐精典游览线路（避免回头路） 省时 省力 省钱 进景区制高点→秦堰楼→二王庙→安澜索桥 鱼嘴→飞沙堰→宝瓶口→离堆公园→景区出口 三分看 七分听 人文景区 都江堰景区北门停车场 2 都江堰景区出入口 都江堰景区出入口 都江堰景区东门出入口 李冰纪念馆（东门） 都江堰景区出入口 都江堰景区南门出入口 都江堰游客中心 都江堰景区出入口 都江堰景区出入口 我的当前位置 旅游公交专线价目表 旅游公交专线综合服务 38元/人（单程车+人工讲解+耳麦） 离堆高铁站—秦堰楼 10元/人（单程车送达服务） 离堆高铁站—离堆公园 5元/人（单程车送达服务） 离堆高铁站—熊猫谷 10元/人（单程车送达服务） 旅游公交专线提供综合服务如下：38元/人 1、离堆高铁站送达景区秦堰楼约4 - 5公里。2、随车讲解服务约15分钟 3、景区内金牌讲解服务约70分钟。4、引导带过线路，避免走冤枉路。5、提供无声景区人声耳麦佩戴服务。
+[图片描述]: 这是一张都江堰景区的旅游攻略指示牌，包含游览路线推荐、景区地图（标注景点与出入口）、旅游公交专线价目表及服务说明，还有“三分看 七分听 人文景区”的提示，以及当前位置和景区出入口的标注（有黄色圈画）。
+[图片文字]: （无）
+[图片描述]: 画面展现了一座临水的传统中式建筑群，建筑屋檐下灯笼点缀，建筑前聚集众多人群，水面呈现蓝绿色，背景可见远山与树木，整体氛围兼具古韵与热闹。
+[图片文字]: （无明显可见文字）
+[图片描述]: 夜晚的河边中式建筑，建筑下有湍急的河流，建筑上挂着灯笼，许多人在建筑和河边活动，背景有山峦。
+[图片文字]: 青城山前山景区全景图
+Panorama of Mount Qingcheng Scenic Area Front Range
+图 例 Legend
+（图例含“你的位置”“主要景点”“次要点”“卫生间”“索道”等符号说明，及距离信息：前五洞天 - 天师洞300m、前五洞天 - 朝阳洞1300m、前五洞天 - 老山门2000m、前五洞天 - 老君阁2500m、前五洞天 - 上清宫2500m、前五洞天 - 索道上站3000m）
+咨询、投诉、救援电话:96526 028 - 87288104
+Enquiries, Complaints and Emergency: 96526 028 - 87288104
+文明与山水同在，和谐与风景共存
+Help to Protect the Environment
+[图片描述]: 这是一张青城山前山景区的全景导览图，呈现景区地图、景点分布、图例说明、景点间距离、联系方式及环保提示，图上用黄色箭头和圆圈标注了特定区域。
+[图片文字]: 五洞天；天然城郭龙幡阵；府以青冥樯橹居福地
+[图片描述]: 红色门洞建筑，上方牌匾书“五洞天”，两侧有竖排对联，一背背包持登山杖的人站在门口摆姿势，背景为山间石阶小路及树木。
+[图片文字]: 轻轨在此
+[图片描述]: 图片呈现一座轻轨站建筑，包含楼梯、扶梯等设施，下方有车辆、行人及遮阳棚，上方文字标注“轻轨在此”。</pre>
+  </section>
+  <section>
+    <h3>content_parts JSON</h3>
+    <pre>{
+  &quot;body&quot;: &quot;详细避坑指南：\n\t\n春熙路出发→地铁2号线（35分钟）→犀浦站\n站内换乘1分钟就能到，提前10分钟检票，开车前2分钟停止检票\n\t\n犀浦站→高铁（30分钟）→青城山站→景区观光车（10分钟）→山门\n出高铁站直走过马路，有景区的观光车售票处（官方车满车立即走，非满车10分钟一趟，其他黑车时间无保障）\nPS：售票处旁边有吃早饭的地方，出门比较早的话可以下了高铁再吃；售票处对面有家肯德基，10点钟开始点餐，时间赶趟的可以带点干粮上山）\n\t\n索道上山，走路下山（约5个小时）\n山门→爬山30分钟→索道→老君阁（山顶）上山路约2个小时→下山（约2小时，有段路比较陡，不太好下）→五洞天（西游记打卡点）→山门（约1小时，坐景区观光车回高铁站）\n\t\n📍以上青城山结束\n以下是都江堰\n\t\n青城山站→轻轨45分钟（高铁站东边100米，有个高架样的，上扶梯，班次很多，不用等）→八角庙站→步行10分钟→离堆公园站→旅游班车15分钟（就停在路边，很显眼）→都江堰6号门（体力不够推荐从最高点往下走）\n\t\n秦堰楼→下山→安澜桥→过桥→鱼嘴（爬不动了推荐在这里搭景区观光车出门）→安澜桥→松茂古道（有段上山下山路）→宣威门（安澜桥到出景区大概有1个小时左右）\n\t\n都江堰游玩结束\n\t\n宣威门出来是段小吃街，很一般，但是可以歇个脚，吃完饭出来，到南桥（蓝眼泪）（说实话很一般不值得看）\n\t\n南桥→步行20分钟→离堆公园站→犀浦（回成都）\n\t\n📍回程的票一定要提前买！如果决定要去都江堰，从出青城山就要买了，基本上下午三点左右晚上六七点的票就没了，推荐18：55的班次，时间完全够\n#城市特种兵 #青城山攻略 #青城山前山 #都江堰景区&quot;,
+  &quot;images&quot;: [
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/7b50226c4b47cda34bc81bd9460d4ff5/1040g00831sdgthplls0g5n1bhcmhdq2ssj3c330!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;都江堰景区 旅游攻略 旅游公交专线推荐精典游览线路（避免回头路） 省时 省力 省钱 进景区制高点→秦堰楼→二王庙→安澜索桥 鱼嘴→飞沙堰→宝瓶口→离堆公园→景区出口 三分看 七分听 人文景区 都江堰景区北门停车场 2 都江堰景区出入口 都江堰景区出入口 都江堰景区东门出入口 李冰纪念馆（东门） 都江堰景区出入口 都江堰景区南门出入口 都江堰游客中心 都江堰景区出入口 都江堰景区出入口 我的当前位置 旅游公交专线价目表 旅游公交专线综合服务 38元/人（单程车+人工讲解+耳麦） 离堆高铁站—秦堰楼 10元/人（单程车送达服务） 离堆高铁站—离堆公园 5元/人（单程车送达服务） 离堆高铁站—熊猫谷 10元/人（单程车送达服务） 旅游公交专线提供综合服务如下：38元/人 1、离堆高铁站送达景区秦堰楼约4 - 5公里。2、随车讲解服务约15分钟 3、景区内金牌讲解服务约70分钟。4、引导带过线路，避免走冤枉路。5、提供无声景区人声耳麦佩戴服务。&quot;,
+      &quot;description&quot;: &quot;这是一张都江堰景区的旅游攻略指示牌，包含游览路线推荐、景区地图（标注景点与出入口）、旅游公交专线价目表及服务说明，还有“三分看 七分听 人文景区”的提示，以及当前位置和景区出入口的标注（有黄色圈画）。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 都江堰景区 旅游攻略 旅游公交专线推荐精典游览线路（避免回头路） 省时 省力 省钱 进景区制高点→秦堰楼→二王庙→安澜索桥 鱼嘴→飞沙堰→宝瓶口→离堆公园→景区出口 三分看 七分听 人文景区 都江堰景区北门停车场 2 都江堰景区出入口 都江堰景区出入口 都江堰景区东门出入口 李冰纪念馆（东门） 都江堰景区出入口 都江堰景区南门出入口 都江堰游客中心 都江堰景区出入口 都江堰景区出入口 我的当前位置 旅游公交专线价目表 旅游公交专线综合服务 38元/人（单程车+人工讲解+耳麦） 离堆高铁站—秦堰楼 10元/人（单程车送达服务） 离堆高铁站—离堆公园 5元/人（单程车送达服务） 离堆高铁站—熊猫谷 10元/人（单程车送达服务） 旅游公交专线提供综合服务如下：38元/人 1、离堆高铁站送达景区秦堰楼约4 - 5公里。2、随车讲解服务约15分钟 3、景区内金牌讲解服务约70分钟。4、引导带过线路，避免走冤枉路。5、提供无声景区人声耳麦佩戴服务。\n[描述]: 这是一张都江堰景区的旅游攻略指示牌，包含游览路线推荐、景区地图（标注景点与出入口）、旅游公交专线价目表及服务说明，还有“三分看 七分听 人文景区”的提示，以及当前位置和景区出入口的标注（有黄色圈画）。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/fd437fc02404b60d58b0d2d5df03a41c/1040g00831sdgthplls4g5n1bhcmhdq2sg131l8o!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;（无）&quot;,
+      &quot;description&quot;: &quot;画面展现了一座临水的传统中式建筑群，建筑屋檐下灯笼点缀，建筑前聚集众多人群，水面呈现蓝绿色，背景可见远山与树木，整体氛围兼具古韵与热闹。&quot;,
+      &quot;raw&quot;: &quot;[文字]: （无）[描述]: 画面展现了一座临水的传统中式建筑群，建筑屋檐下灯笼点缀，建筑前聚集众多人群，水面呈现蓝绿色，背景可见远山与树木，整体氛围兼具古韵与热闹。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;http://sns-webpic-qc.xhscdn.com/202605262037/fd437fc02404b60d58b0d2d5df03a41c/1040g00831sdgthplls4g5n1bhcmhdq2sg131l8o!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;（无明显可见文字）&quot;,
+      &quot;description&quot;: &quot;夜晚的河边中式建筑，建筑下有湍急的河流，建筑上挂着灯笼，许多人在建筑和河边活动，背景有山峦。&quot;,
+      &quot;raw&quot;: &quot;[文字]: （无明显可见文字）[描述]: 夜晚的河边中式建筑，建筑下有湍急的河流，建筑上挂着灯笼，许多人在建筑和河边活动，背景有山峦。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/07cd46081ca9ad0ef4002dc40b3712c5/1040g00831sdgthplls405n1bhcmhdq2svieuh70!nd_dft_wgth_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;青城山前山景区全景图\nPanorama of Mount Qingcheng Scenic Area Front Range\n图 例 Legend\n（图例含“你的位置”“主要景点”“次要点”“卫生间”“索道”等符号说明，及距离信息：前五洞天 - 天师洞300m、前五洞天 - 朝阳洞1300m、前五洞天 - 老山门2000m、前五洞天 - 老君阁2500m、前五洞天 - 上清宫2500m、前五洞天 - 索道上站3000m）\n咨询、投诉、救援电话:96526 028 - 87288104\nEnquiries, Complaints and Emergency: 96526 028 - 87288104\n文明与山水同在，和谐与风景共存\nHelp to Protect the Environment&quot;,
+      &quot;description&quot;: &quot;这是一张青城山前山景区的全景导览图，呈现景区地图、景点分布、图例说明、景点间距离、联系方式及环保提示，图上用黄色箭头和圆圈标注了特定区域。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 青城山前山景区全景图\nPanorama of Mount Qingcheng Scenic Area Front Range\n图 例 Legend\n（图例含“你的位置”“主要景点”“次要点”“卫生间”“索道”等符号说明，及距离信息：前五洞天 - 天师洞300m、前五洞天 - 朝阳洞1300m、前五洞天 - 老山门2000m、前五洞天 - 老君阁2500m、前五洞天 - 上清宫2500m、前五洞天 - 索道上站3000m）\n咨询、投诉、救援电话:96526 028 - 87288104\nEnquiries, Complaints and Emergency: 96526 028 - 87288104\n文明与山水同在，和谐与风景共存\nHelp to Protect the Environment\n[描述]: 这是一张青城山前山景区的全景导览图，呈现景区地图、景点分布、图例说明、景点间距离、联系方式及环保提示，图上用黄色箭头和圆圈标注了特定区域。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/67df3527ff4417d36262eee6b57c55a6/1040g00831sdgthplls3g5n1bhcmhdq2sfuofc5g!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;五洞天；天然城郭龙幡阵；府以青冥樯橹居福地&quot;,
+      &quot;description&quot;: &quot;红色门洞建筑，上方牌匾书“五洞天”，两侧有竖排对联，一背背包持登山杖的人站在门口摆姿势，背景为山间石阶小路及树木。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 五洞天；天然城郭龙幡阵；府以青冥樯橹居福地 [描述]: 红色门洞建筑，上方牌匾书“五洞天”，两侧有竖排对联，一背背包持登山杖的人站在门口摆姿势，背景为山间石阶小路及树木。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262037/1c5bb191f17878da1cc7e27447a078c3/1040g00831sdgthplls1g5n1bhcmhdq2s4etkdm8!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;轻轨在此&quot;,
+      &quot;description&quot;: &quot;图片呈现一座轻轨站建筑，包含楼梯、扶梯等设施，下方有车辆、行人及遮阳棚，上方文字标注“轻轨在此”。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 轻轨在此 [描述]: 图片呈现一座轻轨站建筑，包含楼梯、扶梯等设施，下方有车辆、行人及遮阳棚，上方文字标注“轻轨在此”。&quot;
+    }
+  ],
+  &quot;video_transcript&quot;: &quot;&quot;
+}</pre>
+  </section>
+</article>
+
+
+<article>
+  <div class="card-head">
+    <div>
+      <h2>2026大模型Agent面试全攻略（上）</h2>
+      <div class="meta">note_id: 69ad4bb9000000000d00a454 · user_id: 640c4bcc000000002a0088a8 · <a href="https://www.xiaohongshu.com/explore/69ad4bb9000000000d00a454?xsec_token=AB1m3Ilu0XLTFsJrQUes6fmNcCiX5AF9VlFTDEMoS-q_A=&amp;xsec_source=pc_collect" target="_blank" rel="noreferrer">原文链接</a></div>
+    </div>
+    <span class="badge ok">SQLite content 与 ChromaDB document 一致</span>
+  </div>
+  <div class="stats">
+    <span>indexed：是</span>
+    <span>收藏状态：当前收藏</span>
+    <span>归档时间：无</span>
+    <span>content 字数：2633</span>
+    <span>Chroma document 字数：2633</span>
+    <span>图片数：2</span>
+    <span>OCR 段数：3</span>
+    <span>图片描述段数：3</span>
+    <span>视频转录：无</span>
+  </div>
+  <section>
+    <h3>原始正文 body</h3>
+    <pre>一、核心概念与架构篇
+Q1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。
+回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。
+区别：
+Chain是预定义的、线性的硬编码工作流。
+Agent具备”自主性”，它根据目标自发决定执行路径，通过推理循环（Reasoning Loop）不断调整策略。
+Q2：解释ReAct模式的工作原理。
+回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将”;思考”（Thought）和”行动”（Action）结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。
+Q3：如何实现Agent的长期记忆（Long-term Memory）？
+回答要点：
+短期记忆：利用Context Window，存储当前会话的历史（Chat History）。
+长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。
+2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过”摘要层级结构”对记忆进行递归压缩。
+#面经 #算法 #大模型 #深度学习 #面试题 #人工智能就业 #LLM #agent #智能体 #人工智能发展</pre>
+  </section>
+  <section>
+    <h3>图片 OCR / 描述</h3>
+    <div class="image-part">
+  <div class="meta">图片 1: https://sns-webpic-qc.xhscdn.com/202605262036/49e3889ca825d752ab589766bd39a3f3/spectrum/1040g34o31tepuo82l84040to5t11l9rtkssjhr0!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>三、Agent核心设计模式 (Design Patterns)
+Q6：请对比”工作流 (Workflows)”与”自主智能体 (Autonomous Agents)”的优劣。
+• 回答要点：
+○ Workflows：通过DAG（有向无环图）或状态机硬编码路径。优点是高可靠性、结果可预期，适用于报销审批、标准化客服。
+○ Autonomous Agents：由LLM决定循环次数和工具调用。优点是灵活性极高，适用于开放式研究、代码编写。
+○ 面试金句：2026年的工程趋势是”用Workflow约束Agent”，即在框架定义的路径内给予Agent局部决策权。
+Q7：详细解释”编排者-执行者 (Orchestrator-Workers)”模式。
+• 回答要点：主Agent（Orchestrator）负责将复杂任务分解为子任务，分发给具有不同Skill的Worker Agents，最后汇总结果。
+• 适用场景：大型软件开发（一个写UI，一个写后端，一个写测试）。
+• 难点：任务分解的粒度。如果拆得太细，通信成本极高；太粗，Worker会产生幻觉。
+Q8：什么是”反思/自我纠正 (Reflection/Self-Correction)”模式？
+• 回答要点：这是提升Agent成功率最有效的模式。Agent生成输出后，由另一个（或同一个）Agent扮演批评者（Critic），检查输出是否符合约束条件，并提供反馈让前者迭代。
+• 技术细节：可以使用Reflexion架构，记录”失败轨迹”作为长短期记忆，避免重复同样的错误。</pre>
+  <h3>图片描述</h3>
+  <pre>图片展示了Agent核心设计模式的三个问题（Q6、Q7、Q8）及对应回答要点，分别涉及工作流与自主智能体的对比、编排者-执行者模式、反思/自我纠正模式的解释。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 2: https://sns-webpic-qc.xhscdn.com/202605262036/4dfc36161aac40320516e434e6278227/spectrum/1040g34o31tepuo82l83040to5t11l9rtvpkhcd0!nd_prv_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>2026大模型Agent面试全攻略（上）
+一、核心概念与架构篇
+Q1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。
+回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。
+区别：
+Chain是预定义的、线性的硬编码工作流。
+Agent具备“自主性”，它根据目标自发决定执行路径，通过推理循环(Reasoning Loop)不断调整策略。
+Q2：解释ReAct模式的工作原理。
+回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将“思考”(Thought) 和“行动”(Action) 结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。
+Q3：如何实现Agent的长期记忆（Long-term Memory）？
+回答要点：
+短期记忆：利用Context Window，存储当前会话的历史（Chat History）。
+长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。
+2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过“摘要层级结构”对记忆进行递归压缩。</pre>
+  <h3>图片描述</h3>
+  <pre>图片呈现“2026大模型Agent面试全攻略（上）”的核心概念与架构篇内容，围绕Agent架构、ReAct模式、长期记忆实现等展开问答要点说明。</pre>
+</div>
+<div class="image-part">
+  <div class="meta">图片 3: https://sns-webpic-qc.xhscdn.com/202605262036/9b65dafa5276373b96f68486bbf68201/spectrum/1040g34o31tepuo82l83g40to5t11l9rtmfb5jdg!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>二、多智能体协同（Multi-Agent Systems, MAS）
+Q4: 单Agent遇到瓶颈时，为什么需要Multi-Agent？常见的协作模式有哪些？
+- 原因：单个Agent在处理复杂、跨领域长任务时容易出现”注意力漂移”或”推理链断裂”。
+- 协作模式：
+  - 中心化（Boss-Worker）：一个主Agent拆分任务并指派给子Agent。
+  - 流水线（Pipeline/Sequential）：A的输出作为B的输入（如代码生成 -&gt; 代码审查 -&gt; 修复）。
+  - 民主协作（Joint Discussion）：多个Agent共同讨论得出结论。
+Q5: 多智能体系统中如何解决”无限循环”或”通信冗余”问题？
+- 回答要点：
+  - 循环检测：引入状态机控制流程，设置最大迭代次数。
+  - Token控制：对Agent间的对话进行摘要处理。
+  - 终止条件：明确定义任务完成的标准（Definition of Done）。</pre>
+  <h3>图片描述</h3>
+  <pre>图片展示了多智能体协同（MAS）相关问题的解答，包含单Agent需要Multi-Agent的原因、常见协作模式，以及多智能体系统中解决无限循环或通信冗余的方法。</pre>
+</div>
+  </section>
+  <section>
+    <h3>视频转录</h3>
+    <pre class="empty">空</pre>
+  </section>
+  <section>
+    <h3>最终写入向量库的 content</h3>
+    <pre>一、核心概念与架构篇
+Q1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。
+回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。
+区别：
+Chain是预定义的、线性的硬编码工作流。
+Agent具备”自主性”，它根据目标自发决定执行路径，通过推理循环（Reasoning Loop）不断调整策略。
+Q2：解释ReAct模式的工作原理。
+回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将”;思考”（Thought）和”行动”（Action）结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。
+Q3：如何实现Agent的长期记忆（Long-term Memory）？
+回答要点：
+短期记忆：利用Context Window，存储当前会话的历史（Chat History）。
+长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。
+2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过”摘要层级结构”对记忆进行递归压缩。
+#面经 #算法 #大模型 #深度学习 #面试题 #人工智能就业 #LLM #agent #智能体 #人工智能发展
+[图片文字]: 三、Agent核心设计模式 (Design Patterns)
+Q6：请对比”工作流 (Workflows)”与”自主智能体 (Autonomous Agents)”的优劣。
+• 回答要点：
+○ Workflows：通过DAG（有向无环图）或状态机硬编码路径。优点是高可靠性、结果可预期，适用于报销审批、标准化客服。
+○ Autonomous Agents：由LLM决定循环次数和工具调用。优点是灵活性极高，适用于开放式研究、代码编写。
+○ 面试金句：2026年的工程趋势是”用Workflow约束Agent”，即在框架定义的路径内给予Agent局部决策权。
+Q7：详细解释”编排者-执行者 (Orchestrator-Workers)”模式。
+• 回答要点：主Agent（Orchestrator）负责将复杂任务分解为子任务，分发给具有不同Skill的Worker Agents，最后汇总结果。
+• 适用场景：大型软件开发（一个写UI，一个写后端，一个写测试）。
+• 难点：任务分解的粒度。如果拆得太细，通信成本极高；太粗，Worker会产生幻觉。
+Q8：什么是”反思/自我纠正 (Reflection/Self-Correction)”模式？
+• 回答要点：这是提升Agent成功率最有效的模式。Agent生成输出后，由另一个（或同一个）Agent扮演批评者（Critic），检查输出是否符合约束条件，并提供反馈让前者迭代。
+• 技术细节：可以使用Reflexion架构，记录”失败轨迹”作为长短期记忆，避免重复同样的错误。
+[图片描述]: 图片展示了Agent核心设计模式的三个问题（Q6、Q7、Q8）及对应回答要点，分别涉及工作流与自主智能体的对比、编排者-执行者模式、反思/自我纠正模式的解释。
+[图片文字]: 2026大模型Agent面试全攻略（上）
+一、核心概念与架构篇
+Q1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。
+回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。
+区别：
+Chain是预定义的、线性的硬编码工作流。
+Agent具备“自主性”，它根据目标自发决定执行路径，通过推理循环(Reasoning Loop)不断调整策略。
+Q2：解释ReAct模式的工作原理。
+回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将“思考”(Thought) 和“行动”(Action) 结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。
+Q3：如何实现Agent的长期记忆（Long-term Memory）？
+回答要点：
+短期记忆：利用Context Window，存储当前会话的历史（Chat History）。
+长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。
+2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过“摘要层级结构”对记忆进行递归压缩。
+[图片描述]: 图片呈现“2026大模型Agent面试全攻略（上）”的核心概念与架构篇内容，围绕Agent架构、ReAct模式、长期记忆实现等展开问答要点说明。
+[图片文字]: 二、多智能体协同（Multi-Agent Systems, MAS）
+Q4: 单Agent遇到瓶颈时，为什么需要Multi-Agent？常见的协作模式有哪些？
+- 原因：单个Agent在处理复杂、跨领域长任务时容易出现”注意力漂移”或”推理链断裂”。
+- 协作模式：
+  - 中心化（Boss-Worker）：一个主Agent拆分任务并指派给子Agent。
+  - 流水线（Pipeline/Sequential）：A的输出作为B的输入（如代码生成 -&gt; 代码审查 -&gt; 修复）。
+  - 民主协作（Joint Discussion）：多个Agent共同讨论得出结论。
+Q5: 多智能体系统中如何解决”无限循环”或”通信冗余”问题？
+- 回答要点：
+  - 循环检测：引入状态机控制流程，设置最大迭代次数。
+  - Token控制：对Agent间的对话进行摘要处理。
+  - 终止条件：明确定义任务完成的标准（Definition of Done）。
+[图片描述]: 图片展示了多智能体协同（MAS）相关问题的解答，包含单Agent需要Multi-Agent的原因、常见协作模式，以及多智能体系统中解决无限循环或通信冗余的方法。</pre>
+  </section>
+  <section>
+    <h3>ChromaDB document</h3>
+    <pre>一、核心概念与架构篇
+Q1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。
+回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。
+区别：
+Chain是预定义的、线性的硬编码工作流。
+Agent具备”自主性”，它根据目标自发决定执行路径，通过推理循环（Reasoning Loop）不断调整策略。
+Q2：解释ReAct模式的工作原理。
+回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将”;思考”（Thought）和”行动”（Action）结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。
+Q3：如何实现Agent的长期记忆（Long-term Memory）？
+回答要点：
+短期记忆：利用Context Window，存储当前会话的历史（Chat History）。
+长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。
+2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过”摘要层级结构”对记忆进行递归压缩。
+#面经 #算法 #大模型 #深度学习 #面试题 #人工智能就业 #LLM #agent #智能体 #人工智能发展
+[图片文字]: 三、Agent核心设计模式 (Design Patterns)
+Q6：请对比”工作流 (Workflows)”与”自主智能体 (Autonomous Agents)”的优劣。
+• 回答要点：
+○ Workflows：通过DAG（有向无环图）或状态机硬编码路径。优点是高可靠性、结果可预期，适用于报销审批、标准化客服。
+○ Autonomous Agents：由LLM决定循环次数和工具调用。优点是灵活性极高，适用于开放式研究、代码编写。
+○ 面试金句：2026年的工程趋势是”用Workflow约束Agent”，即在框架定义的路径内给予Agent局部决策权。
+Q7：详细解释”编排者-执行者 (Orchestrator-Workers)”模式。
+• 回答要点：主Agent（Orchestrator）负责将复杂任务分解为子任务，分发给具有不同Skill的Worker Agents，最后汇总结果。
+• 适用场景：大型软件开发（一个写UI，一个写后端，一个写测试）。
+• 难点：任务分解的粒度。如果拆得太细，通信成本极高；太粗，Worker会产生幻觉。
+Q8：什么是”反思/自我纠正 (Reflection/Self-Correction)”模式？
+• 回答要点：这是提升Agent成功率最有效的模式。Agent生成输出后，由另一个（或同一个）Agent扮演批评者（Critic），检查输出是否符合约束条件，并提供反馈让前者迭代。
+• 技术细节：可以使用Reflexion架构，记录”失败轨迹”作为长短期记忆，避免重复同样的错误。
+[图片描述]: 图片展示了Agent核心设计模式的三个问题（Q6、Q7、Q8）及对应回答要点，分别涉及工作流与自主智能体的对比、编排者-执行者模式、反思/自我纠正模式的解释。
+[图片文字]: 2026大模型Agent面试全攻略（上）
+一、核心概念与架构篇
+Q1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。
+回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。
+区别：
+Chain是预定义的、线性的硬编码工作流。
+Agent具备“自主性”，它根据目标自发决定执行路径，通过推理循环(Reasoning Loop)不断调整策略。
+Q2：解释ReAct模式的工作原理。
+回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将“思考”(Thought) 和“行动”(Action) 结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。
+Q3：如何实现Agent的长期记忆（Long-term Memory）？
+回答要点：
+短期记忆：利用Context Window，存储当前会话的历史（Chat History）。
+长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。
+2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过“摘要层级结构”对记忆进行递归压缩。
+[图片描述]: 图片呈现“2026大模型Agent面试全攻略（上）”的核心概念与架构篇内容，围绕Agent架构、ReAct模式、长期记忆实现等展开问答要点说明。
+[图片文字]: 二、多智能体协同（Multi-Agent Systems, MAS）
+Q4: 单Agent遇到瓶颈时，为什么需要Multi-Agent？常见的协作模式有哪些？
+- 原因：单个Agent在处理复杂、跨领域长任务时容易出现”注意力漂移”或”推理链断裂”。
+- 协作模式：
+  - 中心化（Boss-Worker）：一个主Agent拆分任务并指派给子Agent。
+  - 流水线（Pipeline/Sequential）：A的输出作为B的输入（如代码生成 -&gt; 代码审查 -&gt; 修复）。
+  - 民主协作（Joint Discussion）：多个Agent共同讨论得出结论。
+Q5: 多智能体系统中如何解决”无限循环”或”通信冗余”问题？
+- 回答要点：
+  - 循环检测：引入状态机控制流程，设置最大迭代次数。
+  - Token控制：对Agent间的对话进行摘要处理。
+  - 终止条件：明确定义任务完成的标准（Definition of Done）。
+[图片描述]: 图片展示了多智能体协同（MAS）相关问题的解答，包含单Agent需要Multi-Agent的原因、常见协作模式，以及多智能体系统中解决无限循环或通信冗余的方法。</pre>
+  </section>
+  <section>
+    <h3>content_parts JSON</h3>
+    <pre>{
+  &quot;body&quot;: &quot;一、核心概念与架构篇\nQ1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。\n回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。\n区别：\nChain是预定义的、线性的硬编码工作流。\nAgent具备”自主性”，它根据目标自发决定执行路径，通过推理循环（Reasoning Loop）不断调整策略。\nQ2：解释ReAct模式的工作原理。\n回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将”;思考”（Thought）和”行动”（Action）结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。\nQ3：如何实现Agent的长期记忆（Long-term Memory）？\n回答要点：\n短期记忆：利用Context Window，存储当前会话的历史（Chat History）。\n长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。\n2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过”摘要层级结构”对记忆进行递归压缩。\n#面经 #算法 #大模型 #深度学习 #面试题 #人工智能就业 #LLM #agent #智能体 #人工智能发展&quot;,
+  &quot;images&quot;: [
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262036/49e3889ca825d752ab589766bd39a3f3/spectrum/1040g34o31tepuo82l84040to5t11l9rtkssjhr0!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;三、Agent核心设计模式 (Design Patterns)\nQ6：请对比”工作流 (Workflows)”与”自主智能体 (Autonomous Agents)”的优劣。\n• 回答要点：\n○ Workflows：通过DAG（有向无环图）或状态机硬编码路径。优点是高可靠性、结果可预期，适用于报销审批、标准化客服。\n○ Autonomous Agents：由LLM决定循环次数和工具调用。优点是灵活性极高，适用于开放式研究、代码编写。\n○ 面试金句：2026年的工程趋势是”用Workflow约束Agent”，即在框架定义的路径内给予Agent局部决策权。\nQ7：详细解释”编排者-执行者 (Orchestrator-Workers)”模式。\n• 回答要点：主Agent（Orchestrator）负责将复杂任务分解为子任务，分发给具有不同Skill的Worker Agents，最后汇总结果。\n• 适用场景：大型软件开发（一个写UI，一个写后端，一个写测试）。\n• 难点：任务分解的粒度。如果拆得太细，通信成本极高；太粗，Worker会产生幻觉。\nQ8：什么是”反思/自我纠正 (Reflection/Self-Correction)”模式？\n• 回答要点：这是提升Agent成功率最有效的模式。Agent生成输出后，由另一个（或同一个）Agent扮演批评者（Critic），检查输出是否符合约束条件，并提供反馈让前者迭代。\n• 技术细节：可以使用Reflexion架构，记录”失败轨迹”作为长短期记忆，避免重复同样的错误。&quot;,
+      &quot;description&quot;: &quot;图片展示了Agent核心设计模式的三个问题（Q6、Q7、Q8）及对应回答要点，分别涉及工作流与自主智能体的对比、编排者-执行者模式、反思/自我纠正模式的解释。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 三、Agent核心设计模式 (Design Patterns)\nQ6：请对比”工作流 (Workflows)”与”自主智能体 (Autonomous Agents)”的优劣。\n• 回答要点：\n○ Workflows：通过DAG（有向无环图）或状态机硬编码路径。优点是高可靠性、结果可预期，适用于报销审批、标准化客服。\n○ Autonomous Agents：由LLM决定循环次数和工具调用。优点是灵活性极高，适用于开放式研究、代码编写。\n○ 面试金句：2026年的工程趋势是”用Workflow约束Agent”，即在框架定义的路径内给予Agent局部决策权。\nQ7：详细解释”编排者-执行者 (Orchestrator-Workers)”模式。\n• 回答要点：主Agent（Orchestrator）负责将复杂任务分解为子任务，分发给具有不同Skill的Worker Agents，最后汇总结果。\n• 适用场景：大型软件开发（一个写UI，一个写后端，一个写测试）。\n• 难点：任务分解的粒度。如果拆得太细，通信成本极高；太粗，Worker会产生幻觉。\nQ8：什么是”反思/自我纠正 (Reflection/Self-Correction)”模式？\n• 回答要点：这是提升Agent成功率最有效的模式。Agent生成输出后，由另一个（或同一个）Agent扮演批评者（Critic），检查输出是否符合约束条件，并提供反馈让前者迭代。\n• 技术细节：可以使用Reflexion架构，记录”失败轨迹”作为长短期记忆，避免重复同样的错误。\n[描述]: 图片展示了Agent核心设计模式的三个问题（Q6、Q7、Q8）及对应回答要点，分别涉及工作流与自主智能体的对比、编排者-执行者模式、反思/自我纠正模式的解释。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262036/4dfc36161aac40320516e434e6278227/spectrum/1040g34o31tepuo82l83040to5t11l9rtvpkhcd0!nd_prv_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;2026大模型Agent面试全攻略（上）\n一、核心概念与架构篇\nQ1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。\n回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。\n区别：\nChain是预定义的、线性的硬编码工作流。\nAgent具备“自主性”，它根据目标自发决定执行路径，通过推理循环(Reasoning Loop)不断调整策略。\nQ2：解释ReAct模式的工作原理。\n回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将“思考”(Thought) 和“行动”(Action) 结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。\nQ3：如何实现Agent的长期记忆（Long-term Memory）？\n回答要点：\n短期记忆：利用Context Window，存储当前会话的历史（Chat History）。\n长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。\n2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过“摘要层级结构”对记忆进行递归压缩。&quot;,
+      &quot;description&quot;: &quot;图片呈现“2026大模型Agent面试全攻略（上）”的核心概念与架构篇内容，围绕Agent架构、ReAct模式、长期记忆实现等展开问答要点说明。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 2026大模型Agent面试全攻略（上）\n一、核心概念与架构篇\nQ1：请简述Agent的基本架构组成，并解释其与传统LLM Chain的区别。\n回答要点：Agent = LLM + 规划(Planning) + 记忆(Memory) + 工具使用(Tool Use)。\n区别：\nChain是预定义的、线性的硬编码工作流。\nAgent具备“自主性”，它根据目标自发决定执行路径，通过推理循环(Reasoning Loop)不断调整策略。\nQ2：解释ReAct模式的工作原理。\n回答要点：ReAct (Reasoning + Acting)是Agent的基石。它将“思考”(Thought) 和“行动”(Action) 结合。LLM先生成一段推理，说明下一步要做什么，然后调用工具观察（Observation）结果，再根据结果进入下一轮推理。\nQ3：如何实现Agent的长期记忆（Long-term Memory）？\n回答要点：\n短期记忆：利用Context Window，存储当前会话的历史（Chat History）。\n长期记忆：通过RAG (检索增强)。将历史经验、知识编码为Embedding存入向量数据库，Agent在执行任务前检索相关经验（Experience Retrieval）。\n2026新趋势：利用长文本模型（Long-context LLMs）直接处理超长历史，或者通过“摘要层级结构”对记忆进行递归压缩。\n[描述]: 图片呈现“2026大模型Agent面试全攻略（上）”的核心概念与架构篇内容，围绕Agent架构、ReAct模式、长期记忆实现等展开问答要点说明。&quot;
+    },
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262036/9b65dafa5276373b96f68486bbf68201/spectrum/1040g34o31tepuo82l83g40to5t11l9rtmfb5jdg!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;二、多智能体协同（Multi-Agent Systems, MAS）\nQ4: 单Agent遇到瓶颈时，为什么需要Multi-Agent？常见的协作模式有哪些？\n- 原因：单个Agent在处理复杂、跨领域长任务时容易出现”注意力漂移”或”推理链断裂”。\n- 协作模式：\n  - 中心化（Boss-Worker）：一个主Agent拆分任务并指派给子Agent。\n  - 流水线（Pipeline/Sequential）：A的输出作为B的输入（如代码生成 -&gt; 代码审查 -&gt; 修复）。\n  - 民主协作（Joint Discussion）：多个Agent共同讨论得出结论。\nQ5: 多智能体系统中如何解决”无限循环”或”通信冗余”问题？\n- 回答要点：\n  - 循环检测：引入状态机控制流程，设置最大迭代次数。\n  - Token控制：对Agent间的对话进行摘要处理。\n  - 终止条件：明确定义任务完成的标准（Definition of Done）。&quot;,
+      &quot;description&quot;: &quot;图片展示了多智能体协同（MAS）相关问题的解答，包含单Agent需要Multi-Agent的原因、常见协作模式，以及多智能体系统中解决无限循环或通信冗余的方法。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 二、多智能体协同（Multi-Agent Systems, MAS）\nQ4: 单Agent遇到瓶颈时，为什么需要Multi-Agent？常见的协作模式有哪些？\n- 原因：单个Agent在处理复杂、跨领域长任务时容易出现”注意力漂移”或”推理链断裂”。\n- 协作模式：\n  - 中心化（Boss-Worker）：一个主Agent拆分任务并指派给子Agent。\n  - 流水线（Pipeline/Sequential）：A的输出作为B的输入（如代码生成 -&gt; 代码审查 -&gt; 修复）。\n  - 民主协作（Joint Discussion）：多个Agent共同讨论得出结论。\nQ5: 多智能体系统中如何解决”无限循环”或”通信冗余”问题？\n- 回答要点：\n  - 循环检测：引入状态机控制流程，设置最大迭代次数。\n  - Token控制：对Agent间的对话进行摘要处理。\n  - 终止条件：明确定义任务完成的标准（Definition of Done）。\n[描述]: 图片展示了多智能体协同（MAS）相关问题的解答，包含单Agent需要Multi-Agent的原因、常见协作模式，以及多智能体系统中解决无限循环或通信冗余的方法。&quot;
+    }
+  ],
+  &quot;video_transcript&quot;: &quot;&quot;
+}</pre>
+  </section>
+</article>
+
+
+<article>
+  <div class="card-head">
+    <div>
+      <h2>快手 AI Agent研发实习 日常实习 一面</h2>
+      <div class="meta">note_id: 69d61868000000001d0191b2 · user_id: 640c4bcc000000002a0088a8 · <a href="https://www.xiaohongshu.com/explore/69d61868000000001d0191b2?xsec_token=ABzipIkuTGIlNHtFbNzDOKb6tYjlsBXs63OoO9pZhu9i8=&amp;xsec_source=pc_collect" target="_blank" rel="noreferrer">原文链接</a></div>
+    </div>
+    <span class="badge ok">SQLite content 与 ChromaDB document 一致</span>
+  </div>
+  <div class="stats">
+    <span>indexed：是</span>
+    <span>收藏状态：当前收藏</span>
+    <span>归档时间：无</span>
+    <span>content 字数：1387</span>
+    <span>Chroma document 字数：1387</span>
+    <span>图片数：0</span>
+    <span>OCR 段数：1</span>
+    <span>图片描述段数：1</span>
+    <span>视频转录：无</span>
+  </div>
+  <section>
+    <h3>原始正文 body</h3>
+    <pre>又是一篇凉经 不过说实话这次大手子的面试真的感觉是最近收获最多的一场面试了，虽然面完之后有感觉要凉，但拒信来了还是很伤心的
+	
+不过一场面试，不过一次风雨，该复盘还是要复盘滴，所以以下是复盘思考：
+1. 手撕题卡壳，被面试官中间指出代码错误，对于hot100还是岛屿数量这样的题，真的是太不应该了！所以平时刷题保持手感的时候及时是自己思路很熟的题也要适当练一下，尤其注意边界判断。
+	
+2. 也暴露了我提示词工程，上下文工程以及最近的harness 工程不仅要关注，更要多思考一些底层逻辑，就比如openclaw不能只是会用，设计的亮点还是要多深入思考，对于skill也是同理。
+	
+3. agent开发在面试上的侧重点可能要更偏向场景题的问答方式，可能没有传统八股的问题模式，所以更考验对知识细节的理解以及临场的组合推理（切记被面试官质疑的时候也不要慌！）
+	
+4. 沉浸在面试被挂和之后暂时没有约面的焦虑和失落是没有意义的，只有及时的复盘反思，从失败的面试中总结经验并做出策略性的学习练习方向上的调整和贯彻执行才是最重要的。
+	
+不说了继续干！！
+#openclaw #RAG #找实习 #AI应用开发 #大模型 #面试题 #Java #后端开发 #日常实习 #面试面经</pre>
+  </section>
+  <section>
+    <h3>图片 OCR / 描述</h3>
+    <div class="image-part">
+  <div class="meta">图片 1: https://sns-webpic-qc.xhscdn.com/202605262036/200353d90d9294f02c4b1b16a265538a/notes_pre_post/1040g3k831umoae49is705pdi5opkp02df450l9g!nd_dft_wlteh_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>快手 AI Agent研发实习 日常实习
+1. 组内业务的交流讨论
+2. 自我介绍
+3. 聊聊记忆系统模块设计是怎么设计的？（这里我先讲的需求的背景和设计分析）
+4. 之后面试官直接追问这个记忆的检索是用的用户pid还是什么？
+5. （然后我就主动讲了设计的难点和设计的亮点）
+6. 你有了解openclaw的设计实现吗？openclaw和传统的agent实现有什么大的区别？或是说openclaw有什么新设计？
+7. openclaw的记忆系统是怎么设计的？
+8. 那长期记忆是怎么检索的？长期记忆除了存在本地的文件系统当中还存在哪里？
+9. 说说上下文工程是什么？都解决了什么问题？
+10. 那么上下文窗口当中都包含哪些内容？
+11. 那在做上下文管理策略的触发时机一般怎么设置？
+12. 那你说到了像每条message数据都增加一个token总数记录的字段，那么这里token怎么计算？
+13. 那token的阈值该怎么设计？那对于一个agent应用，用户可以配置自己任意的大模型的apikey，那么这里token上下文窗口的大小该怎么设置设计是最合适的？
+14. 刚才也提到了token策略，那你说说这里压缩上下文的策略，压缩的具体是那部分message？
+（我这里说的更应该先压缩llm的内容，因为llm的输出一般是冗余的，用户的可以先不压缩？）
+15. 继续追问那么用户message都不压缩吗？要是现在有五轮对话，压缩了一次llm的输出，那么怎么拼接这个问答对？（我这里说了让llm的之加入一次压缩后的文本，其他四次都是空，但是用户加入五次各自的消息）
+16. 讲讲第二个实习项目当中消息会话中断的后端是怎么实现的？
+17. 手撕：岛屿数量（hot100原题）</pre>
+  <h3>图片描述</h3>
+  <pre>图片呈现了快手AI Agent研发实习的日常实习内容，以列表形式列出17个与业务交流、自我介绍、系统设计（如记忆系统、上下文工程）、技术实现（如token计算、压缩策略）及手撕题相关的问题。</pre>
+</div>
+  </section>
+  <section>
+    <h3>视频转录</h3>
+    <pre class="empty">空</pre>
+  </section>
+  <section>
+    <h3>最终写入向量库的 content</h3>
+    <pre>又是一篇凉经 不过说实话这次大手子的面试真的感觉是最近收获最多的一场面试了，虽然面完之后有感觉要凉，但拒信来了还是很伤心的
+	
+不过一场面试，不过一次风雨，该复盘还是要复盘滴，所以以下是复盘思考：
+1. 手撕题卡壳，被面试官中间指出代码错误，对于hot100还是岛屿数量这样的题，真的是太不应该了！所以平时刷题保持手感的时候及时是自己思路很熟的题也要适当练一下，尤其注意边界判断。
+	
+2. 也暴露了我提示词工程，上下文工程以及最近的harness 工程不仅要关注，更要多思考一些底层逻辑，就比如openclaw不能只是会用，设计的亮点还是要多深入思考，对于skill也是同理。
+	
+3. agent开发在面试上的侧重点可能要更偏向场景题的问答方式，可能没有传统八股的问题模式，所以更考验对知识细节的理解以及临场的组合推理（切记被面试官质疑的时候也不要慌！）
+	
+4. 沉浸在面试被挂和之后暂时没有约面的焦虑和失落是没有意义的，只有及时的复盘反思，从失败的面试中总结经验并做出策略性的学习练习方向上的调整和贯彻执行才是最重要的。
+	
+不说了继续干！！
+#openclaw #RAG #找实习 #AI应用开发 #大模型 #面试题 #Java #后端开发 #日常实习 #面试面经
+[图片文字]: 快手 AI Agent研发实习 日常实习
+1. 组内业务的交流讨论
+2. 自我介绍
+3. 聊聊记忆系统模块设计是怎么设计的？（这里我先讲的需求的背景和设计分析）
+4. 之后面试官直接追问这个记忆的检索是用的用户pid还是什么？
+5. （然后我就主动讲了设计的难点和设计的亮点）
+6. 你有了解openclaw的设计实现吗？openclaw和传统的agent实现有什么大的区别？或是说openclaw有什么新设计？
+7. openclaw的记忆系统是怎么设计的？
+8. 那长期记忆是怎么检索的？长期记忆除了存在本地的文件系统当中还存在哪里？
+9. 说说上下文工程是什么？都解决了什么问题？
+10. 那么上下文窗口当中都包含哪些内容？
+11. 那在做上下文管理策略的触发时机一般怎么设置？
+12. 那你说到了像每条message数据都增加一个token总数记录的字段，那么这里token怎么计算？
+13. 那token的阈值该怎么设计？那对于一个agent应用，用户可以配置自己任意的大模型的apikey，那么这里token上下文窗口的大小该怎么设置设计是最合适的？
+14. 刚才也提到了token策略，那你说说这里压缩上下文的策略，压缩的具体是那部分message？
+（我这里说的更应该先压缩llm的内容，因为llm的输出一般是冗余的，用户的可以先不压缩？）
+15. 继续追问那么用户message都不压缩吗？要是现在有五轮对话，压缩了一次llm的输出，那么怎么拼接这个问答对？（我这里说了让llm的之加入一次压缩后的文本，其他四次都是空，但是用户加入五次各自的消息）
+16. 讲讲第二个实习项目当中消息会话中断的后端是怎么实现的？
+17. 手撕：岛屿数量（hot100原题）
+[图片描述]: 图片呈现了快手AI Agent研发实习的日常实习内容，以列表形式列出17个与业务交流、自我介绍、系统设计（如记忆系统、上下文工程）、技术实现（如token计算、压缩策略）及手撕题相关的问题。</pre>
+  </section>
+  <section>
+    <h3>ChromaDB document</h3>
+    <pre>又是一篇凉经 不过说实话这次大手子的面试真的感觉是最近收获最多的一场面试了，虽然面完之后有感觉要凉，但拒信来了还是很伤心的
+	
+不过一场面试，不过一次风雨，该复盘还是要复盘滴，所以以下是复盘思考：
+1. 手撕题卡壳，被面试官中间指出代码错误，对于hot100还是岛屿数量这样的题，真的是太不应该了！所以平时刷题保持手感的时候及时是自己思路很熟的题也要适当练一下，尤其注意边界判断。
+	
+2. 也暴露了我提示词工程，上下文工程以及最近的harness 工程不仅要关注，更要多思考一些底层逻辑，就比如openclaw不能只是会用，设计的亮点还是要多深入思考，对于skill也是同理。
+	
+3. agent开发在面试上的侧重点可能要更偏向场景题的问答方式，可能没有传统八股的问题模式，所以更考验对知识细节的理解以及临场的组合推理（切记被面试官质疑的时候也不要慌！）
+	
+4. 沉浸在面试被挂和之后暂时没有约面的焦虑和失落是没有意义的，只有及时的复盘反思，从失败的面试中总结经验并做出策略性的学习练习方向上的调整和贯彻执行才是最重要的。
+	
+不说了继续干！！
+#openclaw #RAG #找实习 #AI应用开发 #大模型 #面试题 #Java #后端开发 #日常实习 #面试面经
+[图片文字]: 快手 AI Agent研发实习 日常实习
+1. 组内业务的交流讨论
+2. 自我介绍
+3. 聊聊记忆系统模块设计是怎么设计的？（这里我先讲的需求的背景和设计分析）
+4. 之后面试官直接追问这个记忆的检索是用的用户pid还是什么？
+5. （然后我就主动讲了设计的难点和设计的亮点）
+6. 你有了解openclaw的设计实现吗？openclaw和传统的agent实现有什么大的区别？或是说openclaw有什么新设计？
+7. openclaw的记忆系统是怎么设计的？
+8. 那长期记忆是怎么检索的？长期记忆除了存在本地的文件系统当中还存在哪里？
+9. 说说上下文工程是什么？都解决了什么问题？
+10. 那么上下文窗口当中都包含哪些内容？
+11. 那在做上下文管理策略的触发时机一般怎么设置？
+12. 那你说到了像每条message数据都增加一个token总数记录的字段，那么这里token怎么计算？
+13. 那token的阈值该怎么设计？那对于一个agent应用，用户可以配置自己任意的大模型的apikey，那么这里token上下文窗口的大小该怎么设置设计是最合适的？
+14. 刚才也提到了token策略，那你说说这里压缩上下文的策略，压缩的具体是那部分message？
+（我这里说的更应该先压缩llm的内容，因为llm的输出一般是冗余的，用户的可以先不压缩？）
+15. 继续追问那么用户message都不压缩吗？要是现在有五轮对话，压缩了一次llm的输出，那么怎么拼接这个问答对？（我这里说了让llm的之加入一次压缩后的文本，其他四次都是空，但是用户加入五次各自的消息）
+16. 讲讲第二个实习项目当中消息会话中断的后端是怎么实现的？
+17. 手撕：岛屿数量（hot100原题）
+[图片描述]: 图片呈现了快手AI Agent研发实习的日常实习内容，以列表形式列出17个与业务交流、自我介绍、系统设计（如记忆系统、上下文工程）、技术实现（如token计算、压缩策略）及手撕题相关的问题。</pre>
+  </section>
+  <section>
+    <h3>content_parts JSON</h3>
+    <pre>{
+  &quot;body&quot;: &quot;又是一篇凉经 不过说实话这次大手子的面试真的感觉是最近收获最多的一场面试了，虽然面完之后有感觉要凉，但拒信来了还是很伤心的\n\t\n不过一场面试，不过一次风雨，该复盘还是要复盘滴，所以以下是复盘思考：\n1. 手撕题卡壳，被面试官中间指出代码错误，对于hot100还是岛屿数量这样的题，真的是太不应该了！所以平时刷题保持手感的时候及时是自己思路很熟的题也要适当练一下，尤其注意边界判断。\n\t\n2. 也暴露了我提示词工程，上下文工程以及最近的harness 工程不仅要关注，更要多思考一些底层逻辑，就比如openclaw不能只是会用，设计的亮点还是要多深入思考，对于skill也是同理。\n\t\n3. agent开发在面试上的侧重点可能要更偏向场景题的问答方式，可能没有传统八股的问题模式，所以更考验对知识细节的理解以及临场的组合推理（切记被面试官质疑的时候也不要慌！）\n\t\n4. 沉浸在面试被挂和之后暂时没有约面的焦虑和失落是没有意义的，只有及时的复盘反思，从失败的面试中总结经验并做出策略性的学习练习方向上的调整和贯彻执行才是最重要的。\n\t\n不说了继续干！！\n#openclaw #RAG #找实习 #AI应用开发 #大模型 #面试题 #Java #后端开发 #日常实习 #面试面经&quot;,
+  &quot;images&quot;: [
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262036/200353d90d9294f02c4b1b16a265538a/notes_pre_post/1040g3k831umoae49is705pdi5opkp02df450l9g!nd_dft_wlteh_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;快手 AI Agent研发实习 日常实习\n1. 组内业务的交流讨论\n2. 自我介绍\n3. 聊聊记忆系统模块设计是怎么设计的？（这里我先讲的需求的背景和设计分析）\n4. 之后面试官直接追问这个记忆的检索是用的用户pid还是什么？\n5. （然后我就主动讲了设计的难点和设计的亮点）\n6. 你有了解openclaw的设计实现吗？openclaw和传统的agent实现有什么大的区别？或是说openclaw有什么新设计？\n7. openclaw的记忆系统是怎么设计的？\n8. 那长期记忆是怎么检索的？长期记忆除了存在本地的文件系统当中还存在哪里？\n9. 说说上下文工程是什么？都解决了什么问题？\n10. 那么上下文窗口当中都包含哪些内容？\n11. 那在做上下文管理策略的触发时机一般怎么设置？\n12. 那你说到了像每条message数据都增加一个token总数记录的字段，那么这里token怎么计算？\n13. 那token的阈值该怎么设计？那对于一个agent应用，用户可以配置自己任意的大模型的apikey，那么这里token上下文窗口的大小该怎么设置设计是最合适的？\n14. 刚才也提到了token策略，那你说说这里压缩上下文的策略，压缩的具体是那部分message？\n（我这里说的更应该先压缩llm的内容，因为llm的输出一般是冗余的，用户的可以先不压缩？）\n15. 继续追问那么用户message都不压缩吗？要是现在有五轮对话，压缩了一次llm的输出，那么怎么拼接这个问答对？（我这里说了让llm的之加入一次压缩后的文本，其他四次都是空，但是用户加入五次各自的消息）\n16. 讲讲第二个实习项目当中消息会话中断的后端是怎么实现的？\n17. 手撕：岛屿数量（hot100原题）&quot;,
+      &quot;description&quot;: &quot;图片呈现了快手AI Agent研发实习的日常实习内容，以列表形式列出17个与业务交流、自我介绍、系统设计（如记忆系统、上下文工程）、技术实现（如token计算、压缩策略）及手撕题相关的问题。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 快手 AI Agent研发实习 日常实习\n1. 组内业务的交流讨论\n2. 自我介绍\n3. 聊聊记忆系统模块设计是怎么设计的？（这里我先讲的需求的背景和设计分析）\n4. 之后面试官直接追问这个记忆的检索是用的用户pid还是什么？\n5. （然后我就主动讲了设计的难点和设计的亮点）\n6. 你有了解openclaw的设计实现吗？openclaw和传统的agent实现有什么大的区别？或是说openclaw有什么新设计？\n7. openclaw的记忆系统是怎么设计的？\n8. 那长期记忆是怎么检索的？长期记忆除了存在本地的文件系统当中还存在哪里？\n9. 说说上下文工程是什么？都解决了什么问题？\n10. 那么上下文窗口当中都包含哪些内容？\n11. 那在做上下文管理策略的触发时机一般怎么设置？\n12. 那你说到了像每条message数据都增加一个token总数记录的字段，那么这里token怎么计算？\n13. 那token的阈值该怎么设计？那对于一个agent应用，用户可以配置自己任意的大模型的apikey，那么这里token上下文窗口的大小该怎么设置设计是最合适的？\n14. 刚才也提到了token策略，那你说说这里压缩上下文的策略，压缩的具体是那部分message？\n（我这里说的更应该先压缩llm的内容，因为llm的输出一般是冗余的，用户的可以先不压缩？）\n15. 继续追问那么用户message都不压缩吗？要是现在有五轮对话，压缩了一次llm的输出，那么怎么拼接这个问答对？（我这里说了让llm的之加入一次压缩后的文本，其他四次都是空，但是用户加入五次各自的消息）\n16. 讲讲第二个实习项目当中消息会话中断的后端是怎么实现的？\n17. 手撕：岛屿数量（hot100原题）\n[描述]: 图片呈现了快手AI Agent研发实习的日常实习内容，以列表形式列出17个与业务交流、自我介绍、系统设计（如记忆系统、上下文工程）、技术实现（如token计算、压缩策略）及手撕题相关的问题。&quot;
+    }
+  ],
+  &quot;video_transcript&quot;: &quot;&quot;
+}</pre>
+  </section>
+</article>
+
+
+<article>
+  <div class="card-head">
+    <div>
+      <h2>字节AI Agent面试经验（已Offer）</h2>
+      <div class="meta">note_id: 69de2751000000001f00179a · user_id: 640c4bcc000000002a0088a8 · <a href="https://www.xiaohongshu.com/explore/69de2751000000001f00179a?xsec_token=ABu2uEEs7z9SjFKcpFAo-M0iAzjnpsp826wKGLoCNG6kE=&amp;xsec_source=pc_collect" target="_blank" rel="noreferrer">原文链接</a></div>
+    </div>
+    <span class="badge ok">SQLite content 与 ChromaDB document 一致</span>
+  </div>
+  <div class="stats">
+    <span>indexed：是</span>
+    <span>收藏状态：当前收藏</span>
+    <span>归档时间：无</span>
+    <span>content 字数：873</span>
+    <span>Chroma document 字数：873</span>
+    <span>图片数：0</span>
+    <span>OCR 段数：1</span>
+    <span>图片描述段数：1</span>
+    <span>视频转录：无</span>
+  </div>
+  <section>
+    <h3>原始正文 body</h3>
+    <pre>终于拿到字节跳动 AI Agent 的 offer 啦！来分享一下我的面试经历～
+	
+📅 时间线：3月19日投递简历，当天就收到了电话，约3月25日一面。之后几乎每轮都是当天或隔天收到结果并约好下一轮，4月2日OC，4月14日正式收到 offer——整个流程效率超高，体验也很好！
+	
+值得一提的是，OC之后我对部门的具体工作内容还不太了解，HR很贴心地安排了未来的 Leader 和 Mentor（也就是一二面的面试官）开了一个非正式会议，给我详细介绍了部门情况并解答了我所有的疑问。
+	
+💡 面试经验分享
+时间有点久，具体题目记不太清了，整理了几条干货：
+1、最好有自己亲手做的AI Agent项目。 面试官直接让我投屏演示，有一个能跑起来的网页前端是加分项。同时建议写一份非常详细的README，把系统结构和设计思路讲清楚——面试官会抠很多细节。就算用AI辅助写代码，也一定要搞懂每个设计决策背后的原因。
+2、对目标部门的业务要有一定了解。 会有比较开放的问题，例如&quot;如果要做某个功能，你会怎么设计 Agent流程？&quot;提前做足功课很重要。
+3、简历上的项目要真正吃透。我之前做的一个AI Native游戏被反复拷问各种细节，幸好之前找科研实习时做过一个项目 PPT，临时派上了用场😅
+4、Agent和机器学习相关基础知识要熟悉
+	
+终于上岸，本该开心，却又有点心情复杂……怕以后加班多了，再也没时间写小说了🥲
+也祝大家早日拿到Offer！
+#互联网大厂 #面经 #大模型 #Agent #字节跳动 #面试</pre>
+  </section>
+  <section>
+    <h3>图片 OCR / 描述</h3>
+    <div class="image-part">
+  <div class="meta">图片 1: https://sns-webpic-qc.xhscdn.com/202605262036/fea96feeb69f75b610f16c333680219d/notes_pre_post/1040g3k831uuk36sajqe05npc56fg8474co96eho!nd_prv_wgth_webp_3</div>
+  <h3>OCR 文字</h3>
+  <pre>欢迎你加入字节跳动！ 字 字节跳动ByteDance 4/14 18:12 和优秀的人 做有挑战的事 你好！恭喜你经过层层筛选，通过字节跳动试。我们诚挚的邀请你加入，成为我们的一员，现通过邮件向你发出正式的录用通知，请严格遵守各项保密要求。</pre>
+  <h3>图片描述</h3>
+  <pre>图片展示的是字节跳动发出的录用通知截图，包含欢迎加入的文字、公司名称、发送时间、宣传标语及录用通知内容，告知接收者通过筛选测试后被邀请加入，并要求遵守保密要求。</pre>
+</div>
+  </section>
+  <section>
+    <h3>视频转录</h3>
+    <pre class="empty">空</pre>
+  </section>
+  <section>
+    <h3>最终写入向量库的 content</h3>
+    <pre>终于拿到字节跳动 AI Agent 的 offer 啦！来分享一下我的面试经历～
+	
+📅 时间线：3月19日投递简历，当天就收到了电话，约3月25日一面。之后几乎每轮都是当天或隔天收到结果并约好下一轮，4月2日OC，4月14日正式收到 offer——整个流程效率超高，体验也很好！
+	
+值得一提的是，OC之后我对部门的具体工作内容还不太了解，HR很贴心地安排了未来的 Leader 和 Mentor（也就是一二面的面试官）开了一个非正式会议，给我详细介绍了部门情况并解答了我所有的疑问。
+	
+💡 面试经验分享
+时间有点久，具体题目记不太清了，整理了几条干货：
+1、最好有自己亲手做的AI Agent项目。 面试官直接让我投屏演示，有一个能跑起来的网页前端是加分项。同时建议写一份非常详细的README，把系统结构和设计思路讲清楚——面试官会抠很多细节。就算用AI辅助写代码，也一定要搞懂每个设计决策背后的原因。
+2、对目标部门的业务要有一定了解。 会有比较开放的问题，例如&quot;如果要做某个功能，你会怎么设计 Agent流程？&quot;提前做足功课很重要。
+3、简历上的项目要真正吃透。我之前做的一个AI Native游戏被反复拷问各种细节，幸好之前找科研实习时做过一个项目 PPT，临时派上了用场😅
+4、Agent和机器学习相关基础知识要熟悉
+	
+终于上岸，本该开心，却又有点心情复杂……怕以后加班多了，再也没时间写小说了🥲
+也祝大家早日拿到Offer！
+#互联网大厂 #面经 #大模型 #Agent #字节跳动 #面试
+[图片文字]: 欢迎你加入字节跳动！ 字 字节跳动ByteDance 4/14 18:12 和优秀的人 做有挑战的事 你好！恭喜你经过层层筛选，通过字节跳动试。我们诚挚的邀请你加入，成为我们的一员，现通过邮件向你发出正式的录用通知，请严格遵守各项保密要求。
+[图片描述]: 图片展示的是字节跳动发出的录用通知截图，包含欢迎加入的文字、公司名称、发送时间、宣传标语及录用通知内容，告知接收者通过筛选测试后被邀请加入，并要求遵守保密要求。</pre>
+  </section>
+  <section>
+    <h3>ChromaDB document</h3>
+    <pre>终于拿到字节跳动 AI Agent 的 offer 啦！来分享一下我的面试经历～
+	
+📅 时间线：3月19日投递简历，当天就收到了电话，约3月25日一面。之后几乎每轮都是当天或隔天收到结果并约好下一轮，4月2日OC，4月14日正式收到 offer——整个流程效率超高，体验也很好！
+	
+值得一提的是，OC之后我对部门的具体工作内容还不太了解，HR很贴心地安排了未来的 Leader 和 Mentor（也就是一二面的面试官）开了一个非正式会议，给我详细介绍了部门情况并解答了我所有的疑问。
+	
+💡 面试经验分享
+时间有点久，具体题目记不太清了，整理了几条干货：
+1、最好有自己亲手做的AI Agent项目。 面试官直接让我投屏演示，有一个能跑起来的网页前端是加分项。同时建议写一份非常详细的README，把系统结构和设计思路讲清楚——面试官会抠很多细节。就算用AI辅助写代码，也一定要搞懂每个设计决策背后的原因。
+2、对目标部门的业务要有一定了解。 会有比较开放的问题，例如&quot;如果要做某个功能，你会怎么设计 Agent流程？&quot;提前做足功课很重要。
+3、简历上的项目要真正吃透。我之前做的一个AI Native游戏被反复拷问各种细节，幸好之前找科研实习时做过一个项目 PPT，临时派上了用场😅
+4、Agent和机器学习相关基础知识要熟悉
+	
+终于上岸，本该开心，却又有点心情复杂……怕以后加班多了，再也没时间写小说了🥲
+也祝大家早日拿到Offer！
+#互联网大厂 #面经 #大模型 #Agent #字节跳动 #面试
+[图片文字]: 欢迎你加入字节跳动！ 字 字节跳动ByteDance 4/14 18:12 和优秀的人 做有挑战的事 你好！恭喜你经过层层筛选，通过字节跳动试。我们诚挚的邀请你加入，成为我们的一员，现通过邮件向你发出正式的录用通知，请严格遵守各项保密要求。
+[图片描述]: 图片展示的是字节跳动发出的录用通知截图，包含欢迎加入的文字、公司名称、发送时间、宣传标语及录用通知内容，告知接收者通过筛选测试后被邀请加入，并要求遵守保密要求。</pre>
+  </section>
+  <section>
+    <h3>content_parts JSON</h3>
+    <pre>{
+  &quot;body&quot;: &quot;终于拿到字节跳动 AI Agent 的 offer 啦！来分享一下我的面试经历～\n\t\n📅 时间线：3月19日投递简历，当天就收到了电话，约3月25日一面。之后几乎每轮都是当天或隔天收到结果并约好下一轮，4月2日OC，4月14日正式收到 offer——整个流程效率超高，体验也很好！\n\t\n值得一提的是，OC之后我对部门的具体工作内容还不太了解，HR很贴心地安排了未来的 Leader 和 Mentor（也就是一二面的面试官）开了一个非正式会议，给我详细介绍了部门情况并解答了我所有的疑问。\n\t\n💡 面试经验分享\n时间有点久，具体题目记不太清了，整理了几条干货：\n1、最好有自己亲手做的AI Agent项目。 面试官直接让我投屏演示，有一个能跑起来的网页前端是加分项。同时建议写一份非常详细的README，把系统结构和设计思路讲清楚——面试官会抠很多细节。就算用AI辅助写代码，也一定要搞懂每个设计决策背后的原因。\n2、对目标部门的业务要有一定了解。 会有比较开放的问题，例如\&quot;如果要做某个功能，你会怎么设计 Agent流程？\&quot;提前做足功课很重要。\n3、简历上的项目要真正吃透。我之前做的一个AI Native游戏被反复拷问各种细节，幸好之前找科研实习时做过一个项目 PPT，临时派上了用场😅\n4、Agent和机器学习相关基础知识要熟悉\n\t\n终于上岸，本该开心，却又有点心情复杂……怕以后加班多了，再也没时间写小说了🥲\n也祝大家早日拿到Offer！\n#互联网大厂 #面经 #大模型 #Agent #字节跳动 #面试&quot;,
+  &quot;images&quot;: [
+    {
+      &quot;url&quot;: &quot;https://sns-webpic-qc.xhscdn.com/202605262036/fea96feeb69f75b610f16c333680219d/notes_pre_post/1040g3k831uuk36sajqe05npc56fg8474co96eho!nd_prv_wgth_webp_3&quot;,
+      &quot;ocr_text&quot;: &quot;欢迎你加入字节跳动！ 字 字节跳动ByteDance 4/14 18:12 和优秀的人 做有挑战的事 你好！恭喜你经过层层筛选，通过字节跳动试。我们诚挚的邀请你加入，成为我们的一员，现通过邮件向你发出正式的录用通知，请严格遵守各项保密要求。&quot;,
+      &quot;description&quot;: &quot;图片展示的是字节跳动发出的录用通知截图，包含欢迎加入的文字、公司名称、发送时间、宣传标语及录用通知内容，告知接收者通过筛选测试后被邀请加入，并要求遵守保密要求。&quot;,
+      &quot;raw&quot;: &quot;[文字]: 欢迎你加入字节跳动！ 字 字节跳动ByteDance 4/14 18:12 和优秀的人 做有挑战的事 你好！恭喜你经过层层筛选，通过字节跳动试。我们诚挚的邀请你加入，成为我们的一员，现通过邮件向你发出正式的录用通知，请严格遵守各项保密要求。\n[描述]: 图片展示的是字节跳动发出的录用通知截图，包含欢迎加入的文字、公司名称、发送时间、宣传标语及录用通知内容，告知接收者通过筛选测试后被邀请加入，并要求遵守保密要求。&quot;
+    }
+  ],
+  &quot;video_transcript&quot;: &quot;&quot;
+}</pre>
+  </section>
+</article>
+
+  </main>
+</body>
+</html>

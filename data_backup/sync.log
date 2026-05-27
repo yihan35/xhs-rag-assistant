@@ -1,0 +1,755 @@
+========================================================
+ÂêåÊ≠•ÂºÄÂßãÔºö2026-05-26 20:35:27
+========================================================
+20:35:39  INFO     Cookie “—º”‘ÿ£®3 ∏ˆ◊÷∂Œ£©
+20:35:42  INFO     ±æ¥ŒÕ¨≤Ω”√ªß£∫640c4bcc000000002a0088a8
+20:35:42  INFO      π”√≥÷æ√ªØ profile£∫C:\Users\ƒ™ À”Ò/.xhs_playwright_profile
+20:35:50  INFO     profile ¿ÔŒﬁ XHS session£¨◊¢»Î cookies...
+20:35:50  INFO     ’˝‘⁄ªÒ»° ’≤ÿº–¡–±Ì£®Ω´¥Úø™‰Ø¿¿∆˜£©...
+20:35:50  INFO     ≥ı ºªØ XHS “≥√Ê£®Ω®¡¢ Akamai ÷∏Œ∆£©...
+20:35:57  INFO     Ã¯◊™ ’≤ÿ“≥£∫https://www.xiaohongshu.com/user/profile/640c4bcc000000002a0088a8
+20:36:03  INFO     ¿πΩÿµΩ ’≤ÿ∑÷“≥£¨¿€º∆ 7 Ãı
+20:36:05  INFO     “—µ„ª˜°∏ ’≤ÿ°π±Í«©£®get_by_text exact£©
+20:36:14  INFO     ¡¨–¯Œﬁ–¬ ˝æ›£¨µΩµ◊¡À
+20:36:14  INFO      ’≤ÿº–π≤ 7 Ãı± º«
+20:36:14  INFO      ’≤ÿº–π≤ 7 Ãı± º«
+20:36:15  INFO     [ChromaDB] PersistentClient ≥ı ºªØÕÍ≥…£∫D:\pythonCode\xhs-rag-assistant\data\chroma_db
+20:36:15  INFO     ¥Ê¥¢≤„æÕ–˜£∫SQLite 0 Ãı£¨ChromaDB 0 Ãı“—œÚ¡øªØ
+20:36:15  INFO     ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u25b6' in position 19: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 127, in main
+    logger.info(
+Message: "\u25b6 ’˝‘⁄Õ¨≤Ωµ⁄ 1 ∆™ / π≤ 7 ∆™  [69de2751000000001f00179a]  '◊÷Ω⁄AI Agent√Ê ‘æ≠—È£®“—Offer£©'"
+Arguments: ()
+20:36:15  INFO     [69de2751000000001f00179a] µº∫ΩµΩ https://www.xiaohongshu.com/explore/69de2751000000001f00179a?xsec_token=ABu2uEEs7z9SjFKcpFAo-M0iAzjnpsp826wKGLoCNG6kE=&xsec_source=pc_collect
+20:36:19  INFO       ø™ º¥¶¿Ì 1 ’≈Õº∆¨£®≤¢∑¢ 1 ¬∑£©°≠
+20:36:40  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 1/1] \u2713  https://sns-webpic-qc.xhscdn.com/202605262036/fea96feeb69f75'
+Arguments: ()
+20:36:40  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 49: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 149, in main
+    is_new = store.save(note, user_id=user_id)
+  File "D:\pythonCode\xhs-rag-assistant\rag\storage\__init__.py", line 71, in save
+    logger.info(
+Message: "[69de2751000000001f00179a] –¬‘ˆ \u2713  SQLite + ChromaDB  title='◊÷Ω⁄AI Agent√Ê ‘æ≠—È£®“—Offer£©'"
+Arguments: ()
+20:36:41  INFO     ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u25b6' in position 19: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 127, in main
+    logger.info(
+Message: "\u25b6 ’˝‘⁄Õ¨≤Ωµ⁄ 2 ∆™ / π≤ 7 ∆™  [69d61868000000001d0191b2]  'øÏ ÷ AI Agent—–∑¢ µœ∞ »’≥£ µœ∞ “ª√Ê'"
+Arguments: ()
+20:36:41  INFO     [69d61868000000001d0191b2] µº∫ΩµΩ https://www.xiaohongshu.com/explore/69d61868000000001d0191b2?xsec_token=ABzipIkuTGIlNHtFbNzDOKb6tYjlsBXs63OoO9pZhu9i8=&xsec_source=pc_collect
+20:36:45  INFO       ø™ º¥¶¿Ì 1 ’≈Õº∆¨£®≤¢∑¢ 1 ¬∑£©°≠
+20:37:03  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 1/1] \u2713  https://sns-webpic-qc.xhscdn.com/202605262036/200353d90d9294'
+Arguments: ()
+20:37:03  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 49: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 149, in main
+    is_new = store.save(note, user_id=user_id)
+  File "D:\pythonCode\xhs-rag-assistant\rag\storage\__init__.py", line 71, in save
+    logger.info(
+Message: "[69d61868000000001d0191b2] –¬‘ˆ \u2713  SQLite + ChromaDB  title='øÏ ÷ AI Agent—–∑¢ µœ∞ »’≥£ µœ∞ “ª√Ê'"
+Arguments: ()
+20:37:03  INFO     ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u25b6' in position 19: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 127, in main
+    logger.info(
+Message: "\u25b6 ’˝‘⁄Õ¨≤Ωµ⁄ 3 ∆™ / π≤ 7 ∆™  [69ad4bb9000000000d00a454]  '2026¥Ûƒ£–ÕAgent√Ê ‘»´π•¬‘£®…œ£©'"
+Arguments: ()
+20:37:03  INFO     [69ad4bb9000000000d00a454] µº∫ΩµΩ https://www.xiaohongshu.com/explore/69ad4bb9000000000d00a454?xsec_token=AB1m3Ilu0XLTFsJrQUes6fmNcCiX5AF9VlFTDEMoS-q_A=&xsec_source=pc_collect
+20:37:08  INFO       ø™ º¥¶¿Ì 3 ’≈Õº∆¨£®≤¢∑¢ 3 ¬∑£©°≠
+20:37:22  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 1/3] \u2713  https://sns-webpic-qc.xhscdn.com/202605262036/49e3889ca825d7'
+Arguments: ()
+20:37:23  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 2/3] \u2713  https://sns-webpic-qc.xhscdn.com/202605262036/9b65dafa527637'
+Arguments: ()
+20:37:26  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 3/3] \u2713  https://sns-webpic-qc.xhscdn.com/202605262036/4dfc36161aac40'
+Arguments: ()
+20:37:26  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 49: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 149, in main
+    is_new = store.save(note, user_id=user_id)
+  File "D:\pythonCode\xhs-rag-assistant\rag\storage\__init__.py", line 71, in save
+    logger.info(
+Message: "[69ad4bb9000000000d00a454] –¬‘ˆ \u2713  SQLite + ChromaDB  title='2026¥Ûƒ£–ÕAgent√Ê ‘»´π•¬‘£®…œ£©'"
+Arguments: ()
+20:37:26  INFO     ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u25b6' in position 19: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 127, in main
+    logger.info(
+Message: "\u25b6 ’˝‘⁄Õ¨≤Ωµ⁄ 4 ∆™ / π≤ 7 ∆™  [698b283a000000001503afae]  '≥…∂º°˙«‡≥«…Ω«∞…Ω°˙∂ºΩ≠—ﬂ“ª»’”Œπ•¬‘'"
+Arguments: ()
+20:37:26  INFO     [698b283a000000001503afae] µº∫ΩµΩ https://www.xiaohongshu.com/explore/698b283a000000001503afae?xsec_token=ABJcFTmlS4YIIL_yXWVKgwgG0a9p-ZkVZ0o_LUk8dfTC0=&xsec_source=pc_collect
+20:37:31  INFO       ø™ º¥¶¿Ì 6 ’≈Õº∆¨£®≤¢∑¢ 6 ¬∑£©°≠
+20:37:35  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 1/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/1c5bb191f17878'
+Arguments: ()
+20:37:44  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 2/6] \u2713  http://sns-webpic-qc.xhscdn.com/202605262037/fd437fc02404b60'
+Arguments: ()
+20:37:46  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 3/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/67df3527ff4417'
+Arguments: ()
+20:37:57  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 4/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/fd437fc02404b6'
+Arguments: ()
+20:37:58  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 5/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/7b50226c4b47cd'
+Arguments: ()
+20:38:05  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 6/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/07cd46081ca9ad'
+Arguments: ()
+20:38:05  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 49: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 149, in main
+    is_new = store.save(note, user_id=user_id)
+  File "D:\pythonCode\xhs-rag-assistant\rag\storage\__init__.py", line 71, in save
+    logger.info(
+Message: "[698b283a000000001503afae] –¬‘ˆ \u2713  SQLite + ChromaDB  title='≥…∂º°˙«‡≥«…Ω«∞…Ω°˙∂ºΩ≠—ﬂ“ª»’”Œπ•¬‘'"
+Arguments: ()
+20:38:05  INFO     ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u25b6' in position 19: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 127, in main
+    logger.info(
+Message: "\u25b6 ’˝‘⁄Õ¨≤Ωµ⁄ 5 ∆™ / π≤ 7 ∆™  [69525ed3000000001e020ea0]  '≥…∂º¥˝¡À6ƒÍ£¨«◊≤‚≤ª»∆¬∑Àƒ»’”Œ¬∑œﬂ£°'"
+Arguments: ()
+20:38:05  INFO     [69525ed3000000001e020ea0] µº∫ΩµΩ https://www.xiaohongshu.com/explore/69525ed3000000001e020ea0?xsec_token=ABMiO5svfAxyD37bRVEpXvNYpdBkCeE3yk_vsRoQzn_cI=&xsec_source=pc_collect
+20:38:09  INFO       ø™ º¥¶¿Ì 6 ’≈Õº∆¨£®≤¢∑¢ 6 ¬∑£©°≠
+20:38:18  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 1/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/7666e7df2e8c17'
+Arguments: ()
+20:38:20  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 2/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/c6fcc94b163a07'
+Arguments: ()
+20:38:23  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 3/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/9364d5f00ae79d'
+Arguments: ()
+20:38:28  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 4/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/062e6e2c181af7'
+Arguments: ()
+20:38:29  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 5/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/0b1ea162e79907'
+Arguments: ()
+20:38:30  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 6/6] \u2713  https://sns-webpic-qc.xhscdn.com/202605262037/f3d460adc7f3ec'
+Arguments: ()
+20:38:30  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 49: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 149, in main
+    is_new = store.save(note, user_id=user_id)
+  File "D:\pythonCode\xhs-rag-assistant\rag\storage\__init__.py", line 71, in save
+    logger.info(
+Message: "[69525ed3000000001e020ea0] –¬‘ˆ \u2713  SQLite + ChromaDB  title='≥…∂º¥˝¡À6ƒÍ£¨«◊≤‚≤ª»∆¬∑Àƒ»’”Œ¬∑œﬂ£°'"
+Arguments: ()
+20:38:30  INFO     ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u25b6' in position 19: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 127, in main
+    logger.info(
+Message: "\u25b6 ’˝‘⁄Õ¨≤Ωµ⁄ 6 ∆™ / π≤ 7 ∆™  [68dcdf9400000000030202f5]  'À´ Æ“ª±ÿ∂⁄µƒ»’”√∫Õ¬√––◊®”√∑¿…π'"
+Arguments: ()
+20:38:30  INFO     [68dcdf9400000000030202f5] µº∫ΩµΩ https://www.xiaohongshu.com/explore/68dcdf9400000000030202f5?xsec_token=AB6XCDb7XEN8fapeQymQwLtgshj3AhwxERyYBIN8wFR2w=&xsec_source=pc_collect
+20:38:35  INFO       ø™ º¥¶¿Ì 4 ’≈Õº∆¨£®≤¢∑¢ 4 ¬∑£©°≠
+20:38:41  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 1/4] \u2713  https://sns-webpic-qc.xhscdn.com/202605262038/e51e2f38e00011'
+Arguments: ()
+20:38:42  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 2/4] \u2713  https://sns-webpic-qc.xhscdn.com/202605262038/d1bfcfb4e03bc9'
+Arguments: ()
+20:38:43  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 3/4] \u2713  https://sns-webpic-qc.xhscdn.com/202605262038/28417e5b9959dd'
+Arguments: ()
+20:38:53  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 4/4] \u2713  https://sns-webpic-qc.xhscdn.com/202605262038/c6ef9d1dbcd462'
+Arguments: ()
+20:38:53  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 49: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 149, in main
+    is_new = store.save(note, user_id=user_id)
+  File "D:\pythonCode\xhs-rag-assistant\rag\storage\__init__.py", line 71, in save
+    logger.info(
+Message: "[68dcdf9400000000030202f5] –¬‘ˆ \u2713  SQLite + ChromaDB  title='À´ Æ“ª±ÿ∂⁄µƒ»’”√∫Õ¬√––◊®”√∑¿…π'"
+Arguments: ()
+20:38:53  INFO     ©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§©§
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u25b6' in position 19: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 127, in main
+    logger.info(
+Message: "\u25b6 ’˝‘⁄Õ¨≤Ωµ⁄ 7 ∆™ / π≤ 7 ∆™  [69fc190f000000003503bdfe]  'ªÿ±®¬ ◊Ó∏ﬂµƒ¡Ω÷ß∑¿…π£®618±ÿ∂⁄£°£°£°£©'"
+Arguments: ()
+20:38:53  INFO     [69fc190f000000003503bdfe] µº∫ΩµΩ https://www.xiaohongshu.com/explore/69fc190f000000003503bdfe?xsec_token=ABa3nOqGjONkPxc3iNXT4poEKOMAxriqyypFwQ9ZTc8HM=&xsec_source=pc_collect
+20:38:58  INFO       ø™ º¥¶¿Ì 2 ’≈Õº∆¨£®≤¢∑¢ 2 ¬∑£©°≠
+20:39:06  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 1/2] \u2713  http://sns-webpic-qc.xhscdn.com/202605262038/ebec6768d0a0a99'
+Arguments: ()
+20:39:12  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/chat/completions "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 30: illegal multibyte sequence
+Call stack:
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1002, in _bootstrap
+    self._bootstrap_inner()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "D:\Program Files (x86)\python311\Lib\threading.py", line 982, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 83, in _worker
+    work_item.run()
+  File "D:\Program Files (x86)\python311\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "D:\pythonCode\xhs-rag-assistant\rag\vision.py", line 107, in _process
+    logger.info(f"  [Õº∆¨ {seq}/{total}] \u2713  {url[:60]}")
+Message: '  [Õº∆¨ 2/2] \u2713  https://sns-webpic-qc.xhscdn.com/202605262038/ebec6768d0a0a9'
+Arguments: ()
+20:39:12  INFO     HTTP Request: POST https://open.bigmodel.cn/api/paas/v4/embeddings "HTTP/1.1 200 OK"
+--- Logging error ---
+Traceback (most recent call last):
+  File "D:\Program Files (x86)\python311\Lib\logging\__init__.py", line 1113, in emit
+    stream.write(msg + self.terminator)
+UnicodeEncodeError: 'gbk' codec can't encode character '\u2713' in position 49: illegal multibyte sequence
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 198, in <module>
+    raise SystemExit(main())
+  File "D:\pythonCode\xhs-rag-assistant\crawler\ingest.py", line 149, in main
+    is_new = store.save(note, user_id=user_id)
+  File "D:\pythonCode\xhs-rag-assistant\rag\storage\__init__.py", line 71, in save
+    logger.info(
+Message: "[69fc190f000000003503bdfe] –¬‘ˆ \u2713  SQLite + ChromaDB  title='ªÿ±®¬ ◊Ó∏ﬂµƒ¡Ω÷ß∑¿…π£®618±ÿ∂⁄£°£°£°£©'"
+Arguments: ()
+
+========================================================
+  –°∫Ï È ’≤ÿÕ¨≤ΩÕÍ≥…
+  ∑¢œ÷ ’≤ÿ£∫7
+  ≈¿»°≥…π¶£∫7  –¬‘ˆ£∫7  ∏¸–¬£∫0
+  Ã¯π˝£∫0   ß∞‹£∫0  πÈµµ£∫0
+  SQLite µ±«∞ ’≤ÿ£∫7 Ãı
+  ChromaDB “—œÚ¡øªØ£∫7 Ãı
+  ±æ¥Œ∫ƒ ±£∫3m 34s
+========================================================
+
+========================================================
+ÂØºÂá∫ÂºÄÂèëË∞ÉËØïÈ°µÈù¢
+========================================================
+“—µº≥ˆø™∑¢µ˜ ‘“≥√Ê£∫D:\pythonCode\xhs-rag-assistant\data\notes_debug.html
+SQLite ± º« ˝£∫7
+ChromaDB document  ˝£∫7

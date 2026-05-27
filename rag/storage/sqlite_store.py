@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS notes (
     is_collected      INTEGER NOT NULL DEFAULT 1,      -- 1=当前仍在收藏夹, 0=历史归档
     archived_at       TEXT    NOT NULL DEFAULT '',     -- 取消收藏后本地归档时间
     content_hash      TEXT    NOT NULL DEFAULT '',     -- MD5(title+content)，用于检测内容变化
+    update_seen_hash  TEXT    NOT NULL DEFAULT '',     -- 用户已确认的最新内容版本
     note_published_at TEXT    NOT NULL DEFAULT '',     -- 帖子发布时间（小红书 API 返回的原始时间戳）
     content_changed_at TEXT   NOT NULL DEFAULT '',     -- 本地检测到内容变化的时间
     PRIMARY KEY (note_id, user_id)
@@ -119,6 +120,7 @@ class SQLiteStore:
             ("is_collected",       "INTEGER NOT NULL DEFAULT 1"),
             ("archived_at",        "TEXT    NOT NULL DEFAULT ''"),
             ("content_hash",       "TEXT    NOT NULL DEFAULT ''"),
+            ("update_seen_hash",   "TEXT    NOT NULL DEFAULT ''"),
             ("note_published_at",  "TEXT    NOT NULL DEFAULT ''"),
             ("content_changed_at", "TEXT    NOT NULL DEFAULT ''"),
         ]
@@ -126,13 +128,32 @@ class SQLiteStore:
             if col not in existing:
                 self.conn.execute(f"ALTER TABLE notes ADD COLUMN {col} {defn}")
                 logger.info(f"SQLite schema 已增加 {col} 字段")
+        self.conn.execute(
+            """
+            UPDATE notes
+            SET update_seen_hash = content_hash
+            WHERE update_seen_hash = '' AND content_hash != ''
+            """
+        )
 
     # ── 写入 ──────────────────────────────────────────────────────
 
     @staticmethod
     def _compute_hash(note: dict) -> str:
-        """计算笔记内容的 MD5，用于检测内容变化（title + content）。"""
-        raw = (note.get("title", "") + note.get("content", "")).encode("utf-8")
+        """Compute a stable version hash for user-visible note fields."""
+        payload = {
+            "title": note.get("title", ""),
+            "content": note.get("content", ""),
+            "content_parts": note.get("content_parts", {}),
+            "tags": note.get("tags", []),
+            "cover_url": note.get("cover_url", ""),
+            "image_urls": note.get("image_urls", []),
+            "note_url": note.get("note_url", ""),
+            "likes": int(note.get("likes", 0) or 0),
+            "note_type": note.get("note_type", "image"),
+            "note_published_at": note.get("note_published_at", ""),
+        }
+        raw = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
         return hashlib.md5(raw).hexdigest()
 
     def upsert(self, note: dict, user_id: str) -> bool:
@@ -149,7 +170,7 @@ class SQLiteStore:
 
         existing = self.conn.execute(
             """
-            SELECT indexed, content_hash, content_changed_at
+            SELECT indexed, content_hash, update_seen_hash, content_changed_at
             FROM notes
             WHERE note_id = ? AND user_id = ?
             """,
@@ -163,26 +184,29 @@ class SQLiteStore:
             # 新记录
             old_indexed       = 0
             content_changed_at = ""
+            update_seen_hash   = new_hash
         else:
             old_hash = existing["content_hash"] or ""
             if old_hash and old_hash != new_hash:
                 # 内容发生变化：重置 indexed，记录变化时间，后续触发重新向量化
                 old_indexed        = 0
                 content_changed_at = now
+                update_seen_hash   = existing["update_seen_hash"] or old_hash
                 logger.info(
                     f"[{note['note_id']}] 内容已更新（hash 变化），将重新向量化"
                 )
             else:
                 old_indexed        = existing["indexed"]
                 content_changed_at = existing["content_changed_at"] or ""
+                update_seen_hash   = existing["update_seen_hash"] or new_hash
 
         self.conn.execute(
             """
             INSERT OR REPLACE INTO notes
               (note_id, user_id, title, content, content_parts, tags, cover_url, image_urls,
                note_url, likes, note_type, crawled_at, indexed,
-               is_collected, archived_at, content_hash, note_published_at, content_changed_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               is_collected, archived_at, content_hash, update_seen_hash, note_published_at, content_changed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 note["note_id"],
@@ -201,6 +225,7 @@ class SQLiteStore:
                 1,
                 "",
                 new_hash,
+                update_seen_hash,
                 note.get("note_published_at", ""),
                 content_changed_at,
             ),
@@ -347,13 +372,15 @@ class SQLiteStore:
         """
         if user_id:
             rows = self.conn.execute(
-                "SELECT * FROM notes WHERE content_changed_at != '' AND is_collected = 1 AND user_id = ?"
+                "SELECT * FROM notes WHERE content_changed_at != '' AND content_hash != update_seen_hash"
+                " AND is_collected = 1 AND user_id = ?"
                 " ORDER BY content_changed_at DESC",
                 (user_id,),
             ).fetchall()
         else:
             rows = self.conn.execute(
-                "SELECT * FROM notes WHERE content_changed_at != '' AND is_collected = 1"
+                "SELECT * FROM notes WHERE content_changed_at != '' AND content_hash != update_seen_hash"
+                " AND is_collected = 1"
                 " ORDER BY content_changed_at DESC"
             ).fetchall()
         return [self._deserialize(dict(r)) for r in rows]
@@ -362,12 +389,37 @@ class SQLiteStore:
         """返回内容有更新的笔记数量。"""
         if user_id:
             return self.conn.execute(
-                "SELECT COUNT(*) FROM notes WHERE content_changed_at != '' AND is_collected = 1 AND user_id = ?",
+                "SELECT COUNT(*) FROM notes WHERE content_changed_at != '' AND content_hash != update_seen_hash"
+                " AND is_collected = 1 AND user_id = ?",
                 (user_id,),
             ).fetchone()[0]
         return self.conn.execute(
-            "SELECT COUNT(*) FROM notes WHERE content_changed_at != '' AND is_collected = 1"
+            "SELECT COUNT(*) FROM notes WHERE content_changed_at != '' AND content_hash != update_seen_hash"
+            " AND is_collected = 1"
         ).fetchone()[0]
+
+    def mark_updates_seen(self, user_id: str, note_id: str | None = None) -> int:
+        """Mark one note, or all notes for a user, as seen at the current version."""
+        if note_id:
+            cursor = self.conn.execute(
+                """
+                UPDATE notes
+                SET update_seen_hash = content_hash
+                WHERE user_id = ? AND note_id = ? AND is_collected = 1
+                """,
+                (user_id, note_id),
+            )
+        else:
+            cursor = self.conn.execute(
+                """
+                UPDATE notes
+                SET update_seen_hash = content_hash
+                WHERE user_id = ? AND is_collected = 1
+                """,
+                (user_id,),
+            )
+        self.conn.commit()
+        return cursor.rowcount
 
     # ── 内部工具 ──────────────────────────────────────────────────
 

@@ -62,6 +62,48 @@ class ArchiveSyncTests(unittest.TestCase):
         self.assertEqual(row["archived_at"], "")
         self.assertEqual(row["title"], "restored")
 
+    def test_sqlite_tracks_unread_updates_and_marks_seen(self):
+        from rag.storage.sqlite_store import SQLiteStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = SQLiteStore(str(Path(tmp) / "notes.db"))
+            store.upsert(sample_note("note-1", "first"), user_id="user-1")
+
+            self.assertEqual(store.count_updated("user-1"), 0)
+            self.assertEqual(store.get_updated("user-1"), [])
+
+            store.upsert(sample_note("note-1", "changed"), user_id="user-1")
+            updated_rows = store.get_updated("user-1")
+
+            self.assertEqual(store.count_updated("user-1"), 1)
+            self.assertEqual([row["note_id"] for row in updated_rows], ["note-1"])
+            self.assertNotEqual(updated_rows[0]["content_changed_at"], "")
+
+            changed = store.mark_updates_seen("user-1", "note-1")
+
+            self.assertEqual(changed, 1)
+            self.assertEqual(store.count_updated("user-1"), 0)
+            self.assertEqual(store.get_updated("user-1"), [])
+            store.close()
+
+    def test_sqlite_update_tracking_is_scoped_to_collected_user_notes(self):
+        from rag.storage.sqlite_store import SQLiteStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = SQLiteStore(str(Path(tmp) / "notes.db"))
+            store.upsert(sample_note("note-1", "first"), user_id="user-1")
+            store.upsert(sample_note("note-1", "first"), user_id="user-2")
+            store.upsert(sample_note("other", "first"), user_id="user-1")
+
+            store.upsert(sample_note("note-1", "changed"), user_id="user-1")
+            store.upsert(sample_note("note-1", "changed"), user_id="user-2")
+            store.mark_uncollected_missing("user-2", set())
+
+            self.assertEqual(store.count_updated("user-1"), 1)
+            self.assertEqual(store.count_updated("user-2"), 0)
+            self.assertEqual([row["note_id"] for row in store.get_updated("user-1")], ["note-1"])
+            store.close()
+
     def test_note_store_archive_missing_deletes_archived_vectors(self):
         from rag.storage import NoteStore
 
