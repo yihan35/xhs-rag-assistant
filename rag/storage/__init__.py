@@ -130,9 +130,9 @@ class NoteStore:
 
         return active_hits
 
-    def notes(self, user_id: str = "") -> list[dict]:
+    def notes(self, user_id: str = "", category: str = "") -> list[dict]:
         """从 SQLite 返回元数据列表（供前端展示）。"""
-        return self.sqlite.all_notes(user_id=user_id)
+        return self.sqlite.all_notes(user_id=user_id, category=category)
 
     def archive_missing(self, user_id: str, current_note_ids: set[str]) -> list[str]:
         """
