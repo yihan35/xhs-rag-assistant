@@ -47,3 +47,6 @@ data/notes.db.bak
 
 # Local agent/tool settings
 .claude/settings.local.json
+
+# Superpowers brainstorming artifacts
+.superpowers/
