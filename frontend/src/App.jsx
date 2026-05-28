@@ -27,7 +27,9 @@ export default function App() {
   const {
     updateCount,
     updatedNoteIds,
+    checkState,
     fetchUpdates,
+    startCheck,
     markSeen,
   } = useFavoriteUpdates(userId, {
     onNewUpdates: handleNewFavoriteUpdates,
@@ -89,7 +91,11 @@ export default function App() {
           notesLoading={notesLoading}
           stats={stats}
           updateCount={updateCount}
-          onRefreshNotes={() => fetchNotes(userId)}
+          updateCheckState={checkState}
+          onRefreshNotes={() => {
+            fetchNotes(userId)
+            startCheck(userId)
+          }}
           onSync={() => startSync(userId)}
           onMarkNoteSeen={noteId => markSeen(noteId)}
           syncState={syncState}
@@ -145,7 +151,10 @@ export default function App() {
               <Bell size={16} />
             </div>
             <button
-              onClick={() => updateToast.noteId && markSeen(updateToast.noteId)}
+              onClick={() => {
+                if (updateToast.noteId) markSeen(updateToast.noteId)
+                setUpdateToast(null)
+              }}
               className="flex-1 min-w-0 text-left"
             >
               <p className="text-sm font-semibold text-gray-800">收藏帖子已更新</p>

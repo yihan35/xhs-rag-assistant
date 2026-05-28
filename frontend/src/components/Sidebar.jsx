@@ -11,6 +11,7 @@ export default function Sidebar({
   notesLoading,
   stats,
   updateCount = 0,
+  updateCheckState = null,
   onRefreshNotes,
   onSync,
   onMarkNoteSeen,
@@ -38,6 +39,7 @@ export default function Sidebar({
           <SyncStatus
             stats={stats}
             updateCount={updateCount}
+            updateCheckState={updateCheckState}
             onRefresh={onRefreshNotes}
             onSync={onSync}
             syncState={syncState}
@@ -132,8 +134,9 @@ function SyncButton({ syncState, onSync }) {
   )
 }
 
-function SyncStatus({ stats, updateCount = 0, onRefresh, onSync, syncState, syncError }) {
+function SyncStatus({ stats, updateCount = 0, updateCheckState = null, onRefresh, onSync, syncState, syncError }) {
   const isRunning = syncState === 'running'
+  const isCheckingUpdates = Boolean(updateCheckState?.running)
 
   // 同步中：整行替换为进度提示
   if (isRunning) {
@@ -179,6 +182,13 @@ function SyncStatus({ stats, updateCount = 0, onRefresh, onSync, syncState, sync
         <div className="flex items-center gap-1.5 text-xs text-amber-500">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
           <span>{updateCount} 篇内容有更新</span>
+        </div>
+      )}
+
+      {isCheckingUpdates && (
+        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <RefreshCw size={10} className="animate-spin" />
+          <span>正在后台检查收藏更新</span>
         </div>
       )}
 

@@ -57,10 +57,12 @@ export function useSync(onDone) {
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ user_id: userId }),
       })
-      // 409 = 已在运行中，也视作 running
-      if (!res.ok && res.status !== 409) {
+      if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail || `启动失败 (${res.status})`)
+        const message = err.detail || `启动失败 (${res.status})`
+        if (!(res.status === 409 && message.includes('同步任务已在运行'))) {
+          throw new Error(message)
+        }
       }
 
       // 每 2 秒轮询状态
@@ -97,10 +99,15 @@ export function useSync(onDone) {
   return { startSync, syncState: state, syncError: errorMsg }
 }
 
-export function useFavoriteUpdates(userId, { intervalMs = 60000, onNewUpdates } = {}) {
+export function useFavoriteUpdates(
+  userId,
+  { intervalMs = 60000, checkIntervalMs = 300000, onNewUpdates } = {},
+) {
   const [updates, setUpdates] = useState([])
   const [loading, setLoading] = useState(false)
+  const [checkState, setCheckState] = useState({ running: false, error: null })
   const notifiedRef = useRef(new Set())
+  const checkPollRef = useRef(null)
 
   const fetchUpdates = useCallback(async (uid = userId) => {
     if (!uid) return []
@@ -111,7 +118,7 @@ export function useFavoriteUpdates(userId, { intervalMs = 60000, onNewUpdates } 
       const data = await res.json()
       const nextUpdates = data.notes || []
       const newItems = nextUpdates.filter(note => {
-        const version = note.content_hash || note.content_changed_at || ''
+        const version = note.text_update_hash || note.content_hash || note.content_changed_at || ''
         const key = `${note.note_id}:${version}`
         if (notifiedRef.current.has(key)) return false
         notifiedRef.current.add(key)
@@ -127,6 +134,49 @@ export function useFavoriteUpdates(userId, { intervalMs = 60000, onNewUpdates } 
       setLoading(false)
     }
   }, [userId, onNewUpdates])
+
+  const pollCheckStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`${BASE}/api/updates/check/status`)
+      if (!res.ok) return
+      const data = await res.json()
+      setCheckState(data)
+      if (!data.running) {
+        clearInterval(checkPollRef.current)
+        checkPollRef.current = null
+        fetchUpdates(userId)
+      }
+    } catch (e) {
+      console.error('pollFavoriteUpdateCheck error:', e)
+    }
+  }, [fetchUpdates, userId])
+
+  const startCheck = useCallback(async (uid = userId) => {
+    if (!uid || checkPollRef.current) return
+    try {
+      const res = await fetch(`${BASE}/api/updates/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: uid }),
+      })
+      if (!res.ok) {
+        if (res.status !== 409) {
+          const err = await res.json().catch(() => ({}))
+          setCheckState(current => ({
+            ...current,
+            running: false,
+            error: err.detail || `更新快检启动失败 (${res.status})`,
+          }))
+        }
+        return
+      }
+      setCheckState(current => ({ ...current, running: true, error: null }))
+      checkPollRef.current = setInterval(pollCheckStatus, 2000)
+      pollCheckStatus()
+    } catch (e) {
+      setCheckState(current => ({ ...current, running: false, error: e.message }))
+    }
+  }, [userId, pollCheckStatus])
 
   const markSeen = useCallback(async (noteId = null, uid = userId) => {
     if (!uid) return
@@ -152,12 +202,23 @@ export function useFavoriteUpdates(userId, { intervalMs = 60000, onNewUpdates } 
     return () => clearInterval(timer)
   }, [userId, intervalMs, fetchUpdates])
 
+  useEffect(() => () => clearInterval(checkPollRef.current), [])
+
+  useEffect(() => {
+    if (!userId) return undefined
+    startCheck(userId)
+    const timer = setInterval(() => startCheck(userId), checkIntervalMs)
+    return () => clearInterval(timer)
+  }, [userId, checkIntervalMs, startCheck])
+
   return {
     updates,
     updatedNoteIds: new Set(updates.map(note => note.note_id)),
     updateCount: updates.length,
     loading,
+    checkState,
     fetchUpdates,
+    startCheck,
     markSeen,
   }
 }

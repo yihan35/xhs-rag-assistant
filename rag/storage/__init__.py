@@ -152,6 +152,10 @@ class NoteStore:
         """Mark one updated note, or all updated notes, as seen for the user."""
         return self.sqlite.mark_updates_seen(user_id=user_id, note_id=note_id)
 
+    def save_lightweight_text(self, note: dict, user_id: str) -> str:
+        """Save title/body metadata from the fast update checker."""
+        return self.sqlite.upsert_lightweight_text(note, user_id=user_id)
+
     # ── 统计 ──────────────────────────────────────────────────────
 
     def stats(self) -> dict:

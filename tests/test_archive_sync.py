@@ -104,6 +104,40 @@ class ArchiveSyncTests(unittest.TestCase):
             self.assertEqual([row["note_id"] for row in store.get_updated("user-1")], ["note-1"])
             store.close()
 
+    def test_sqlite_lightweight_text_check_baselines_new_notes(self):
+        from rag.storage.sqlite_store import SQLiteStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = SQLiteStore(str(Path(tmp) / "notes.db"))
+
+            result = store.upsert_lightweight_text(sample_note("note-1", "first"), user_id="user-1")
+
+            self.assertEqual(result, "new")
+            self.assertEqual(store.count_updated("user-1"), 0)
+            self.assertEqual(store.get_updated("user-1"), [])
+            store.close()
+
+    def test_sqlite_lightweight_text_check_marks_existing_text_updates_unread(self):
+        from rag.storage.sqlite_store import SQLiteStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = SQLiteStore(str(Path(tmp) / "notes.db"))
+            store.upsert(sample_note("note-1", "first"), user_id="user-1")
+
+            result = store.upsert_lightweight_text(sample_note("note-1", "changed"), user_id="user-1")
+            updated_rows = store.get_updated("user-1")
+
+            self.assertEqual(result, "updated")
+            self.assertEqual(store.count_updated("user-1"), 1)
+            self.assertEqual(updated_rows[0]["title"], "changed")
+            self.assertNotEqual(updated_rows[0]["text_update_hash"], updated_rows[0]["text_seen_hash"])
+            self.assertEqual(updated_rows[0]["indexed"], 0)
+
+            store.mark_updates_seen("user-1", "note-1")
+
+            self.assertEqual(store.count_updated("user-1"), 0)
+            store.close()
+
     def test_note_store_archive_missing_deletes_archived_vectors(self):
         from rag.storage import NoteStore
 
