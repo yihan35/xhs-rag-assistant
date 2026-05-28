@@ -31,6 +31,13 @@ export default function Sidebar({
     }
   }, [userId, showNotes, stats?.sqlite_total, categoriesVersion])
 
+  // 同步或分类完成后刷新分类列表
+  useEffect(() => {
+    if (userId && showNotes && (syncState === 'done' || classifyState === 'done')) {
+      fetchCategories(userId).then(setCategories)
+    }
+  }, [syncState, classifyState, userId, showNotes])
+
   return (
     <aside className="flex flex-col h-full bg-white border-r border-pink-100 relative overflow-hidden">
       {/* 品牌标题 */}
