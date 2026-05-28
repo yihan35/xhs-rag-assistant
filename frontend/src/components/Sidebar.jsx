@@ -332,7 +332,7 @@ function NotesView({ notes, loading, onBack, onRefresh, categories, activeCatego
           <Tag size={10} className={isClassifying ? 'animate-pulse' : ''} />
         </button>
         <button
-          onClick={onRefresh}
+          onClick={() => onRefresh()}
           disabled={loading}
           className="text-gray-400 hover:text-xhs-red transition-colors disabled:opacity-40"
           title="刷新"
