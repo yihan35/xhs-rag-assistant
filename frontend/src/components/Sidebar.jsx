@@ -22,13 +22,14 @@ export default function Sidebar({
   const [showNotes, setShowNotes] = useState(false)
   const [categories, setCategories] = useState([])
   const [activeCategory, setActiveCategory] = useState('')
+  const [categoriesVersion, setCategoriesVersion] = useState(0)
 
-  // 加载分类列表（当打开收藏视图或笔记总数变化时）
+  // 加载分类列表（当打开收藏视图、笔记总数变化或分类被更新时）
   useEffect(() => {
     if (userId && showNotes) {
       fetchCategories(userId).then(setCategories)
     }
-  }, [userId, showNotes, stats?.sqlite_total])
+  }, [userId, showNotes, stats?.sqlite_total, categoriesVersion])
 
   return (
     <aside className="flex flex-col h-full bg-white border-r border-pink-100 relative overflow-hidden">
@@ -73,6 +74,7 @@ export default function Sidebar({
             onClassify={onClassify}
             classifyState={classifyState}
             userId={userId}
+            onCategoriesRefresh={() => setCategoriesVersion(v => v + 1)}
           />
         ) : (
           <SessionsView
@@ -289,13 +291,14 @@ function SessionItem({ session, active, onSelect, onDelete }) {
 
 /* ── 收藏列表视图 ─────────────────────────────────────────────── */
 
-function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange, onClassify, classifyState, userId }) {
+function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange, onClassify, classifyState, userId, onCategoriesRefresh }) {
   const isClassifying = classifyState === 'running'
   const classifyDone   = classifyState === 'done'
 
   const handleUpdateCategory = async (noteId, category) => {
     try {
       await updateNoteCategory(noteId, userId, category)
+      onCategoriesRefresh?.()
       onRefresh()
     } catch (e) {
       console.error('update category error:', e)
@@ -445,7 +448,7 @@ function CompactNoteItem({ note, categories, onUpdateCategory }) {
           {note.category ? (
             <>
               <button
-                onClick={() => setEditing(!editing)}
+                onClick={(e) => { e.stopPropagation(); setEditing(!editing) }}
                 className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium
                            bg-xhs-rose text-xhs-red hover:bg-xhs-red hover:text-white
                            transition-colors cursor-pointer"
@@ -455,7 +458,8 @@ function CompactNoteItem({ note, categories, onUpdateCategory }) {
               </button>
               {editing && (
                 <div className="absolute left-0 top-full mt-1 z-20 bg-white border border-pink-100
-                                rounded-lg shadow-lg py-1 min-w-[100px]">
+                                rounded-lg shadow-lg py-1 min-w-[100px]"
+                     onClick={e => e.stopPropagation()}>
                   {/* 预设分类 */}
                   {availableCats.length > 0 && (
                     <>
