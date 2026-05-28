@@ -16,6 +16,9 @@ export default function App() {
   const [updateToast, setUpdateToast] = useState(null)
 
   const { notes, loading: notesLoading, stats, fetchNotes } = useNotes(userId)
+  const handleUpdateCheckDone = useCallback(() => {
+    fetchNotes(userId)
+  }, [fetchNotes, userId])
   const handleNewFavoriteUpdates = useCallback(items => {
     const first = items[0]
     setUpdateToast({
@@ -33,6 +36,7 @@ export default function App() {
     markSeen,
   } = useFavoriteUpdates(userId, {
     onNewUpdates: handleNewFavoriteUpdates,
+    onCheckDone: handleUpdateCheckDone,
   })
   const { startSync, syncState, syncError } = useSync(() => {
     fetchNotes(userId)
@@ -74,6 +78,10 @@ export default function App() {
     if (currentId) updateSession(currentId, updater)
   }, [currentId, updateSession])
 
+  const handleRefreshFavoriteUpdates = useCallback(() => {
+    startCheck(userId)
+  }, [startCheck, userId])
+
   return (
     <div className="flex h-screen overflow-hidden bg-xhs-light">
       {/* 侧边栏 */}
@@ -92,10 +100,7 @@ export default function App() {
           stats={stats}
           updateCount={updateCount}
           updateCheckState={checkState}
-          onRefreshNotes={() => {
-            fetchNotes(userId)
-            startCheck(userId)
-          }}
+          onRefreshNotes={handleRefreshFavoriteUpdates}
           onSync={() => startSync(userId)}
           onMarkNoteSeen={noteId => markSeen(noteId)}
           syncState={syncState}

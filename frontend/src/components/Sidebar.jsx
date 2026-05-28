@@ -53,7 +53,7 @@ export default function Sidebar({
         {showNotes ? (
           <NotesView
             notes={notes}
-            loading={notesLoading}
+            loading={notesLoading || Boolean(updateCheckState?.running)}
             onBack={() => setShowNotes(false)}
             onRefresh={onRefreshNotes}
             onMarkNoteSeen={onMarkNoteSeen}

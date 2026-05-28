@@ -101,7 +101,7 @@ export function useSync(onDone) {
 
 export function useFavoriteUpdates(
   userId,
-  { intervalMs = 60000, checkIntervalMs = 300000, onNewUpdates } = {},
+  { intervalMs = 60000, onNewUpdates, onCheckDone } = {},
 ) {
   const [updates, setUpdates] = useState([])
   const [loading, setLoading] = useState(false)
@@ -144,12 +144,13 @@ export function useFavoriteUpdates(
       if (!data.running) {
         clearInterval(checkPollRef.current)
         checkPollRef.current = null
+        onCheckDone?.()
         fetchUpdates(userId)
       }
     } catch (e) {
       console.error('pollFavoriteUpdateCheck error:', e)
     }
-  }, [fetchUpdates, userId])
+  }, [fetchUpdates, onCheckDone, userId])
 
   const startCheck = useCallback(async (uid = userId) => {
     if (!uid || checkPollRef.current) return
@@ -203,13 +204,6 @@ export function useFavoriteUpdates(
   }, [userId, intervalMs, fetchUpdates])
 
   useEffect(() => () => clearInterval(checkPollRef.current), [])
-
-  useEffect(() => {
-    if (!userId) return undefined
-    startCheck(userId)
-    const timer = setInterval(() => startCheck(userId), checkIntervalMs)
-    return () => clearInterval(timer)
-  }, [userId, checkIntervalMs, startCheck])
 
   return {
     updates,
