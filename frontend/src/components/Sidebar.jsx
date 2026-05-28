@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Plus, Trash2, Sparkles, BookMarked, ChevronLeft, RefreshCw, FileText, Film, Tag } from 'lucide-react'
 import { fetchCategories, updateNoteCategory } from '../hooks/useApi'
 
@@ -409,6 +409,19 @@ function CompactNoteItem({ note, categories, onUpdateCategory, isEditing, onStar
   const hasCover = note.cover_url?.startsWith('http')
   const isVideo  = note.note_type === 'video'
   const [customCat, setCustomCat] = useState('')
+  const dropdownRef = useRef(null)
+
+  // 点击外部区域关闭下拉
+  useEffect(() => {
+    if (!isEditing) return
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        onEndEdit()
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [isEditing, onEndEdit])
 
   const handleSelect = (cat) => {
     onEndEdit()
@@ -482,7 +495,7 @@ function CompactNoteItem({ note, categories, onUpdateCategory, isEditing, onStar
               {note.category}
             </button>
             {isEditing && (
-              <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-pink-100
+              <div ref={dropdownRef} className="absolute right-0 top-full mt-1 z-20 bg-white border border-pink-100
                               rounded-lg shadow-lg py-1 min-w-[100px]">
                 {availableCats.length > 0 && (
                   <>
