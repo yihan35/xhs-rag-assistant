@@ -156,6 +156,10 @@ class NoteStore:
         """Save title/body metadata from the fast update checker."""
         return self.sqlite.upsert_lightweight_text(note, user_id=user_id)
 
+    def reset_text_update_baseline(self, user_id: str = "") -> int:
+        """Reset lightweight update alerts to the current title/body baseline."""
+        return self.sqlite.reset_text_update_baseline(user_id=user_id)
+
     # ── 统计 ──────────────────────────────────────────────────────
 
     def stats(self) -> dict:

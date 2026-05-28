@@ -166,15 +166,30 @@ class SQLiteStore:
         """Compute the lightweight title/body version used by fast checks."""
         payload = {
             "title": (note.get("title") or "").strip(),
-            "content": (note.get("content") or "").strip(),
+            "content": SQLiteStore._extract_text_body(note),
         }
         raw = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
         return hashlib.md5(raw).hexdigest()
 
+    @staticmethod
+    def _extract_text_body(note: dict) -> str:
+        """Return the body text used for lightweight update checks."""
+        parts = note.get("content_parts")
+        if isinstance(parts, str):
+            try:
+                parts = json.loads(parts)
+            except Exception:
+                parts = {}
+        if isinstance(parts, dict):
+            body = parts.get("body")
+            if body is not None:
+                return str(body).strip()
+        return (note.get("content") or "").strip()
+
     def _backfill_text_hashes(self) -> None:
         rows = self.conn.execute(
             """
-            SELECT note_id, user_id, title, content
+            SELECT note_id, user_id, title, content, content_parts
             FROM notes
             WHERE text_update_hash = '' OR text_seen_hash = ''
             """
@@ -579,6 +594,44 @@ class SQLiteStore:
             )
         self.conn.commit()
         return cursor.rowcount
+
+    def reset_text_update_baseline(self, user_id: str = "") -> int:
+        """Reset lightweight text-update state to the current title/body baseline."""
+        if user_id:
+            rows = self.conn.execute(
+                """
+                SELECT note_id, user_id, title, content, content_parts
+                FROM notes
+                WHERE user_id = ? AND is_collected = 1
+                """,
+                (user_id,),
+            ).fetchall()
+        else:
+            rows = self.conn.execute(
+                """
+                SELECT note_id, user_id, title, content, content_parts
+                FROM notes
+                WHERE is_collected = 1
+                """
+            ).fetchall()
+
+        for row in rows:
+            text_hash = self._compute_text_hash(dict(row))
+            self.conn.execute(
+                """
+                UPDATE notes
+                SET text_update_hash = ?,
+                    text_seen_hash = ?,
+                    content_changed_at = CASE
+                        WHEN content_hash = update_seen_hash THEN ''
+                        ELSE content_changed_at
+                    END
+                WHERE note_id = ? AND user_id = ?
+                """,
+                (text_hash, text_hash, row["note_id"], row["user_id"]),
+            )
+        self.conn.commit()
+        return len(rows)
 
     # ── 内部工具 ──────────────────────────────────────────────────
 

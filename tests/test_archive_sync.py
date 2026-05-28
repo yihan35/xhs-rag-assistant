@@ -20,6 +20,17 @@ def sample_note(note_id: str, title: str | None = None) -> dict:
     }
 
 
+def sample_rich_note(note_id: str, title: str, body: str, media_text: str) -> dict:
+    note = sample_note(note_id, title)
+    note["content"] = f"{body}\n{media_text}"
+    note["content_parts"] = {
+        "body": body,
+        "images": [{"ocr_text": media_text, "description": ""}],
+        "video_transcript": "",
+    }
+    return note
+
+
 class ArchiveSyncTests(unittest.TestCase):
     def test_sqlite_marks_missing_notes_archived_and_hides_them_by_default(self):
         from rag.storage.sqlite_store import SQLiteStore
@@ -136,6 +147,81 @@ class ArchiveSyncTests(unittest.TestCase):
             store.mark_updates_seen("user-1", "note-1")
 
             self.assertEqual(store.count_updated("user-1"), 0)
+            store.close()
+
+    def test_sqlite_lightweight_text_check_ignores_media_text_from_full_sync(self):
+        from rag.storage.sqlite_store import SQLiteStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = SQLiteStore(str(Path(tmp) / "notes.db"))
+            store.upsert(
+                sample_rich_note(
+                    "note-1",
+                    "same title",
+                    "same body",
+                    "[图片文字]: full sync OCR text",
+                ),
+                user_id="user-1",
+            )
+
+            result = store.upsert_lightweight_text(
+                sample_note("note-1", "same title") | {
+                    "content": "same body",
+                    "content_parts": {"body": "same body", "images": [], "video_transcript": ""},
+                },
+                user_id="user-1",
+            )
+
+            self.assertEqual(result, "unchanged")
+            self.assertEqual(store.count_updated("user-1"), 0)
+            store.close()
+
+    def test_sqlite_text_hash_backfill_uses_content_parts_body(self):
+        from rag.storage.sqlite_store import SQLiteStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = Path(tmp) / "notes.db"
+            store = SQLiteStore(str(db_path))
+            rich_note = sample_rich_note(
+                "note-1",
+                "same title",
+                "same body",
+                "[图片文字]: old OCR text",
+            )
+            store.upsert(rich_note, user_id="user-1")
+            store.conn.execute("UPDATE notes SET text_update_hash = '', text_seen_hash = ''")
+            store.conn.commit()
+            store.close()
+
+            store = SQLiteStore(str(db_path))
+            result = store.upsert_lightweight_text(
+                sample_note("note-1", "same title") | {
+                    "content": "same body",
+                    "content_parts": {"body": "same body", "images": [], "video_transcript": ""},
+                },
+                user_id="user-1",
+            )
+
+            self.assertEqual(result, "unchanged")
+            self.assertEqual(store.count_updated("user-1"), 0)
+            store.close()
+
+    def test_sqlite_reset_text_update_baseline_clears_false_positive(self):
+        from rag.storage.sqlite_store import SQLiteStore
+
+        with tempfile.TemporaryDirectory() as tmp:
+            store = SQLiteStore(str(Path(tmp) / "notes.db"))
+            store.upsert(sample_note("note-1", "first"), user_id="user-1")
+            store.upsert_lightweight_text(sample_note("note-1", "changed"), user_id="user-1")
+
+            self.assertEqual(store.count_updated("user-1"), 1)
+
+            reset_count = store.reset_text_update_baseline("user-1")
+
+            self.assertEqual(reset_count, 1)
+            self.assertEqual(store.count_updated("user-1"), 0)
+            row = store.all_notes(user_id="user-1")[0]
+            self.assertEqual(row["content_changed_at"], "")
             store.close()
 
     def test_note_store_archive_missing_deletes_archived_vectors(self):
