@@ -343,7 +343,10 @@ function NotesView({ notes, loading, onBack, onRefresh, categories, activeCatego
 
       {/* 分类筛选栏 */}
       {categories.length > 0 && (
-        <div className="flex-shrink-0 px-3 pb-2 overflow-x-auto no-scrollbar">
+        <div
+          className="flex-shrink-0 px-3 pb-2 overflow-x-auto no-scrollbar"
+          onWheel={(e) => { e.currentTarget.scrollLeft += e.deltaY }}
+        >
           <div className="flex gap-1.5">
             <button
               onClick={() => onCategoryChange('')}
