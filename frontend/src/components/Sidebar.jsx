@@ -294,6 +294,7 @@ function SessionItem({ session, active, onSelect, onDelete }) {
 function NotesView({ notes, loading, onBack, onRefresh, categories, activeCategory, onCategoryChange, onClassify, classifyState, userId, onCategoriesRefresh }) {
   const isClassifying = classifyState === 'running'
   const classifyDone   = classifyState === 'done'
+  const [editingNoteId, setEditingNoteId] = useState(null)
 
   const handleUpdateCategory = async (noteId, category) => {
     try {
@@ -388,7 +389,15 @@ function NotesView({ notes, loading, onBack, onRefresh, categories, activeCatego
           </div>
         ) : (
           notes.map(note => (
-            <CompactNoteItem key={note.note_id} note={note} categories={categories} onUpdateCategory={handleUpdateCategory} />
+            <CompactNoteItem
+              key={note.note_id}
+              note={note}
+              categories={categories}
+              onUpdateCategory={handleUpdateCategory}
+              isEditing={editingNoteId === note.note_id}
+              onStartEdit={(id) => setEditingNoteId(id)}
+              onEndEdit={() => setEditingNoteId(null)}
+            />
           ))
         )}
       </div>
@@ -396,14 +405,13 @@ function NotesView({ notes, loading, onBack, onRefresh, categories, activeCatego
   )
 }
 
-function CompactNoteItem({ note, categories, onUpdateCategory }) {
+function CompactNoteItem({ note, categories, onUpdateCategory, isEditing, onStartEdit, onEndEdit }) {
   const hasCover = note.cover_url?.startsWith('http')
   const isVideo  = note.note_type === 'video'
-  const [editing, setEditing] = useState(false)
   const [customCat, setCustomCat] = useState('')
 
   const handleSelect = (cat) => {
-    setEditing(false)
+    onEndEdit()
     if (cat && cat !== note.category) {
       onUpdateCategory?.(note.note_id, cat)
     }
@@ -415,7 +423,7 @@ function CompactNoteItem({ note, categories, onUpdateCategory }) {
       setCustomCat('')
     }
     if (e.key === 'Escape') {
-      setEditing(false)
+      onEndEdit()
       setCustomCat('')
     }
   }
@@ -423,94 +431,101 @@ function CompactNoteItem({ note, categories, onUpdateCategory }) {
   const availableCats = (categories || []).map(c => c.name).filter(c => c !== note.category)
 
   return (
-    <a
-      href={note.note_url || '#'}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex gap-2.5 p-2.5 rounded-xl hover:bg-pink-50 transition-colors group"
-      onClick={e => { if (!note.note_url) e.preventDefault() }}
-    >
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-pink-100">
-        {hasCover ? (
-          <img src={note.cover_url} alt={note.title}
-               className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none' }} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            {isVideo ? <Film size={14} className="text-xhs-pink" /> : <FileText size={14} className="text-xhs-pink" />}
+    <div className="flex gap-2.5 p-2.5 rounded-xl hover:bg-pink-50 transition-colors group">
+      {/* 封面 + 标题：可点击跳转 */}
+      <a
+        href={note.note_url || '#'}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex gap-2.5 flex-1 min-w-0"
+        onClick={e => { if (!note.note_url) e.preventDefault() }}
+      >
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-pink-100">
+          {hasCover ? (
+            <img src={note.cover_url} alt={note.title}
+                 className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none' }} />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              {isVideo ? <Film size={14} className="text-xhs-pink" /> : <FileText size={14} className="text-xhs-pink" />}
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-gray-700 line-clamp-2 leading-snug group-hover:text-xhs-red transition-colors">
+            {note.title || '无标题'}
+          </p>
+          <div className="flex items-center gap-1 mt-1">
+            {note.content_changed_at && (
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"
+                title={`内容已更新：${new Date(note.content_changed_at).toLocaleDateString('zh-CN')}`}
+              />
+            )}
+            {note.indexed === 1 && !note.content_changed_at && (
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400" title="已向量化" />
+            )}
           </div>
+        </div>
+      </a>
+
+      {/* 分类 pill：独立于链接之外 */}
+      <div className="flex-shrink-0 flex items-start pt-0.5 relative">
+        {note.category ? (
+          <>
+            <button
+              onClick={() => isEditing ? onEndEdit() : onStartEdit(note.note_id)}
+              className="px-1.5 py-0.5 rounded text-[10px] font-medium
+                         bg-xhs-rose text-xhs-red hover:bg-xhs-red hover:text-white
+                         transition-colors cursor-pointer whitespace-nowrap"
+              title="点击修改分类"
+            >
+              {note.category}
+            </button>
+            {isEditing && (
+              <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-pink-100
+                              rounded-lg shadow-lg py-1 min-w-[100px]">
+                {availableCats.length > 0 && (
+                  <>
+                    {availableCats.slice(0, 8).map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => handleSelect(cat)}
+                        className="block w-full text-left px-3 py-1.5 text-[11px] text-gray-600
+                                   hover:bg-pink-50 hover:text-xhs-red transition-colors whitespace-nowrap"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                    <div className="border-t border-pink-50 my-0.5" />
+                  </>
+                )}
+                <input
+                  type="text"
+                  placeholder="自定义分类..."
+                  value={customCat}
+                  onChange={e => setCustomCat(e.target.value)}
+                  onKeyDown={handleCustomSubmit}
+                  className="w-full px-3 py-1.5 text-[11px] text-gray-600 outline-none
+                             placeholder-gray-300 focus:bg-pink-50"
+                  maxLength={10}
+                  autoFocus
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <button
+            onClick={() => onStartEdit(note.note_id)}
+            className="px-1.5 py-0.5 rounded text-[10px] font-medium
+                       bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-500
+                       transition-colors cursor-pointer whitespace-nowrap"
+            title="添加分类"
+          >
+            未分类
+          </button>
         )}
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-gray-700 line-clamp-2 leading-snug group-hover:text-xhs-red transition-colors">
-          {note.title || '无标题'}
-        </p>
-        <div className="relative mt-0.5">
-          {note.category ? (
-            <>
-              <button
-                onClick={(e) => { e.stopPropagation(); setEditing(!editing) }}
-                className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium
-                           bg-xhs-rose text-xhs-red hover:bg-xhs-red hover:text-white
-                           transition-colors cursor-pointer"
-                title="点击修改分类"
-              >
-                {note.category}
-              </button>
-              {editing && (
-                <div className="absolute left-0 top-full mt-1 z-20 bg-white border border-pink-100
-                                rounded-lg shadow-lg py-1 min-w-[100px]"
-                     onClick={e => e.stopPropagation()}>
-                  {/* 预设分类 */}
-                  {availableCats.length > 0 && (
-                    <>
-                      {availableCats.slice(0, 8).map(cat => (
-                        <button
-                          key={cat}
-                          onClick={() => handleSelect(cat)}
-                          className="block w-full text-left px-3 py-1.5 text-[11px] text-gray-600
-                                     hover:bg-pink-50 hover:text-xhs-red transition-colors"
-                        >
-                          {cat}
-                        </button>
-                      ))}
-                      <div className="border-t border-pink-50 my-0.5" />
-                    </>
-                  )}
-                  {/* 自定义输入 */}
-                  <input
-                    type="text"
-                    placeholder="自定义分类..."
-                    value={customCat}
-                    onChange={e => setCustomCat(e.target.value)}
-                    onKeyDown={handleCustomSubmit}
-                    className="w-full px-3 py-1.5 text-[11px] text-gray-600 outline-none
-                               placeholder-gray-300 focus:bg-pink-50"
-                    maxLength={10}
-                    autoFocus
-                  />
-                </div>
-              )}
-            </>
-          ) : (
-            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium
-                             bg-gray-100 text-gray-400">
-              未分类
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-1 mt-1">
-          {note.content_changed_at && (
-            <span
-              className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"
-              title={`内容已更新：${new Date(note.content_changed_at).toLocaleDateString('zh-CN')}`}
-            />
-          )}
-          {note.indexed === 1 && !note.content_changed_at && (
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400" title="已向量化" />
-          )}
-        </div>
-      </div>
-    </a>
+    </div>
   )
 }
 
