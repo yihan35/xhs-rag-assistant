@@ -415,3 +415,48 @@ fetch_note_detail()    session_handler.handle_search()  GET  /api/stats      →
 - [ ] 新增 Key/Token 走 `os.getenv()`，未硬编码
 - [ ] `data/cookies.json`、`.env`、`data/` 运行产物在 `.gitignore` 中
 - [ ] 本地运行 `python -m crawler.test_crawl` 通过
+
+---
+
+## feature/favorite-update-alerts 分支变更说明
+
+本分支相对 `main` 增加了“收藏帖子更新提醒”能力，目标是在用户收藏的小红书帖子标题或正文真的发生变化后，在前端提醒用户是哪篇帖子更新了。
+
+### 后端能力
+
+- `GET /api/updates`：读取本地数据库中当前用户未读的收藏更新提醒，不访问小红书。
+- `POST /api/updates/seen`：把某篇帖子或全部帖子更新提醒标记为已读。
+- `POST /api/updates/check`：手动触发一次轻量快检，复用登录态打开收藏帖详情页，只抓取标题和正文，不执行图片 Vision、OCR、视频转录或向量化。
+- `GET /api/updates/check/status`：查询轻量快检运行状态、最近错误、发现更新数量和最后完成时间。
+- `POST /api/sync` 保持原有完整同步逻辑不变，仍负责完整爬取、入库和向量化。
+
+### 前端交互
+
+- 打开前端时不会自动爬取小红书，也取消了每 5 分钟自动快检，避免频繁访问导致账号风险。
+- 顶部“同步”按钮保持原样，仍调用完整同步。
+- “我的收藏”列表右上角刷新按钮是当前唯一触发收藏更新快检的入口。
+- 前端继续每 60 秒轮询 `GET /api/updates`，该轮询只读本地数据库，不会爬取小红书。
+- 检测到真实更新后，前端会显示全局弹窗提醒，并在“我的收藏”入口/收藏卡片上显示未读数量或“已更新”状态。
+- 用户点击弹窗或对应收藏卡片后，会调用 `POST /api/updates/seen` 标记已读。
+
+### 更新判定和存储
+
+- 快检只比较 `title + 正文` 的文字签名，忽略点赞数、浏览量、图片 OCR、图片描述和视频内容。
+- 完整同步和轻量快检使用同一套文字签名算法：优先取 `content_parts.body`，没有时才回退到 `content`。
+- `notes` 表新增/使用 `text_update_hash` 与 `text_seen_hash` 保存当前文字版本和用户已读版本。
+- 首次完整同步或首次快检只建立基线，设置 `text_update_hash = text_seen_hash`，不会提醒用户。
+- 只有之后标题或正文再次变化，且 `text_update_hash != text_seen_hash` 时，才会返回未读更新。
+- 快检发现文字变化后会先更新本地标题/正文和更新时间提醒；完整 Vision/向量化仍留给后续完整同步处理。
+
+### 相关文件
+
+- `main.py`：新增更新提醒与轻量快检 API，并处理快检和完整同步的互斥。
+- `crawler/xhs_crawler.py`：新增轻量详情页文本快照抓取逻辑。
+- `rag/storage/sqlite_store.py`：新增文字签名、首次基线、已读标记和轻量文本更新写入逻辑。
+- `frontend/src/hooks/useApi.js`：封装更新提醒读取、标记已读和手动快检状态。
+- `frontend/src/App.jsx`、`frontend/src/components/Sidebar.jsx`：接入弹窗、未读标记和“我的收藏”刷新按钮触发快检。
+- `tests/test_archive_sync.py`：覆盖首次基线不提醒、真实文字变化才提醒、非收藏/非当前用户不提醒、点击后已读等行为。
+
+### 注意
+
+当前分支相对 `main` 也包含 `data_backup/` 下的一批运行数据备份文件。这些文件不是收藏更新提醒功能运行时必须依赖的代码。
