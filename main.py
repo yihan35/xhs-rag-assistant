@@ -38,6 +38,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Literal
 
+from crawler import XHSCrawler, detect_user_id, load_or_extract_cookies
 from rag.storage import NoteStore, metadata_store
 from rag.storage.session_store import SessionStore
 from rag import session_handler
@@ -92,6 +93,20 @@ class QueryResponse(BaseModel):
     answer:  str | None
     sources: list[SourceItem]
     total:   int
+
+
+class CategoryUpdateRequest(BaseModel):
+    user_id:  str = Field(..., min_length=1, description="小红书用户 ID")
+    category: str = Field(..., description="新分类名")
+
+
+class UpdateSeenRequest(BaseModel):
+    user_id: str = Field(..., min_length=1, description="小红书用户 ID")
+    note_id: str | None = Field(default=None, description="留空则标记全部更新为已读")
+
+
+class UpdateCheckRequest(BaseModel):
+    user_id: str = Field(default="", description="小红书用户 ID，留空则自动检测")
 
 
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -213,18 +228,144 @@ def list_updates(
     return {"total": len(result), "notes": result}
 
 
+@app.get("/api/categories", summary="用户分类列表（去重计数）")
+def list_categories(
+    user_id: str = Query(..., min_length=1, description="小红书用户 ID"),
+):
+    """返回当前用户的分类列表，按笔记数量降序排列。"""
+    with metadata_store() as store:
+        categories = store.sqlite.get_categories(user_id=user_id)
+    return {"categories": categories}
+
+
+@app.post("/api/updates/seen", summary="标记收藏帖子更新提醒为已读")
+def mark_updates_seen(req: UpdateSeenRequest):
+    """
+    将一个或全部收藏帖子更新提醒标记为已读。
+    前端可在用户点击更新提醒或进入帖子详情后调用此接口。
+    """
+    with metadata_store() as store:
+        updated = store.mark_updates_seen(user_id=req.user_id, note_id=req.note_id)
+    return {"updated": updated}
+
+
+_check_lock = threading.Lock()
+_check_state: dict = {
+    "running": False,
+    "error": None,
+    "last_check": None,
+    "last_user_id": "",
+    "found": 0,
+    "checked": 0,
+    "updated": 0,
+    "created": 0,
+    "skipped": 0,
+}
+
+
+def _resolve_check_user_id(explicit_user_id: str, cookies: dict) -> str:
+    user_id = (explicit_user_id or "").strip()
+    if user_id:
+        return user_id
+    return (detect_user_id(cookies) or "").strip()
+
+
+def _run_update_check(user_id: str) -> None:
+    created = updated = skipped = checked = found = 0
+    try:
+        cookies_path = os.path.join(_PROJECT_ROOT, "data", "cookies.json")
+        cookies = load_or_extract_cookies(cookies_path)
+        resolved_user_id = _resolve_check_user_id(user_id, cookies)
+        if not resolved_user_id:
+            raise RuntimeError("无法确定 user_id，请先设置用户 ID 或登录小红书")
+
+        with XHSCrawler(cookies) as crawler:
+            note_metas = crawler.fetch_collect_list(resolved_user_id)
+            found = len(note_metas)
+            with metadata_store() as store:
+                current_note_ids = {meta["note_id"] for meta in note_metas if meta.get("note_id")}
+                store.archive_missing(resolved_user_id, current_note_ids)
+
+                for meta in note_metas:
+                    note_id = meta.get("note_id", "")
+                    if not note_id:
+                        skipped += 1
+                        continue
+                    try:
+                        note = crawler.fetch_note_text_snapshot(
+                            note_id,
+                            xsec_token=meta.get("xsec_token", ""),
+                        )
+                    except Exception as exc:
+                        logger.warning(f"[{note_id}] 快检失败：{exc}")
+                        skipped += 1
+                        continue
+                    if note is None:
+                        skipped += 1
+                        continue
+                    result = store.save_lightweight_text(note, user_id=resolved_user_id)
+                    checked += 1
+                    if result == "new":
+                        created += 1
+                    elif result == "updated":
+                        updated += 1
+
+        _check_state.update({
+            "error": None,
+            "last_check": datetime.now(timezone.utc).isoformat(),
+            "last_user_id": resolved_user_id,
+            "found": found,
+            "checked": checked,
+            "updated": updated,
+            "created": created,
+            "skipped": skipped,
+        })
+    except Exception as exc:
+        _check_state["error"] = str(exc)
+        logger.error(f"收藏更新快检失败：{exc}")
+    finally:
+        _check_state["running"] = False
+
+
+@app.post("/api/updates/check", summary="后台快速检测收藏帖子文字更新")
+def start_update_check(req: UpdateCheckRequest = UpdateCheckRequest()):
+    with _sync_lock:
+        with _check_lock:
+            if _sync_state["running"]:
+                raise HTTPException(status_code=409, detail="完整同步正在运行中，请稍后再快检")
+            if _check_state["running"]:
+                raise HTTPException(status_code=409, detail="更新快检正在运行中，请稍后")
+            _check_state.update({
+                "running": True,
+                "error": None,
+                "found": 0,
+                "checked": 0,
+                "updated": 0,
+                "created": 0,
+                "skipped": 0,
+            })
+    threading.Thread(target=_run_update_check, args=(req.user_id,), daemon=True).start()
+    return {"status": "started"}
+
+
+@app.get("/api/updates/check/status", summary="查询收藏帖子更新快检状态")
+def get_update_check_status():
+    return dict(_check_state)
+
+
 @app.get("/api/notes", summary="用户笔记列表")
 def list_notes(
     user_id:   str = Query(..., min_length=1, description="小红书用户 ID"),
     page:      int = Query(default=1,  ge=1,  description="页码，从 1 开始"),
     page_size: int = Query(default=20, ge=1, le=100, description="每页条数，最大 100"),
+    category:   str = Query(default="",  description="按分类筛选，空字符串表示全部"),
 ):
     """
     返回用户的笔记列表（从 SQLite 查询，按爬取时间倒序）。
     支持分页，可用于前端收藏夹展示。
     """
     with metadata_store() as store:
-        all_notes = store.notes(user_id=user_id)
+        all_notes = store.notes(user_id=user_id, category=category)
     all_notes = [
         {k: v for k, v in note.items() if k not in {"content", "content_parts"}}
         for note in all_notes
@@ -242,6 +383,20 @@ def list_notes(
     }
 
 
+@app.put("/api/notes/{note_id}/category", summary="修正笔记分类")
+def update_note_category(note_id: str, req: CategoryUpdateRequest):
+    """用户手动修改某条笔记的分类。"""
+    with NoteStore() as store:
+        existing = store.sqlite.conn.execute(
+            "SELECT 1 FROM notes WHERE note_id = ? AND user_id = ?",
+            (note_id, req.user_id),
+        ).fetchone()
+        if existing is None:
+            raise HTTPException(status_code=404, detail="笔记不存在")
+        store.sqlite.set_category(note_id, req.user_id, req.category)
+    return {"status": "ok", "note_id": note_id, "category": req.category}
+
+
 # ── 同步状态（进程级单例） ──────────────────────────────────────────
 
 _sync_lock  = threading.Lock()
@@ -250,6 +405,81 @@ _sync_state: dict = {
     "error":     None,   # 最近一次失败的错误信息
     "last_sync": None,   # 最近一次成功完成的 ISO 时间
 }
+
+# ── 分类状态（进程级单例） ──────────────────────────────────────────
+
+_classify_lock  = threading.Lock()
+_classify_state: dict = {
+    "running":   False,
+    "error":     None,
+    "last_run":  None,
+}
+
+
+class ClassifyRequest(BaseModel):
+    user_id: str = Field(..., min_length=1, description="小红书用户 ID")
+
+
+@app.post("/api/classify", summary="触发 AI 智能分类（异步，后台执行）")
+def start_classify(req: ClassifyRequest):
+    """
+    对未分类的笔记执行 AI 分类，后台子进程执行，接口立即返回。
+    通过 GET /api/classify/status 轮询进度。
+    """
+    with _classify_lock:
+        if _classify_state["running"]:
+            raise HTTPException(status_code=409, detail="分类任务已在运行中，请稍候")
+        _classify_state["running"] = True
+        _classify_state["error"]   = None
+
+    env = os.environ.copy()
+    log_path = os.path.join(_PROJECT_ROOT, "data", "sync.log")
+
+    def _run_classify():
+        try:
+            with open(log_path, "a", encoding="utf-8", buffering=1) as log_file:
+                log_file.write(
+                    f"\n{'=' * 56}\n"
+                    f"手动触发 AI 分类：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    f"{'=' * 56}\n"
+                )
+                log_file.flush()
+                result = subprocess.run(
+                    [sys.executable, "-m", "rag.classifier", "--user_id", req.user_id],
+                    cwd=_PROJECT_ROOT,
+                    env=env,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+            if result.returncode == 0:
+                _classify_state["last_run"] = datetime.now(timezone.utc).isoformat()
+                logger.info(f"手动分类完成，user_id={req.user_id}")
+            else:
+                try:
+                    with open(log_path, encoding="utf-8") as f:
+                        tail = f.read()[-500:].strip()
+                except Exception:
+                    tail = ""
+                _classify_state["error"] = tail or f"退出码 {result.returncode}"
+                logger.error(f"手动分类失败（code={result.returncode}）")
+        except Exception as exc:
+            _classify_state["error"] = str(exc)
+            logger.error(f"分类子进程异常：{exc}")
+        finally:
+            _classify_state["running"] = False
+
+    threading.Thread(target=_run_classify, daemon=True).start()
+    return {"status": "started"}
+
+
+@app.get("/api/classify/status", summary="查询分类任务状态")
+def get_classify_status():
+    return {
+        "running":  _classify_state["running"],
+        "error":    _classify_state["error"],
+        "last_run": _classify_state["last_run"],
+    }
 
 
 class SyncRequest(BaseModel):
@@ -266,12 +496,15 @@ def start_sync(req: SyncRequest = SyncRequest()):
     - 通过 GET /api/sync/status 轮询进度。
     """
     with _sync_lock:
+        if _check_state["running"]:
+            raise HTTPException(status_code=409, detail="更新快检正在运行中，请稍后再同步")
         if _sync_state["running"]:
             raise HTTPException(status_code=409, detail="同步任务已在运行中，请稍候")
         _sync_state["running"] = True
         _sync_state["error"]   = None
 
     env = os.environ.copy()
+    _sync_user_id = req.user_id or ""
     if req.user_id:
         env["XHS_USER_ID"] = req.user_id
 
@@ -300,7 +533,29 @@ def start_sync(req: SyncRequest = SyncRequest()):
                 )
                 ingest_ok = result.returncode == 0
 
-                # ── 第二步：导出调试页面（无论爬取是否成功均执行） ──
+                # ── 第二步：AI 分类（仅同步成功时执行） ──────
+                if ingest_ok:
+                    classify_user_id = _sync_user_id or env.get("XHS_USER_ID", "")
+                    if classify_user_id:
+                        log_file.write(
+                            f"\n{'=' * 56}\n"
+                            f"AI 智能分类\n"
+                            f"{'=' * 56}\n"
+                        )
+                        log_file.flush()
+                        subprocess.run(
+                            [
+                                sys.executable, "-m", "rag.classifier",
+                                "--user_id", classify_user_id,
+                            ],
+                            cwd=_PROJECT_ROOT,
+                            env=env,
+                            stdout=log_file,
+                            stderr=subprocess.STDOUT,
+                            text=True,
+                        )
+
+                # ── 第三步：导出调试页面（无论爬取是否成功均执行） ──
                 log_file.write(
                     f"\n{'=' * 56}\n"
                     f"导出开发调试页面\n"
