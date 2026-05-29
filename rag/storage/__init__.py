@@ -208,9 +208,9 @@ class NoteStore:
 
         return result
 
-    def notes(self, user_id: str = "") -> list[dict]:
+    def notes(self, user_id: str = "", category: str = "") -> list[dict]:
         """从 SQLite 返回元数据列表（供前端展示）。"""
-        return self.sqlite.all_notes(user_id=user_id)
+        return self.sqlite.all_notes(user_id=user_id, category=category)
 
     def archive_missing(self, user_id: str, current_note_ids: set[str]) -> list[str]:
         """
@@ -225,6 +225,18 @@ class NoteStore:
     def updated_notes(self, user_id: str = "") -> list[dict]:
         """返回内容已变化的笔记列表（content_changed_at 非空）。"""
         return self.sqlite.get_updated(user_id=user_id)
+
+    def mark_updates_seen(self, user_id: str, note_id: str | None = None) -> int:
+        """Mark one updated note, or all updated notes, as seen for the user."""
+        return self.sqlite.mark_updates_seen(user_id=user_id, note_id=note_id)
+
+    def save_lightweight_text(self, note: dict, user_id: str) -> str:
+        """Save title/body metadata from the fast update checker."""
+        return self.sqlite.upsert_lightweight_text(note, user_id=user_id)
+
+    def reset_text_update_baseline(self, user_id: str = "") -> int:
+        """Reset lightweight update alerts to the current title/body baseline."""
+        return self.sqlite.reset_text_update_baseline(user_id=user_id)
 
     # ── 统计 ──────────────────────────────────────────────────────
 

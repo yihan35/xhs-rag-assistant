@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { Plus, Trash2, Sparkles, BookMarked, ChevronLeft, RefreshCw, FileText, Film } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Plus, Trash2, Sparkles, BookMarked, ChevronLeft, RefreshCw, FileText, Film, Tag } from 'lucide-react'
+import { fetchCategories, updateNoteCategory } from '../hooks/useApi'
 
 export default function Sidebar({
   sessions,
@@ -10,12 +11,36 @@ export default function Sidebar({
   notes,
   notesLoading,
   stats,
+  updateCount = 0,
+  updateCheckState = null,
   onRefreshNotes,
+  onCategoryChange,
   onSync,
+  onMarkNoteSeen,
   syncState  = 'idle',
   syncError  = '',
+  userId,
+  onClassify,
+  classifyState = 'idle',
 }) {
   const [showNotes, setShowNotes] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [activeCategory, setActiveCategory] = useState('')
+  const [categoriesVersion, setCategoriesVersion] = useState(0)
+
+  // 加载分类列表（当打开收藏视图、笔记总数变化或分类被更新时）
+  useEffect(() => {
+    if (userId && showNotes) {
+      fetchCategories(userId).then(setCategories)
+    }
+  }, [userId, showNotes, stats?.sqlite_total, categoriesVersion])
+
+  // 同步或分类完成后刷新分类列表
+  useEffect(() => {
+    if (userId && showNotes && (syncState === 'done' || classifyState === 'done')) {
+      fetchCategories(userId).then(setCategories)
+    }
+  }, [syncState, classifyState, userId, showNotes])
 
   return (
     <aside className="flex flex-col h-full bg-white border-r border-pink-100 relative overflow-hidden">
@@ -35,6 +60,8 @@ export default function Sidebar({
         <div className="mt-3">
           <SyncStatus
             stats={stats}
+            updateCount={updateCount}
+            updateCheckState={updateCheckState}
             onRefresh={onRefreshNotes}
             onSync={onSync}
             syncState={syncState}
@@ -48,9 +75,20 @@ export default function Sidebar({
         {showNotes ? (
           <NotesView
             notes={notes}
-            loading={notesLoading}
+            loading={notesLoading || Boolean(updateCheckState?.running)}
             onBack={() => setShowNotes(false)}
             onRefresh={onRefreshNotes}
+            categories={categories}
+            activeCategory={activeCategory}
+            onCategoryChange={(cat) => {
+              setActiveCategory(cat)
+              onCategoryChange?.(cat)
+            }}
+            onClassify={onClassify}
+            classifyState={classifyState}
+            userId={userId}
+            onCategoriesRefresh={() => setCategoriesVersion(v => v + 1)}
+            onMarkNoteSeen={onMarkNoteSeen}
           />
         ) : (
           <SessionsView
@@ -74,10 +112,10 @@ export default function Sidebar({
             <BookMarked size={15} className="text-xhs-pink" />
             <span>我的收藏</span>
             <div className="ml-auto flex items-center gap-1.5">
-              {stats?.updated_count > 0 && (
+              {updateCount > 0 && (
                 <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1
                                  rounded-full bg-amber-400 text-white text-[10px] font-bold">
-                  {stats.updated_count}
+                  {updateCount}
                 </span>
               )}
               {stats?.sqlite_total > 0 && (
@@ -128,8 +166,9 @@ function SyncButton({ syncState, onSync }) {
   )
 }
 
-function SyncStatus({ stats, onRefresh, onSync, syncState, syncError }) {
+function SyncStatus({ stats, updateCount = 0, updateCheckState = null, onRefresh, onSync, syncState, syncError }) {
   const isRunning = syncState === 'running'
+  const isCheckingUpdates = Boolean(updateCheckState?.running)
 
   // 同步中：整行替换为进度提示
   if (isRunning) {
@@ -152,8 +191,6 @@ function SyncStatus({ stats, onRefresh, onSync, syncState, syncError }) {
   }
 
   const n            = stats.sqlite_total ?? 0
-  const updatedCount = stats.updated_count ?? 0
-
   return (
     <div className="flex flex-col gap-1">
       {/* 主状态行 */}
@@ -173,10 +210,17 @@ function SyncStatus({ stats, onRefresh, onSync, syncState, syncError }) {
       </div>
 
       {/* 更新提醒行 */}
-      {updatedCount > 0 && (
+      {updateCount > 0 && (
         <div className="flex items-center gap-1.5 text-xs text-amber-500">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span>{updatedCount} 篇内容有更新</span>
+          <span>{updateCount} 篇内容有更新</span>
+        </div>
+      )}
+
+      {isCheckingUpdates && (
+        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <RefreshCw size={10} className="animate-spin" />
+          <span>正在后台检查收藏更新</span>
         </div>
       )}
 
@@ -267,7 +311,34 @@ function SessionItem({ session, active, onSelect, onDelete }) {
 
 /* ── 收藏列表视图 ─────────────────────────────────────────────── */
 
-function NotesView({ notes, loading, onBack, onRefresh }) {
+function NotesView({
+  notes,
+  loading,
+  onBack,
+  onRefresh,
+  categories,
+  activeCategory,
+  onCategoryChange,
+  onClassify,
+  classifyState,
+  userId,
+  onCategoriesRefresh,
+  onMarkNoteSeen,
+}) {
+  const isClassifying = classifyState === 'running'
+  const classifyDone   = classifyState === 'done'
+  const [editingNoteId, setEditingNoteId] = useState(null)
+
+  const handleUpdateCategory = async (noteId, category) => {
+    try {
+      await updateNoteCategory(noteId, userId, category)
+      onCategoriesRefresh?.()
+      onCategoryChange?.(activeCategory)
+    } catch (e) {
+      console.error('update category error:', e)
+    }
+  }
+
   return (
     <>
       {/* 顶栏 */}
@@ -281,14 +352,64 @@ function NotesView({ notes, loading, onBack, onRefresh }) {
         </button>
         <span className="text-sm font-medium text-gray-700">我的收藏</span>
         <button
-          onClick={onRefresh}
+          onClick={onClassify}
+          disabled={isClassifying}
+          title="AI 智能分类"
+          className={`ml-auto px-2 py-0.5 rounded-md text-[10px] font-medium border
+                      transition-all duration-150 disabled:cursor-not-allowed
+                      ${classifyDone
+                        ? 'border-green-300 text-green-600 bg-green-50'
+                        : 'border-xhs-red/40 text-xhs-red bg-transparent hover:bg-xhs-rose hover:border-xhs-red/60'
+                      }`}
+        >
+          <Tag size={10} className={isClassifying ? 'animate-pulse' : ''} />
+        </button>
+        <button
+          onClick={() => onRefresh()}
           disabled={loading}
-          className="ml-auto text-gray-400 hover:text-xhs-red transition-colors disabled:opacity-40"
+          className="text-gray-400 hover:text-xhs-red transition-colors disabled:opacity-40"
           title="刷新"
         >
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
+
+      {/* 分类筛选栏 */}
+      {categories.length > 0 && (
+        <div
+          className="flex-shrink-0 px-3 pb-2 overflow-x-auto no-scrollbar"
+          onWheel={(e) => { e.currentTarget.scrollLeft += e.deltaY }}
+        >
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => onCategoryChange('')}
+              className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium
+                          transition-all duration-150
+                          ${activeCategory === ''
+                            ? 'bg-xhs-red text-white'
+                            : 'bg-pink-50 text-gray-500 hover:bg-pink-100 hover:text-gray-700'
+                          }`}
+            >
+              全部
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat.name}
+                onClick={() => onCategoryChange(cat.name)}
+                className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium
+                            transition-all duration-150
+                            ${activeCategory === cat.name
+                              ? 'bg-xhs-red text-white'
+                              : 'bg-pink-50 text-gray-500 hover:bg-pink-100 hover:text-gray-700'
+                            }`}
+              >
+                {cat.name}
+                <span className="ml-1 opacity-70">{cat.count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 笔记列表 */}
       <div className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5">
@@ -304,7 +425,16 @@ function NotesView({ notes, loading, onBack, onRefresh }) {
           </div>
         ) : (
           notes.map(note => (
-            <CompactNoteItem key={note.note_id} note={note} />
+            <CompactNoteItem
+              key={note.note_id}
+              note={note}
+              categories={categories}
+              onUpdateCategory={handleUpdateCategory}
+              isEditing={editingNoteId === note.note_id}
+              onStartEdit={(id) => setEditingNoteId(id)}
+              onEndEdit={() => setEditingNoteId(null)}
+              onMarkSeen={onMarkNoteSeen}
+            />
           ))
         )}
       </div>
@@ -312,46 +442,155 @@ function NotesView({ notes, loading, onBack, onRefresh }) {
   )
 }
 
-function CompactNoteItem({ note }) {
+function CompactNoteItem({
+  note,
+  categories,
+  onUpdateCategory,
+  isEditing,
+  onStartEdit,
+  onEndEdit,
+  onMarkSeen,
+}) {
   const [coverFailed, setCoverFailed] = useState(false)
   const hasCover = Boolean(note.cover_url) && !coverFailed
   const isVideo  = note.note_type === 'video'
+  const [customCat, setCustomCat] = useState('')
+  const dropdownRef = useRef(null)
+
+  // 点击外部区域关闭下拉
+  useEffect(() => {
+    if (!isEditing) return
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        onEndEdit()
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [isEditing, onEndEdit])
+
+  const handleSelect = (cat) => {
+    onEndEdit()
+    if (cat && cat !== note.category) {
+      onUpdateCategory?.(note.note_id, cat)
+    }
+  }
+
+  const handleCustomSubmit = (e) => {
+    if (e.key === 'Enter' && customCat.trim()) {
+      handleSelect(customCat.trim())
+      setCustomCat('')
+    }
+    if (e.key === 'Escape') {
+      onEndEdit()
+      setCustomCat('')
+    }
+  }
+
+  const availableCats = (categories || []).map(c => c.name).filter(c => c !== note.category)
 
   return (
-    <a
-      href={note.note_url || '#'}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex gap-2.5 p-2.5 rounded-xl hover:bg-pink-50 transition-colors group"
-      onClick={e => { if (!note.note_url) e.preventDefault() }}
-    >
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-pink-100">
-        {hasCover ? (
-          <img src={note.cover_url} alt={note.title}
-               className="w-full h-full object-cover" onError={() => setCoverFailed(true)} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            {isVideo ? <Film size={14} className="text-xhs-pink" /> : <FileText size={14} className="text-xhs-pink" />}
-          </div>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-gray-700 line-clamp-2 leading-snug group-hover:text-xhs-red transition-colors">
-          {note.title || '无标题'}
-        </p>
-        <div className="flex items-center gap-1 mt-1">
-          {note.content_changed_at && (
-            <span
-              className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"
-              title={`内容已更新：${new Date(note.content_changed_at).toLocaleDateString('zh-CN')}`}
-            />
-          )}
-          {note.indexed === 1 && !note.content_changed_at && (
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400" title="已向量化" />
+    <div className="flex gap-2.5 p-2.5 rounded-xl hover:bg-pink-50 transition-colors group">
+      {/* 封面 + 标题：可点击跳转 */}
+      <a
+        href={note.note_url || '#'}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex gap-2.5 flex-1 min-w-0"
+        onClick={e => {
+          if (!note.note_url) e.preventDefault()
+          if (note.has_unread_update) onMarkSeen?.(note.note_id)
+        }}
+      >
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-pink-100">
+          {hasCover ? (
+            <img src={note.cover_url} alt={note.title}
+                 className="w-full h-full object-cover" onError={() => setCoverFailed(true)} />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              {isVideo ? <Film size={14} className="text-xhs-pink" /> : <FileText size={14} className="text-xhs-pink" />}
+            </div>
           )}
         </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-gray-700 line-clamp-2 leading-snug group-hover:text-xhs-red transition-colors">
+            {note.title || '无标题'}
+          </p>
+          <div className="flex items-center gap-1 mt-1">
+            {note.has_unread_update && (
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"
+                title={note.content_changed_at ? `内容已更新：${new Date(note.content_changed_at).toLocaleDateString('zh-CN')}` : '内容已更新'}
+              />
+            )}
+            {note.indexed === 1 && !note.has_unread_update && (
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400" title="已向量化" />
+            )}
+            {note.has_unread_update && (
+              <span className="text-[10px] font-medium text-amber-500">已更新</span>
+            )}
+          </div>
+        </div>
+      </a>
+
+      {/* 分类 pill：独立于链接之外 */}
+      <div className="flex-shrink-0 flex items-start pt-0.5 relative">
+        {note.category ? (
+          <>
+            <button
+              onClick={() => isEditing ? onEndEdit() : onStartEdit(note.note_id)}
+              className="px-1.5 py-0.5 rounded text-[10px] font-medium
+                         bg-xhs-rose text-xhs-red hover:bg-xhs-red hover:text-white
+                         transition-colors cursor-pointer whitespace-nowrap"
+              title="点击修改分类"
+            >
+              {note.category}
+            </button>
+            {isEditing && (
+              <div ref={dropdownRef} className="absolute right-0 top-full mt-1 z-20 bg-white border border-pink-100
+                              rounded-lg shadow-lg py-1 min-w-[100px]">
+                {availableCats.length > 0 && (
+                  <>
+                    {availableCats.slice(0, 8).map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => handleSelect(cat)}
+                        className="block w-full text-left px-3 py-1.5 text-[11px] text-gray-600
+                                   hover:bg-pink-50 hover:text-xhs-red transition-colors whitespace-nowrap"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                    <div className="border-t border-pink-50 my-0.5" />
+                  </>
+                )}
+                <input
+                  type="text"
+                  placeholder="自定义分类..."
+                  value={customCat}
+                  onChange={e => setCustomCat(e.target.value)}
+                  onKeyDown={handleCustomSubmit}
+                  className="w-full px-3 py-1.5 text-[11px] text-gray-600 outline-none
+                             placeholder-gray-300 focus:bg-pink-50"
+                  maxLength={10}
+                  autoFocus
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <button
+            onClick={() => onStartEdit(note.note_id)}
+            className="px-1.5 py-0.5 rounded text-[10px] font-medium
+                       bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-500
+                       transition-colors cursor-pointer whitespace-nowrap"
+            title="添加分类"
+          >
+            未分类
+          </button>
+        )}
       </div>
-    </a>
+    </div>
   )
 }
 

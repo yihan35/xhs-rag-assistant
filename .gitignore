@@ -7,6 +7,7 @@ data/debug_state.json
 data/notes_debug.html
 data/*.pid
 data/*.log
+data_backup/
 
 # 保留目录结构
 !data/.gitkeep
@@ -48,3 +49,6 @@ data/notes.db.bak
 
 # Local agent/tool settings
 .claude/settings.local.json
+
+# Superpowers brainstorming artifacts
+.superpowers/
