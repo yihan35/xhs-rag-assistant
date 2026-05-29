@@ -59,3 +59,40 @@ def index_notes(notes: list[dict], user_id: str) -> dict:
                 logger.error(f"[{note.get('note_id')}] 入库失败：{e}")
                 failed += 1
     return {"new": new, "updated": updated, "failed": failed}
+
+
+def reindex_all(user_id: str) -> dict:
+    """
+    对指定用户的所有在库笔记重新向量化（用于 embedding 策略变更后的存量迁移）。
+
+    流程：将所有 is_collected=1 的笔记的 indexed 标记置 0，
+    然后重新 upsert 到 ChromaDB（自动使用最新的 document 构建策略）。
+
+    返回：{"reindexed": int, "failed": int}
+    """
+    from rag.storage import NoteStore
+
+    reindexed = failed = 0
+    with NoteStore() as store:
+        notes = store.sqlite.all_notes(user_id=user_id)
+        logger.info(f"[reindex_all] 共 {len(notes)} 条笔记待重建索引，user_id={user_id}")
+        for note in notes:
+            try:
+                content = (note.get("content") or "").strip()
+                if not content:
+                    logger.debug(f"[{note['note_id']}] content 为空，跳过")
+                    continue
+                store.chroma.upsert(
+                    note_id=note["note_id"],
+                    content=content,
+                    user_id=user_id,
+                    title=note.get("title", ""),
+                )
+                store.sqlite.mark_indexed(note["note_id"], user_id)
+                reindexed += 1
+            except Exception as e:
+                logger.error(f"[{note.get('note_id')}] 重建索引失败：{e}")
+                failed += 1
+
+    logger.info(f"[reindex_all] 完成：reindexed={reindexed}, failed={failed}")
+    return {"reindexed": reindexed, "failed": failed}

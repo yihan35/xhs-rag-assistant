@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Heart, FileText, Film } from 'lucide-react'
 
 export default function NoteCard({ note, compact = false, onClick, active = false }) {
-  const hasCover = note.cover_url && note.cover_url.startsWith('http')
+  const [coverFailed, setCoverFailed] = useState(false)
+  const hasCover = Boolean(note.cover_url) && !coverFailed
   const isVideo  = note.note_type === 'video'
 
   if (compact) {
@@ -22,7 +24,7 @@ export default function NoteCard({ note, compact = false, onClick, active = fals
               src={note.cover_url}
               alt={note.title}
               className="w-full h-full object-cover"
-              onError={e => { e.target.style.display = 'none' }}
+              onError={() => setCoverFailed(true)}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -71,7 +73,7 @@ export default function NoteCard({ note, compact = false, onClick, active = fals
             src={note.cover_url}
             alt={note.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={e => { e.target.style.display = 'none' }}
+            onError={() => setCoverFailed(true)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

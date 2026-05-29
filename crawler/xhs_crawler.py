@@ -368,7 +368,7 @@ class XHSCrawler:
                     "xsec_token": note.get("xsec_token", ""),
                     "title":      note.get("display_title") or note.get("title") or "",
                     "note_type":  note.get("type", "normal"),
-                    "cover_url":  cover.get("url") or cover.get("urlDefault") or "",
+                    "cover_url":  _best_image_url(cover),
                     "likes":      str((note.get("interact_info") or {}).get("liked_count", "0")),
                 })
 
@@ -525,6 +525,132 @@ class XHSCrawler:
             note_published_at=_parse_published_at(api_data),
         ).to_dict()
 
+    def fetch_note_text_snapshot(
+        self,
+        note_id: str,
+        xsec_token: str = "",
+        xsec_source: str = "pc_collect",
+    ) -> dict | None:
+        """
+        Fetch a lightweight title/body snapshot for update checks.
+
+        This skips Vision OCR, video transcription, and vector-ready media
+        enrichment so the app can detect text edits quickly.
+        """
+        if not xsec_token:
+            logger.warning(f"[{note_id}] 未提供 xsec_token，笔记可能无法访问")
+
+        note_url = build_note_url(note_id, xsec_token, xsec_source)
+        api_note_holder: list[dict] = []
+
+        def on_response(resp):
+            for pat in _NOTE_API_PATTERNS:
+                if pat in resp.url:
+                    try:
+                        body = resp.json()
+                        if body.get("success") or body.get("code") == 0:
+                            nd = _extract_note_from_api_body(body, note_id)
+                            if nd:
+                                api_note_holder.append(nd)
+                    except Exception as exc:
+                        logger.debug(f"[{note_id}] 解析 {pat} 响应失败：{exc}")
+                    break
+
+        self.open()
+        self.page.on("response", on_response)
+        try:
+            logger.info(f"[{note_id}] 快检导航到 {note_url}")
+            self.page.goto(note_url, wait_until="domcontentloaded", timeout=30_000)
+            try:
+                self.page.wait_for_selector(
+                    ", ".join(_TITLE_SELECTORS + [".error-page", ".note-unavailable"]),
+                    timeout=8_000,
+                )
+            except Exception:
+                pass
+            self.page.wait_for_timeout(1_000)
+
+            if "login" in self.page.url.lower():
+                logger.warning(f"[{note_id}] 未登录，请先手动登录")
+                return None
+
+            try:
+                body_text = self.page.inner_text("body")
+                if "暂时无法浏览" in body_text or "该内容暂不支持" in body_text:
+                    logger.warning(f"[{note_id}] 笔记不可访问")
+                    return None
+            except Exception:
+                pass
+
+            def _try_selectors(selectors: list[str]) -> str:
+                for sel in selectors:
+                    try:
+                        el = self.page.locator(sel).first
+                        if el.count() > 0:
+                            txt = el.inner_text()
+                            if txt and txt.strip():
+                                return txt.strip()
+                    except Exception:
+                        continue
+                return ""
+
+            dom_title = _try_selectors(_TITLE_SELECTORS)
+            dom_desc = _try_selectors(_DESC_SELECTORS)
+
+            dom_images: list[str] = []
+            try:
+                dom_images = self.page.evaluate("""
+                    () => {
+                        const imgs = document.querySelectorAll(
+                            '.swiper-slide img[src], .note-image img[src], .image-view img[src]'
+                        );
+                        const urls = [];
+                        imgs.forEach(img => {
+                            const s = img.getAttribute('src') || img.getAttribute('data-src') || '';
+                            if (s && s.startsWith('http') && !urls.includes(s)) urls.push(s);
+                        });
+                        return urls;
+                    }
+                """)
+            except Exception:
+                pass
+        finally:
+            try:
+                self.page.remove_listener("response", on_response)
+            except Exception:
+                pass
+
+        api_data = api_note_holder[0] if api_note_holder else {}
+        title = dom_title or api_data.get("title") or api_data.get("display_title") or ""
+        desc = dom_desc or api_data.get("desc") or api_data.get("description") or ""
+        ntype_raw = api_data.get("type") or api_data.get("note_type") or ""
+        ntype = "video" if ntype_raw == "video" else "image"
+
+        if api_data:
+            cover_url, other_images = _parse_images(api_data)
+        else:
+            cover_url = dom_images[0] if dom_images else ""
+            other_images = dom_images[1:] if len(dom_images) > 1 else []
+
+        if not title and not desc:
+            logger.warning(f"[{note_id}] 快检未能提取标题或正文")
+            return None
+
+        return RawNote(
+            note_id=note_id,
+            title=title,
+            content=desc,
+            tags=_parse_tags(api_data),
+            note_url=note_url,
+            cover_url=cover_url,
+            image_urls=other_images,
+            likes=_parse_likes(api_data),
+            note_type=ntype,
+            crawled_at=datetime.now(timezone.utc).isoformat(),
+            content_parts={"body": desc, "images": [], "video_transcript": ""},
+            note_published_at=_parse_published_at(api_data),
+        ).to_dict()
+
 
 # ═══════════════════════════════════════════════════════════════════
 # __INITIAL_STATE__ 解析（笔记详情专用，无需签名）
@@ -604,20 +730,31 @@ def _locate_note_data(state: dict, note_id: str) -> dict:
     return _search(state) or {}
 
 
+def _best_image_url(img: dict) -> str:
+    if not isinstance(img, dict):
+        return ""
+
+    for key in ("urlDefault", "url_default", "url", "urlPre", "url_pre"):
+        value = img.get(key)
+        if value:
+            return value
+
+    info = img.get("infoList") or img.get("info_list") or []
+    if not isinstance(info, list):
+        return ""
+
+    for item in reversed(info):
+        if isinstance(item, dict) and item.get("url"):
+            return item["url"]
+    return ""
+
+
 def _parse_images(note_data: dict) -> tuple[str, list[str]]:
     images = note_data.get("imageList") or note_data.get("image_list") or []
     if not images:
         return "", []
 
-    def best_url(img: dict) -> str:
-        for key in ("urlDefault", "url"):
-            v = img.get(key)
-            if v:
-                return v
-        info = img.get("infoList") or []
-        return info[-1].get("url", "") if info else ""
-
-    urls = [u for u in (best_url(img) for img in images) if u]
+    urls = [u for u in (_best_image_url(img) for img in images) if u]
     return (urls[0] if urls else ""), urls[1:]
 
 
