@@ -16,6 +16,7 @@ GLM-5.1 thinking 模式默认关闭（需显式 enabled 才开启），
 import logging
 from typing import Generator
 
+from .debug_logging import llm_io_logging_enabled, to_log_json
 from .llm_config import zhipu_client, CHAT_MODEL
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,20 @@ _DEFAULT_SYSTEM = (
 
 # 关闭 thinking 模式（GLM-5.1 虽默认关闭，此处显式声明防止行为漂移）
 _NO_THINKING = {"thinking": {"type": "disabled"}}
+
+
+def _log_llm_prompt(call_name: str, messages: list[dict]) -> None:
+    if llm_io_logging_enabled():
+        logger.info(
+            "[llm-io][analysis][%s][prompt]\n%s",
+            call_name,
+            to_log_json(messages),
+        )
+
+
+def _log_llm_output(call_name: str, output: str) -> None:
+    if llm_io_logging_enabled():
+        logger.info("[llm-io][analysis][%s][output]\n%s", call_name, output)
 
 
 def build_analysis_user_message(
@@ -90,14 +105,18 @@ def analyze(
         return "未找到相关笔记，请尝试换个关键词搜索。"
 
     try:
+        messages = _build_messages(user_query, context_notes, system_prompt)
+        _log_llm_prompt("analyze", messages)
         response = zhipu_client.chat.completions.create(
             model=CHAT_MODEL,
-            messages=_build_messages(user_query, context_notes, system_prompt),
+            messages=messages,
             temperature=temperature,
             max_tokens=max_tokens,
             extra_body=_NO_THINKING,
         )
-        return response.choices[0].message.content or ""
+        answer = response.choices[0].message.content or ""
+        _log_llm_output("analyze", answer)
+        return answer
     except Exception as e:
         logger.error(f"Chat API 调用失败：{e}")
         return ""
@@ -122,20 +141,27 @@ def analyze_stream(
         yield "未找到相关笔记，请尝试换个关键词搜索。"
         return
 
+    messages = _build_messages(user_query, context_notes, system_prompt)
+    _log_llm_prompt("analyze_stream", messages)
     stream = zhipu_client.chat.completions.create(
         model=CHAT_MODEL,
-        messages=_build_messages(user_query, context_notes, system_prompt),
+        messages=messages,
         temperature=temperature,
         max_tokens=max_tokens,
         stream=True,
         extra_body=_NO_THINKING,
     )
 
-    for chunk in stream:
-        delta = chunk.choices[0].delta
-        content = getattr(delta, "content", None) or ""
-        if content:
-            yield content
+    full_output = ""
+    try:
+        for chunk in stream:
+            delta = chunk.choices[0].delta
+            content = getattr(delta, "content", None) or ""
+            if content:
+                full_output += content
+                yield content
+    finally:
+        _log_llm_output("analyze_stream", full_output)
 
 
 def analyze_stream_with_history(
@@ -164,17 +190,24 @@ def analyze_stream_with_history(
         yield "暂无上下文，请先提问。"
         return
 
+    api_messages = [{"role": "system", "content": system_prompt}] + messages
+    _log_llm_prompt("analyze_stream_with_history", api_messages)
     stream = zhipu_client.chat.completions.create(
         model=CHAT_MODEL,
-        messages=[{"role": "system", "content": system_prompt}] + messages,
+        messages=api_messages,
         temperature=temperature,
         max_tokens=max_tokens,
         stream=True,
         extra_body=_NO_THINKING,
     )
 
-    for chunk in stream:
-        delta = chunk.choices[0].delta
-        content = getattr(delta, "content", None) or ""
-        if content:
-            yield content
+    full_output = ""
+    try:
+        for chunk in stream:
+            delta = chunk.choices[0].delta
+            content = getattr(delta, "content", None) or ""
+            if content:
+                full_output += content
+                yield content
+    finally:
+        _log_llm_output("analyze_stream_with_history", full_output)

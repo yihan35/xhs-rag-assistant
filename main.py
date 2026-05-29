@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typing import Literal
 
@@ -95,6 +96,9 @@ class QueryResponse(BaseModel):
 
 
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+_COVERS_DIR = os.path.join(_PROJECT_ROOT, "data", "covers")
+os.makedirs(_COVERS_DIR, exist_ok=True)
+app.mount("/covers", StaticFiles(directory=_COVERS_DIR), name="covers")
 
 # ── Session 存储（进程级单例，复用 notes.db） ─────────────────────
 _session_store = SessionStore(os.path.join(_PROJECT_ROOT, "data", "notes.db"))

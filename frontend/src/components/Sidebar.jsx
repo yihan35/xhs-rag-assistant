@@ -313,7 +313,8 @@ function NotesView({ notes, loading, onBack, onRefresh }) {
 }
 
 function CompactNoteItem({ note }) {
-  const hasCover = note.cover_url?.startsWith('http')
+  const [coverFailed, setCoverFailed] = useState(false)
+  const hasCover = Boolean(note.cover_url) && !coverFailed
   const isVideo  = note.note_type === 'video'
 
   return (
@@ -327,7 +328,7 @@ function CompactNoteItem({ note }) {
       <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-pink-100">
         {hasCover ? (
           <img src={note.cover_url} alt={note.title}
-               className="w-full h-full object-cover" onError={e => { e.target.style.display = 'none' }} />
+               className="w-full h-full object-cover" onError={() => setCoverFailed(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             {isVideo ? <Film size={14} className="text-xhs-pink" /> : <FileText size={14} className="text-xhs-pink" />}

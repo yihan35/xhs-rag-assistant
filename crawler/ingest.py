@@ -28,6 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from crawler import XHSCrawler, detect_user_id, load_or_extract_cookies
+from crawler.cover_cache import cache_cover_image
 from rag.storage import NoteStore
 
 logging.basicConfig(
@@ -137,6 +138,9 @@ def main() -> int:
                 )
 
                 if store.sqlite.is_indexed(note_id, user_id):
+                    cached_cover = cache_cover_image(note_id, meta.get("cover_url", ""))
+                    if cached_cover and cached_cover != meta.get("cover_url", ""):
+                        store.sqlite.update_cover_url(note_id, user_id, cached_cover)
                     logger.info("  跳过（已在向量库中）")
                     skipped_count += 1
                     continue

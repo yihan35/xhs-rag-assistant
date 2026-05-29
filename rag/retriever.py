@@ -27,6 +27,7 @@ import logging
 from rag.storage import NoteStore
 from rag.rewriter import rewrite_query
 from rag.expander import expand_query
+from rag.debug_logging import llm_io_logging_enabled, to_log_json
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ def retrieve(
     user_id: str,
     folder_id: str | None = None,
     top_k: int = 6,
+    mode: str = "unknown",
 ) -> list[dict]:
     """
     混合多路检索，返回相关笔记列表。
@@ -71,6 +73,14 @@ def retrieve(
     # Step 2：语义扩展，生成扩展词组（失败时静默返回 []）
     expanded = expand_query(q0)
     all_queries = [q0] + expanded  # [q0, q1?, q2?]
+    if llm_io_logging_enabled():
+        logger.info(
+            "[llm-io][retrieve][%s] original_query=%s\nrewritten_query=%s\nexpanded_queries=%s",
+            mode,
+            query,
+            q0,
+            to_log_json(expanded),
+        )
 
     # Step 3：多路混合检索，每路结果独立 RRF
     # 为让多路 RRF 叠加有意义，每路单独检索 fetch_k 条
@@ -89,6 +99,22 @@ def retrieve(
         logger.info(
             f"[retrieve] {len(merged)} 条合并结果均被相关度过滤，返回空。"
             f"最高 rrf_score={merged[0].get('rrf_score', 0):.4f}"
+        )
+    if llm_io_logging_enabled():
+        titles = [
+            {
+                "rank": i,
+                "note_id": doc.get("note_id", ""),
+                "title": doc.get("title", ""),
+                "distance": doc.get("distance"),
+                "rrf_score": doc.get("rrf_score"),
+            }
+            for i, doc in enumerate(relevant, start=1)
+        ]
+        logger.info(
+            "[llm-io][retrieve][%s] recalled_titles=%s",
+            mode,
+            to_log_json(titles),
         )
 
     return relevant

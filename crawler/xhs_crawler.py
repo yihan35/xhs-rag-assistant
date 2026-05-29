@@ -368,7 +368,7 @@ class XHSCrawler:
                     "xsec_token": note.get("xsec_token", ""),
                     "title":      note.get("display_title") or note.get("title") or "",
                     "note_type":  note.get("type", "normal"),
-                    "cover_url":  cover.get("url") or cover.get("urlDefault") or "",
+                    "cover_url":  _best_image_url(cover),
                     "likes":      str((note.get("interact_info") or {}).get("liked_count", "0")),
                 })
 
@@ -604,20 +604,31 @@ def _locate_note_data(state: dict, note_id: str) -> dict:
     return _search(state) or {}
 
 
+def _best_image_url(img: dict) -> str:
+    if not isinstance(img, dict):
+        return ""
+
+    for key in ("urlDefault", "url_default", "url", "urlPre", "url_pre"):
+        value = img.get(key)
+        if value:
+            return value
+
+    info = img.get("infoList") or img.get("info_list") or []
+    if not isinstance(info, list):
+        return ""
+
+    for item in reversed(info):
+        if isinstance(item, dict) and item.get("url"):
+            return item["url"]
+    return ""
+
+
 def _parse_images(note_data: dict) -> tuple[str, list[str]]:
     images = note_data.get("imageList") or note_data.get("image_list") or []
     if not images:
         return "", []
 
-    def best_url(img: dict) -> str:
-        for key in ("urlDefault", "url"):
-            v = img.get(key)
-            if v:
-                return v
-        info = img.get("infoList") or []
-        return info[-1].get("url", "") if info else ""
-
-    urls = [u for u in (best_url(img) for img in images) if u]
+    urls = [u for u in (_best_image_url(img) for img in images) if u]
     return (urls[0] if urls else ""), urls[1:]
 
 

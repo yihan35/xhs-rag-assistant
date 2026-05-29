@@ -261,6 +261,14 @@ class SQLiteStore:
         )
         self.conn.commit()
 
+    def update_cover_url(self, note_id: str, user_id: str, cover_url: str) -> None:
+        """更新本地封面 URL。用于已向量化笔记补齐封面缓存，不影响索引状态。"""
+        self.conn.execute(
+            "UPDATE notes SET cover_url = ? WHERE note_id = ? AND user_id = ?",
+            (cover_url, note_id, user_id),
+        )
+        self.conn.commit()
+
     def mark_uncollected_missing(self, user_id: str, current_note_ids: set[str]) -> list[str]:
         """
         将当前收藏列表中不存在的历史记录软归档。

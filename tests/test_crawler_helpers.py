@@ -79,6 +79,40 @@ class CrawlerHelperTests(unittest.TestCase):
         self.assertTrue(str(TEST_COOKIES_FILE).endswith("data/cookies.json"))
         self.assertTrue(str(DEBUG_STATE_FILE).endswith("data/debug_state.json"))
 
+    def test_best_image_url_accepts_collect_cover_snake_case_fields(self):
+        from crawler.xhs_crawler import _best_image_url
+
+        cover = {
+            "url_pre": "https://example.com/preview.webp",
+            "url_default": "https://example.com/default.webp",
+            "info_list": [
+                {"image_scene": "WB_PRV", "url": "https://example.com/info-preview.webp"},
+                {"image_scene": "WB_DFT", "url": "https://example.com/info-default.webp"},
+            ],
+        }
+
+        self.assertEqual(_best_image_url(cover), "https://example.com/default.webp")
+
+    def test_parse_images_accepts_snake_case_image_fields(self):
+        from crawler.xhs_crawler import _parse_images
+
+        note_data = {
+            "image_list": [
+                {"url_default": "https://example.com/first.webp"},
+                {
+                    "info_list": [
+                        {"image_scene": "WB_PRV", "url": "https://example.com/second-preview.webp"},
+                        {"image_scene": "WB_DFT", "url": "https://example.com/second-default.webp"},
+                    ],
+                },
+            ],
+        }
+
+        cover_url, image_urls = _parse_images(note_data)
+
+        self.assertEqual(cover_url, "https://example.com/first.webp")
+        self.assertEqual(image_urls, ["https://example.com/second-default.webp"])
+
     def test_chroma_client_initializes_once_under_concurrency(self):
         import rag.storage.chroma_store as chroma_store
 

@@ -1,6 +1,7 @@
 # 数据文件（不提交到 git）
 data/notes.db
 data/chroma_db/
+data/covers/
 data/cookies.json
 data/debug_state.json
 data/notes_debug.html

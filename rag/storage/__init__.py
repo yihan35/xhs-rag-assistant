@@ -54,6 +54,14 @@ class NoteStore:
 
         返回 True 表示新笔记，False 表示已存在（已更新）。
         """
+        try:
+            from crawler.cover_cache import cache_cover_image
+
+            note = dict(note)
+            note["cover_url"] = cache_cover_image(note.get("note_id", ""), note.get("cover_url", ""))
+        except Exception as e:
+            logger.warning(f"[{note.get('note_id')}] 封面缓存步骤失败，继续入库：{e}")
+
         is_new = self.sqlite.upsert(note, user_id)
         action = "新增" if is_new else "更新"
 

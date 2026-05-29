@@ -78,7 +78,7 @@ def handle_search(req, session_store: SessionStore) -> dict:
     """
     搜索模式：重新检索，保存 docs，清空 LLM 历史，不调 LLM。
     """
-    docs = retrieve(req.query, req.user_id, top_k=req.top_k)
+    docs = retrieve(req.query, req.user_id, top_k=req.top_k, mode="search")
     state = session_store.get(req.session_id) or _new_state()
     state.update({"docs": docs, "messages": [], "last_query": req.query})
     session_store.save(req.session_id, req.user_id, state)
@@ -119,14 +119,14 @@ def handle_stream(
     # 新话题 / 首次分析
     if not state["docs"]:
         # docs 为空：直接分析或新话题，重新检索
-        docs = retrieve(req.query, req.user_id, top_k=req.top_k)
+        docs = retrieve(req.query, req.user_id, top_k=req.top_k, mode="analysis")
         state["docs"] = docs
         logger.info(f"[session] {req.session_id[:8]}… → 首次分析，检索 {len(docs)} docs")
     else:
         # docs 已有
         if has_prior_analysis:
             # 明确的新话题：重新检索，刷新 docs
-            docs = retrieve(req.query, req.user_id, top_k=req.top_k)
+            docs = retrieve(req.query, req.user_id, top_k=req.top_k, mode="analysis")
             state["docs"] = docs
             logger.info(f"[session] {req.session_id[:8]}… → 新话题，刷新 docs")
         else:

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { User, Sparkles, Loader2, FileText } from 'lucide-react'
 
 export default function MessageBubble({ message }) {
@@ -112,7 +113,8 @@ export default function MessageBubble({ message }) {
 /* ── 来源卡片 ────────────────────────────────────────────────── */
 
 function SourceCard({ source }) {
-  const hasCover = source.cover_url?.startsWith('http')
+  const [coverFailed, setCoverFailed] = useState(false)
+  const hasCover = Boolean(source.cover_url) && !coverFailed
 
   return (
     <a
@@ -131,7 +133,7 @@ function SourceCard({ source }) {
             src={source.cover_url}
             alt={source.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={e => { e.target.style.display = 'none' }}
+            onError={() => setCoverFailed(true)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
