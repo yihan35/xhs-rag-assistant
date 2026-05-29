@@ -6,13 +6,16 @@ export function useNotes(userId) {
   const [notes, setNotes]     = useState([])
   const [loading, setLoading] = useState(false)
   const [stats, setStats]     = useState(null)
+  const [category, setCategory] = useState('')
 
-  const fetchNotes = useCallback(async (uid = userId) => {
+  const fetchNotes = useCallback(async (uid = userId, cat = '') => {
     if (!uid) return
     setLoading(true)
     try {
+      let url = `${BASE}/api/notes?user_id=${encodeURIComponent(uid)}&page_size=100`
+      if (cat) url += `&category=${encodeURIComponent(cat)}`
       const [notesRes, statsRes] = await Promise.all([
-        fetch(`${BASE}/api/notes?user_id=${encodeURIComponent(uid)}&page_size=100`),
+        fetch(url),
         fetch(`${BASE}/api/stats`),
       ])
       if (notesRes.ok) {
@@ -29,7 +32,7 @@ export function useNotes(userId) {
     }
   }, [userId])
 
-  return { notes, loading, stats, fetchNotes }
+  return { notes, loading, stats, fetchNotes, category, setCategory }
 }
 
 /**
@@ -95,6 +98,68 @@ export function useSync(onDone) {
   }, [state, onDone])
 
   return { startSync, syncState: state, syncError: errorMsg }
+}
+
+/**
+ * 智能分类 hook
+ *
+ * state: 'idle' | 'running' | 'done' | 'error'
+ * startClassify(userId) — 触发分类；完成后自动回调 onDone
+ */
+export function useClassify(onDone) {
+  const [state,    setState]    = useState('idle')
+  const [errorMsg, setErrorMsg] = useState('')
+  const pollRef = useRef(null)
+
+  useEffect(() => () => clearInterval(pollRef.current), [])
+
+  const startClassify = useCallback(async (userId) => {
+    if (!userId || state === 'running') return
+    setState('running')
+    setErrorMsg('')
+
+    try {
+      const res = await fetch('/api/classify', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ user_id: userId }),
+      })
+      if (!res.ok && res.status !== 409) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.detail || `启动失败 (${res.status})`)
+      }
+
+      pollRef.current = setInterval(async () => {
+        try {
+          const sr   = await fetch('/api/classify/status')
+          const data = await sr.json()
+          if (!data.running) {
+            clearInterval(pollRef.current)
+            if (data.error) {
+              setErrorMsg(data.error)
+              setState('error')
+              setTimeout(() => setState('idle'), 3000)
+            } else {
+              setState('done')
+              onDone?.()
+              setTimeout(() => setState('idle'), 2000)
+            }
+          }
+        } catch {
+          clearInterval(pollRef.current)
+          setErrorMsg('网络错误')
+          setState('error')
+          setTimeout(() => setState('idle'), 3000)
+        }
+      }, 2000)
+    } catch (e) {
+      setErrorMsg(e.message)
+      setState('error')
+      setTimeout(() => setState('idle'), 3000)
+    }
+  }, [state, onDone])
+
+  return { startClassify, classifyState: state, classifyError: errorMsg }
 }
 
 /** search 模式：JSON 响应 */
@@ -179,4 +244,27 @@ export async function queryStreamApi({ query, userId, sessionId, topK = 6 }, cal
   } finally {
     reader.releaseLock()
   }
+}
+
+/** 获取分类列表（去重计数） */
+export async function fetchCategories(userId) {
+  if (!userId) return []
+  const res = await fetch(`${BASE}/api/categories?user_id=${encodeURIComponent(userId)}`)
+  if (!res.ok) return []
+  const data = await res.json()
+  return data.categories || []
+}
+
+/** 修改笔记分类 */
+export async function updateNoteCategory(noteId, userId, category) {
+  const res = await fetch(`${BASE}/api/notes/${encodeURIComponent(noteId)}/category`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: userId, category }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.detail || `修改分类失败 (${res.status})`)
+  }
+  return res.json()
 }

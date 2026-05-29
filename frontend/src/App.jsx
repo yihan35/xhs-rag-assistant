@@ -3,7 +3,7 @@ import { Settings, PanelLeftClose, PanelLeft } from 'lucide-react'
 import Sidebar from './components/Sidebar.jsx'
 import ChatArea from './components/ChatArea.jsx'
 import SettingsModal from './components/SettingsModal.jsx'
-import { useNotes, useSync } from './hooks/useApi.js'
+import { useNotes, useSync, useClassify } from './hooks/useApi.js'
 import { useSessions } from './hooks/useSessions.js'
 
 const DEFAULT_USER_ID = '640c4bcc000000002a0088a8'
@@ -14,8 +14,9 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
 
-  const { notes, loading: notesLoading, stats, fetchNotes } = useNotes(userId)
+  const { notes, loading: notesLoading, stats, fetchNotes, category, setCategory } = useNotes(userId)
   const { startSync, syncState, syncError } = useSync(() => fetchNotes(userId))
+  const { startClassify, classifyState } = useClassify(() => fetchNotes(userId))
   const {
     sessions,
     currentId,
@@ -27,8 +28,8 @@ export default function App() {
   } = useSessions()
 
   useEffect(() => {
-    if (userId) fetchNotes(userId)
-  }, [userId])
+    if (userId) fetchNotes(userId, category)
+  }, [userId, category])
 
   const handleSaveUserId = useCallback(uid => {
     localStorage.setItem(LS_KEY, uid)
@@ -55,10 +56,13 @@ export default function App() {
           notes={notes}
           notesLoading={notesLoading}
           stats={stats}
-          onRefreshNotes={() => fetchNotes(userId)}
+          onRefreshNotes={(cat) => { setCategory(cat || ''); fetchNotes(userId, cat || '') }}
           onSync={() => startSync(userId)}
           syncState={syncState}
           syncError={syncError}
+          userId={userId}
+          onClassify={() => startClassify(userId)}
+          classifyState={classifyState}
         />
       </div>
 

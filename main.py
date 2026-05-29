@@ -94,6 +94,11 @@ class QueryResponse(BaseModel):
     total:   int
 
 
+class CategoryUpdateRequest(BaseModel):
+    user_id:  str = Field(..., min_length=1, description="小红书用户 ID")
+    category: str = Field(..., description="新分类名")
+
+
 _PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # ── Session 存储（进程级单例，复用 notes.db） ─────────────────────
@@ -213,18 +218,29 @@ def list_updates(
     return {"total": len(result), "notes": result}
 
 
+@app.get("/api/categories", summary="用户分类列表（去重计数）")
+def list_categories(
+    user_id: str = Query(..., min_length=1, description="小红书用户 ID"),
+):
+    """返回当前用户的分类列表，按笔记数量降序排列。"""
+    with metadata_store() as store:
+        categories = store.sqlite.get_categories(user_id=user_id)
+    return {"categories": categories}
+
+
 @app.get("/api/notes", summary="用户笔记列表")
 def list_notes(
     user_id:   str = Query(..., min_length=1, description="小红书用户 ID"),
     page:      int = Query(default=1,  ge=1,  description="页码，从 1 开始"),
     page_size: int = Query(default=20, ge=1, le=100, description="每页条数，最大 100"),
+    category:   str = Query(default="",  description="按分类筛选，空字符串表示全部"),
 ):
     """
     返回用户的笔记列表（从 SQLite 查询，按爬取时间倒序）。
     支持分页，可用于前端收藏夹展示。
     """
     with metadata_store() as store:
-        all_notes = store.notes(user_id=user_id)
+        all_notes = store.notes(user_id=user_id, category=category)
     all_notes = [
         {k: v for k, v in note.items() if k not in {"content", "content_parts"}}
         for note in all_notes
@@ -242,6 +258,20 @@ def list_notes(
     }
 
 
+@app.put("/api/notes/{note_id}/category", summary="修正笔记分类")
+def update_note_category(note_id: str, req: CategoryUpdateRequest):
+    """用户手动修改某条笔记的分类。"""
+    with NoteStore() as store:
+        existing = store.sqlite.conn.execute(
+            "SELECT 1 FROM notes WHERE note_id = ? AND user_id = ?",
+            (note_id, req.user_id),
+        ).fetchone()
+        if existing is None:
+            raise HTTPException(status_code=404, detail="笔记不存在")
+        store.sqlite.set_category(note_id, req.user_id, req.category)
+    return {"status": "ok", "note_id": note_id, "category": req.category}
+
+
 # ── 同步状态（进程级单例） ──────────────────────────────────────────
 
 _sync_lock  = threading.Lock()
@@ -250,6 +280,81 @@ _sync_state: dict = {
     "error":     None,   # 最近一次失败的错误信息
     "last_sync": None,   # 最近一次成功完成的 ISO 时间
 }
+
+# ── 分类状态（进程级单例） ──────────────────────────────────────────
+
+_classify_lock  = threading.Lock()
+_classify_state: dict = {
+    "running":   False,
+    "error":     None,
+    "last_run":  None,
+}
+
+
+class ClassifyRequest(BaseModel):
+    user_id: str = Field(..., min_length=1, description="小红书用户 ID")
+
+
+@app.post("/api/classify", summary="触发 AI 智能分类（异步，后台执行）")
+def start_classify(req: ClassifyRequest):
+    """
+    对未分类的笔记执行 AI 分类，后台子进程执行，接口立即返回。
+    通过 GET /api/classify/status 轮询进度。
+    """
+    with _classify_lock:
+        if _classify_state["running"]:
+            raise HTTPException(status_code=409, detail="分类任务已在运行中，请稍候")
+        _classify_state["running"] = True
+        _classify_state["error"]   = None
+
+    env = os.environ.copy()
+    log_path = os.path.join(_PROJECT_ROOT, "data", "sync.log")
+
+    def _run_classify():
+        try:
+            with open(log_path, "a", encoding="utf-8", buffering=1) as log_file:
+                log_file.write(
+                    f"\n{'=' * 56}\n"
+                    f"手动触发 AI 分类：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    f"{'=' * 56}\n"
+                )
+                log_file.flush()
+                result = subprocess.run(
+                    [sys.executable, "-m", "rag.classifier", "--user_id", req.user_id],
+                    cwd=_PROJECT_ROOT,
+                    env=env,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+            if result.returncode == 0:
+                _classify_state["last_run"] = datetime.now(timezone.utc).isoformat()
+                logger.info(f"手动分类完成，user_id={req.user_id}")
+            else:
+                try:
+                    with open(log_path, encoding="utf-8") as f:
+                        tail = f.read()[-500:].strip()
+                except Exception:
+                    tail = ""
+                _classify_state["error"] = tail or f"退出码 {result.returncode}"
+                logger.error(f"手动分类失败（code={result.returncode}）")
+        except Exception as exc:
+            _classify_state["error"] = str(exc)
+            logger.error(f"分类子进程异常：{exc}")
+        finally:
+            _classify_state["running"] = False
+
+    threading.Thread(target=_run_classify, daemon=True).start()
+    return {"status": "started"}
+
+
+@app.get("/api/classify/status", summary="查询分类任务状态")
+def get_classify_status():
+    return {
+        "running":  _classify_state["running"],
+        "error":    _classify_state["error"],
+        "last_run": _classify_state["last_run"],
+    }
 
 
 class SyncRequest(BaseModel):
@@ -272,6 +377,7 @@ def start_sync(req: SyncRequest = SyncRequest()):
         _sync_state["error"]   = None
 
     env = os.environ.copy()
+    _sync_user_id = req.user_id or ""
     if req.user_id:
         env["XHS_USER_ID"] = req.user_id
 
@@ -300,7 +406,29 @@ def start_sync(req: SyncRequest = SyncRequest()):
                 )
                 ingest_ok = result.returncode == 0
 
-                # ── 第二步：导出调试页面（无论爬取是否成功均执行） ──
+                # ── 第二步：AI 分类（仅同步成功时执行） ──────
+                if ingest_ok:
+                    classify_user_id = _sync_user_id or env.get("XHS_USER_ID", "")
+                    if classify_user_id:
+                        log_file.write(
+                            f"\n{'=' * 56}\n"
+                            f"AI 智能分类\n"
+                            f"{'=' * 56}\n"
+                        )
+                        log_file.flush()
+                        subprocess.run(
+                            [
+                                sys.executable, "-m", "rag.classifier",
+                                "--user_id", classify_user_id,
+                            ],
+                            cwd=_PROJECT_ROOT,
+                            env=env,
+                            stdout=log_file,
+                            stderr=subprocess.STDOUT,
+                            text=True,
+                        )
+
+                # ── 第三步：导出调试页面（无论爬取是否成功均执行） ──
                 log_file.write(
                     f"\n{'=' * 56}\n"
                     f"导出开发调试页面\n"
