@@ -191,12 +191,20 @@ class NoteStore:
         for rank, hit in enumerate(vec_hits, start=1):
             nid = hit["note_id"]
             scores[nid] = scores.get(nid, 0.0) + 1.0 / (k + rank)
-            note_data.setdefault(nid, hit)
+            note_data.setdefault(nid, dict(hit))
 
         for rank, hit in enumerate(bm25_hits, start=1):
             nid = hit["note_id"]
             scores[nid] = scores.get(nid, 0.0) + 1.0 / (k + rank)
-            note_data.setdefault(nid, hit)
+            if nid in note_data:
+                note_data[nid]["bm25_match"] = True
+                note_data[nid]["bm25"] = hit.get("bm25", note_data[nid].get("bm25"))
+                if not note_data[nid].get("title"):
+                    note_data[nid]["title"] = hit.get("title", "")
+            else:
+                entry = dict(hit)
+                entry["bm25_match"] = True
+                note_data[nid] = entry
 
         sorted_ids = sorted(scores, key=lambda nid: scores[nid], reverse=True)[:top_k]
 
