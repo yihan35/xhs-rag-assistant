@@ -420,11 +420,6 @@ _classify_state: dict = {
 }
 
 
-# ── 建议问题缓存（进程级） ──────────────────────────────────────────
-
-_suggestions_cache: dict[str, list[str]] = {}
-
-
 class SuggestionsResponse(BaseModel):
     suggestions: list[str]
 
@@ -440,10 +435,6 @@ def get_suggestions(
         "求职简历怎么写？",
         "好用的生产力工具？",
     ]
-
-    # 检查缓存
-    if user_id in _suggestions_cache:
-        return {"suggestions": _suggestions_cache[user_id]}
 
     # 查用户收藏
     with metadata_store() as store:
@@ -494,7 +485,6 @@ def get_suggestions(
         logger.warning("[suggestions] LLM 生成失败，使用默认问题")
         suggestions = DEFAULT
 
-    _suggestions_cache[user_id] = suggestions
     return {"suggestions": suggestions}
 
 
@@ -536,7 +526,6 @@ def start_classify(req: ClassifyRequest):
                 )
             if result.returncode == 0:
                 _classify_state["last_run"] = datetime.now(timezone.utc).isoformat()
-                _suggestions_cache.pop(req.user_id, None)
                 logger.info(f"手动分类完成，user_id={req.user_id}")
             else:
                 try:
@@ -664,7 +653,6 @@ def start_sync(req: SyncRequest = SyncRequest()):
                 logger.error(f"同步子进程失败（code={result.returncode}）")
             else:
                 _sync_state["last_sync"] = datetime.now(timezone.utc).isoformat()
-                _suggestions_cache.pop(_sync_user_id, None)
                 logger.info(f"同步子进程完成，日志：{log_path}")
         except Exception as exc:
             _sync_state["error"] = str(exc)
