@@ -24,6 +24,7 @@ API 端点：
 import json
 import logging
 import os
+import random
 import subprocess
 import sys
 import threading
@@ -455,6 +456,14 @@ def get_suggestions(
     if zhipu_client is None:
         return {"suggestions": DEFAULT}
 
+    hints = [
+        "这次多关注用户收藏量最多的分类。",
+        "这次尝试跨分类组合提问。",
+        "这次从实用角度出发，问一些能立刻行动的问题。",
+        "这次从好奇心角度出发，问一些能引发探索的问题。",
+        "这次关注冷门或小众的分类方向。",
+    ]
+
     try:
         resp = zhipu_client.chat.completions.create(
             model="glm-4.6",
@@ -465,6 +474,7 @@ def get_suggestions(
                     "只返回问题列表，每行一个问题，以 '- ' 开头。"
                     "问题应该覆盖不同分类，引导用户深入探索自己的收藏。"
                     "每个问题 10-20 字，中文口语风格。"
+                    + random.choice(hints)
                 )},
                 {"role": "user", "content": (
                     f"该用户收藏了 {total} 篇笔记\n"
@@ -472,7 +482,7 @@ def get_suggestions(
                     f"部分笔记标题：\n{titles_str}"
                 )},
             ],
-            temperature=0.8,
+            temperature=1.0,
             max_tokens=200,
             extra_body={"thinking": {"type": "disabled"}},
         )
