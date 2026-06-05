@@ -443,10 +443,11 @@ def get_suggestions(
         if total == 0:
             return {"suggestions": DEFAULT}
         categories = store.sqlite.get_categories(user_id=user_id)
-        notes = store.sqlite.all_notes(user_id=user_id, category="")
-        if not notes:
-            notes = store.sqlite.all_notes(user_id=user_id)
-        notes = notes[:10]
+        notes = store.sqlite.all_notes(user_id=user_id)
+        # 随机采样最多 10 条笔记，保证每次请求输入不同
+        if len(notes) > 8:
+            notes = random.sample(notes, 8)
+        random.shuffle(categories)
 
     # 拼分类和标题
     cats_str = ", ".join(f"{c['name']}({c['count']})" for c in categories[:8]) if categories else "暂无分类"
