@@ -444,9 +444,10 @@ def get_suggestions(
             return {"suggestions": DEFAULT}
         categories = store.sqlite.get_categories(user_id=user_id)
         notes = store.sqlite.all_notes(user_id=user_id)
-        # 按分类分组，每组至少采 1 条做保底，剩余名额加权采样
-        if len(notes) > 8:
-            cat_count = {c['name']: c['count'] for c in categories}
+        cat_count = {c['name']: c['count'] for c in categories}
+        sample_size = max(4, min(12, len(categories) * 2))
+        # 保底 + 加权采样
+        if len(notes) > sample_size:
             # 按分类分组
             by_cat: dict[str, list] = {}
             for n in notes:
@@ -460,14 +461,14 @@ def get_suggestions(
                 pool.extend([n for n in ns if n['note_id'] != pick['note_id']])
             random.shuffle(guaranteed)
             # 剩余名额加权采样
-            remaining = 8 - len(guaranteed)
+            remaining = sample_size - len(guaranteed)
             if remaining > 0 and pool:
                 weights = [cat_count.get(n.get('category', ''), 1) for n in pool]
                 scored = [(random.random() ** (1.0 / w), n) for n, w in zip(pool, weights)]
                 scored.sort(key=lambda x: x[0], reverse=True)
                 notes = guaranteed + [n for _, n in scored[:remaining]]
             else:
-                notes = guaranteed[:8]
+                notes = guaranteed[:sample_size]
             random.shuffle(notes)
         random.shuffle(categories)
 
