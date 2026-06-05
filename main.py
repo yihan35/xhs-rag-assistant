@@ -420,6 +420,84 @@ _classify_state: dict = {
 }
 
 
+# ── 建议问题缓存（进程级） ──────────────────────────────────────────
+
+_suggestions_cache: dict[str, list[str]] = {}
+
+
+class SuggestionsResponse(BaseModel):
+    suggestions: list[str]
+
+
+@app.get("/api/suggestions", response_model=SuggestionsResponse, summary="获取个性化建议问题")
+def get_suggestions(
+    user_id: str = Query(..., min_length=1, description="小红书用户 ID"),
+):
+    """根据用户收藏内容动态生成引导问题。收藏为空时返回默认问题。"""
+    DEFAULT = [
+        "面试经验有哪些总结？",
+        "有没有旅行攻略推荐？",
+        "求职简历怎么写？",
+        "好用的生产力工具？",
+    ]
+
+    # 检查缓存
+    if user_id in _suggestions_cache:
+        return {"suggestions": _suggestions_cache[user_id]}
+
+    # 查用户收藏
+    with metadata_store() as store:
+        total = store.sqlite.count(user_id=user_id)
+        if total == 0:
+            return {"suggestions": DEFAULT}
+        categories = store.sqlite.get_categories(user_id=user_id)
+        notes = store.sqlite.all_notes(user_id=user_id, category="")
+        if not notes:
+            notes = store.sqlite.all_notes(user_id=user_id)
+        notes = notes[:10]
+
+    # 拼分类和标题
+    cats_str = ", ".join(f"{c['name']}({c['count']})" for c in categories[:8]) if categories else "暂无分类"
+    titles_str = "\n".join(f"- {n.get('title', '无标题')[:40]}" for n in notes)
+
+    from rag.llm_config import zhipu_client
+    if zhipu_client is None:
+        return {"suggestions": DEFAULT}
+
+    try:
+        resp = zhipu_client.chat.completions.create(
+            model="glm-4.6",
+            messages=[
+                {"role": "system", "content": (
+                    "你是一个对话引导助手。根据用户的收藏内容，"
+                    "生成 4 个用户可能感兴趣的问题。"
+                    "只返回问题列表，每行一个问题，以 '- ' 开头。"
+                    "问题应该覆盖不同分类，引导用户深入探索自己的收藏。"
+                    "每个问题 10-20 字，中文口语风格。"
+                )},
+                {"role": "user", "content": (
+                    f"该用户收藏了 {total} 篇笔记\n"
+                    f"分类分布：{cats_str}\n"
+                    f"部分笔记标题：\n{titles_str}"
+                )},
+            ],
+            temperature=0.3,
+            max_tokens=200,
+            extra_body={"thinking": {"type": "disabled"}},
+        )
+        raw = resp.choices[0].message.content or ""
+        suggestions = [line.lstrip("- ").strip() for line in raw.split("\n") if line.strip().startswith("-")]
+        suggestions = suggestions[:4]
+        if len(suggestions) < 2:
+            suggestions = DEFAULT
+    except Exception:
+        logger.warning("[suggestions] LLM 生成失败，使用默认问题")
+        suggestions = DEFAULT
+
+    _suggestions_cache[user_id] = suggestions
+    return {"suggestions": suggestions}
+
+
 class ClassifyRequest(BaseModel):
     user_id: str = Field(..., min_length=1, description="小红书用户 ID")
 
@@ -458,6 +536,7 @@ def start_classify(req: ClassifyRequest):
                 )
             if result.returncode == 0:
                 _classify_state["last_run"] = datetime.now(timezone.utc).isoformat()
+                _suggestions_cache.pop(req.user_id, None)
                 logger.info(f"手动分类完成，user_id={req.user_id}")
             else:
                 try:
@@ -585,6 +664,7 @@ def start_sync(req: SyncRequest = SyncRequest()):
                 logger.error(f"同步子进程失败（code={result.returncode}）")
             else:
                 _sync_state["last_sync"] = datetime.now(timezone.utc).isoformat()
+                _suggestions_cache.pop(_sync_user_id, None)
                 logger.info(f"同步子进程完成，日志：{log_path}")
         except Exception as exc:
             _sync_state["error"] = str(exc)
