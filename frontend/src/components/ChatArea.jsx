@@ -8,7 +8,7 @@ export default function ChatArea({ session, onUpdateSession, userId, noteCount }
   const [mode, setMode]     = useState('search')
   const [loading, setLoading] = useState(false)
   const [autoScroll, setAutoScroll] = useState(true)
-  const [suggestions, setSuggestions] = useState([])
+  const [suggestions, setSuggestions] = useState(null)
   const [suggestionsLoading, setSuggestionsLoading] = useState(false)
 
   const scrollRef   = useRef(null)
@@ -295,7 +295,8 @@ function WelcomeScreen({ mode, onSuggest, suggestions, loading }) {
     '求职简历怎么写？',
     '好用的生产力工具？',
   ]
-  const items = loading ? [] : (suggestions.length > 0 ? suggestions : DEFAULT_SUGGESTIONS)
+  const pending = loading || suggestions === null
+  const items = pending ? [] : (suggestions.length > 0 ? suggestions : DEFAULT_SUGGESTIONS)
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60%] gap-8 animate-fade-in">
@@ -316,11 +317,11 @@ function WelcomeScreen({ mode, onSuggest, suggestions, loading }) {
         <div className="flex items-center gap-2 mb-3">
           <Lightbulb size={13} className="text-xhs-pink" />
           <span className="text-xs text-gray-400 font-medium">
-            {loading ? '正在生成建议...' : '试试这些问题'}
+            {pending ? '正在生成建议...' : '试试这些问题'}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {loading ? (
+          {pending ? (
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="h-[52px] rounded-xl bg-gray-100 animate-pulse" />
             ))

@@ -472,7 +472,7 @@ def get_suggestions(
                     f"部分笔记标题：\n{titles_str}"
                 )},
             ],
-            temperature=0.3,
+            temperature=0.8,
             max_tokens=200,
             extra_body={"thinking": {"type": "disabled"}},
         )
