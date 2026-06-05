@@ -446,29 +446,28 @@ def get_suggestions(
         notes = store.sqlite.all_notes(user_id=user_id)
         cat_count = {c['name']: c['count'] for c in categories}
         sample_size = max(4, min(12, len(categories) * 2))
-        # 保底 + 加权采样
+        max_guarantee = sample_size // 2
+        # 保底 + 加权采样（保底不超过一半名额，确保大类永远有机会）
         if len(notes) > sample_size:
-            # 按分类分组
             by_cat: dict[str, list] = {}
             for n in notes:
                 by_cat.setdefault(n.get('category', '其他'), []).append(n)
-            # 每类保底 1 条
-            guaranteed = []
-            pool = []
-            for cat, ns in by_cat.items():
-                pick = random.choice(ns)
-                guaranteed.append(pick)
-                pool.extend([n for n in ns if n['note_id'] != pick['note_id']])
-            random.shuffle(guaranteed)
-            # 剩余名额加权采样
+            # 随机选 max_guarantee 个分类各保底 1 条
+            cat_names = list(by_cat.keys())
+            random.shuffle(cat_names)
+            guaranteed_cats = cat_names[:max_guarantee]
+            guaranteed = [random.choice(by_cat[c]) for c in guaranteed_cats]
+            guaranteed_ids = {n['note_id'] for n in guaranteed}
+            # 剩余名额从全量池加权采样（含所有分类）
             remaining = sample_size - len(guaranteed)
-            if remaining > 0 and pool:
+            pool = [n for n in notes if n['note_id'] not in guaranteed_ids]
+            if remaining > 0:
                 weights = [cat_count.get(n.get('category', ''), 1) for n in pool]
                 scored = [(random.random() ** (1.0 / w), n) for n, w in zip(pool, weights)]
                 scored.sort(key=lambda x: x[0], reverse=True)
                 notes = guaranteed + [n for _, n in scored[:remaining]]
             else:
-                notes = guaranteed[:sample_size]
+                notes = guaranteed
             random.shuffle(notes)
         random.shuffle(categories)
 
