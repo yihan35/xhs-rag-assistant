@@ -444,9 +444,13 @@ def get_suggestions(
             return {"suggestions": DEFAULT}
         categories = store.sqlite.get_categories(user_id=user_id)
         notes = store.sqlite.all_notes(user_id=user_id)
-        # 随机采样最多 10 条笔记，保证每次请求输入不同
+        # 加权采样：收藏数多的分类下的笔记有更高概率被选中
         if len(notes) > 8:
-            notes = random.sample(notes, 8)
+            cat_count = {c['name']: c['count'] for c in categories}
+            weights = [cat_count.get(n.get('category', ''), 1) for n in notes]
+            scored = [(random.random() ** (1.0 / w), n) for n, w in zip(notes, weights)]
+            scored.sort(key=lambda x: x[0], reverse=True)
+            notes = [n for _, n in scored[:8]]
         random.shuffle(categories)
 
     # 拼分类和标题
