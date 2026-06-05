@@ -444,13 +444,31 @@ def get_suggestions(
             return {"suggestions": DEFAULT}
         categories = store.sqlite.get_categories(user_id=user_id)
         notes = store.sqlite.all_notes(user_id=user_id)
-        # 加权采样：收藏数多的分类下的笔记有更高概率被选中
+        # 按分类分组，每组至少采 1 条做保底，剩余名额加权采样
         if len(notes) > 8:
             cat_count = {c['name']: c['count'] for c in categories}
-            weights = [cat_count.get(n.get('category', ''), 1) for n in notes]
-            scored = [(random.random() ** (1.0 / w), n) for n, w in zip(notes, weights)]
-            scored.sort(key=lambda x: x[0], reverse=True)
-            notes = [n for _, n in scored[:8]]
+            # 按分类分组
+            by_cat: dict[str, list] = {}
+            for n in notes:
+                by_cat.setdefault(n.get('category', '其他'), []).append(n)
+            # 每类保底 1 条
+            guaranteed = []
+            pool = []
+            for cat, ns in by_cat.items():
+                pick = random.choice(ns)
+                guaranteed.append(pick)
+                pool.extend([n for n in ns if n['note_id'] != pick['note_id']])
+            random.shuffle(guaranteed)
+            # 剩余名额加权采样
+            remaining = 8 - len(guaranteed)
+            if remaining > 0 and pool:
+                weights = [cat_count.get(n.get('category', ''), 1) for n in pool]
+                scored = [(random.random() ** (1.0 / w), n) for n, w in zip(pool, weights)]
+                scored.sort(key=lambda x: x[0], reverse=True)
+                notes = guaranteed + [n for _, n in scored[:remaining]]
+            else:
+                notes = guaranteed[:8]
+            random.shuffle(notes)
         random.shuffle(categories)
 
     # 拼分类和标题
