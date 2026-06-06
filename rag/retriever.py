@@ -160,7 +160,10 @@ def _multi_rrf_merge(
             scores[nid] = scores.get(nid, 0.0) + 1.0 / (k + rank)
             # 优先保留 content 字段最丰富的版本（向量路已携带）
             if nid not in note_data or not note_data[nid].get("content"):
-                note_data[nid] = hit
+                note_data[nid] = dict(hit)
+            elif hit.get("bm25_match"):
+                note_data[nid]["bm25_match"] = True
+                note_data[nid]["bm25"] = hit.get("bm25", note_data[nid].get("bm25"))
 
     sorted_ids = sorted(scores, key=lambda nid: scores[nid], reverse=True)[:top_k]
     result = []
@@ -183,6 +186,9 @@ def _filter_by_relevance(hits: list[dict], threshold: float) -> list[dict]:
     """
     result = []
     for h in hits:
+        if h.get("bm25_match"):
+            result.append(h)
+            continue
         dist = h.get("distance", 1.0)
         # BM25-only 命中的笔记 distance 字段不存在或为 1.0（默认值）
         is_bm25_only = "distance" not in h or dist >= 0.999
