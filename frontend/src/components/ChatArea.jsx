@@ -3,18 +3,13 @@ import { Send, Search, Sparkles, Square, Lightbulb } from 'lucide-react'
 import MessageBubble from './MessageBubble.jsx'
 import { queryApi, queryStreamApi } from '../hooks/useApi.js'
 
-const SUGGESTIONS = [
-  '面试经验有哪些总结？',
-  '有没有旅行攻略推荐？',
-  '求职简历怎么写？',
-  '好用的生产力工具？',
-]
-
 export default function ChatArea({ session, onUpdateSession, userId, noteCount }) {
   const [input, setInput]   = useState('')
   const [mode, setMode]     = useState('search')
   const [loading, setLoading] = useState(false)
   const [autoScroll, setAutoScroll] = useState(true)
+  const [suggestions, setSuggestions] = useState(null)
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
 
   const scrollRef   = useRef(null)
   const textareaRef = useRef(null)
@@ -45,6 +40,17 @@ export default function ChatArea({ session, onUpdateSession, userId, noteCount }
     ta.style.height = 'auto'
     ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'
   }, [input])
+
+  // 加载个性化建议问题
+  useEffect(() => {
+    if (!userId || noteCount === null || noteCount === undefined) return
+    setSuggestionsLoading(true)
+    fetch(`/api/suggestions?user_id=${encodeURIComponent(userId)}`)
+      .then(res => res.ok ? res.json() : Promise.reject(res))
+      .then(data => setSuggestions(data.suggestions || []))
+      .catch(() => setSuggestions([]))
+      .finally(() => setSuggestionsLoading(false))
+  }, [userId, noteCount])
 
   const stopStream = useCallback(() => {
     abortRef.current?.abort()
@@ -158,7 +164,7 @@ export default function ChatArea({ session, onUpdateSession, userId, noteCount }
         className="flex-1 overflow-y-auto px-6 py-6 space-y-5"
       >
         {isEmpty ? (
-          <WelcomeScreen mode={mode} onSuggest={sendMessage} />
+          <WelcomeScreen mode={mode} onSuggest={sendMessage} suggestions={suggestions} loading={suggestionsLoading} />
         ) : (
           messages.map(msg => (
             <MessageBubble key={msg.id} message={msg} />
@@ -282,7 +288,16 @@ function ModeChip({ active, icon, label, onClick, disabled }) {
 
 /* ── 欢迎页（空会话时显示） ──────────────────────────────────── */
 
-function WelcomeScreen({ mode, onSuggest }) {
+function WelcomeScreen({ mode, onSuggest, suggestions, loading }) {
+  const DEFAULT_SUGGESTIONS = [
+    '面试经验有哪些总结？',
+    '有没有旅行攻略推荐？',
+    '求职简历怎么写？',
+    '好用的生产力工具？',
+  ]
+  const pending = loading || suggestions === null
+  const items = pending ? [] : (suggestions.length > 0 ? suggestions : DEFAULT_SUGGESTIONS)
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[60%] gap-8 animate-fade-in">
       <div className="text-center">
@@ -301,20 +316,28 @@ function WelcomeScreen({ mode, onSuggest }) {
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-3">
           <Lightbulb size={13} className="text-xhs-pink" />
-          <span className="text-xs text-gray-400 font-medium">试试这些问题</span>
+          <span className="text-xs text-gray-400 font-medium">
+            {pending ? '正在生成建议...' : '试试这些问题'}
+          </span>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {SUGGESTIONS.map(s => (
-            <button
-              key={s}
-              onClick={() => onSuggest(s)}
-              className="text-left text-sm px-4 py-3 rounded-xl bg-white border border-pink-100
-                         hover:border-xhs-red/40 hover:shadow-card hover:text-xhs-red
-                         transition-all duration-200 text-gray-600 leading-snug"
-            >
-              {s}
-            </button>
-          ))}
+          {pending ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-[52px] rounded-xl bg-gray-100 animate-pulse" />
+            ))
+          ) : (
+            items.map(s => (
+              <button
+                key={s}
+                onClick={() => onSuggest(s)}
+                className="text-left text-sm px-4 py-3 rounded-xl bg-white border border-pink-100
+                           hover:border-xhs-red/40 hover:shadow-card hover:text-xhs-red
+                           transition-all duration-200 text-gray-600 leading-snug"
+              >
+                {s}
+              </button>
+            ))
+          )}
         </div>
       </div>
     </div>

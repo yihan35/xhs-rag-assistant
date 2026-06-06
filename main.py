@@ -24,6 +24,7 @@ API 端点：
 import json
 import logging
 import os
+import random
 import subprocess
 import sys
 import threading
@@ -418,6 +419,106 @@ _classify_state: dict = {
     "error":     None,
     "last_run":  None,
 }
+
+
+class SuggestionsResponse(BaseModel):
+    suggestions: list[str]
+
+
+@app.get("/api/suggestions", response_model=SuggestionsResponse, summary="获取个性化建议问题")
+def get_suggestions(
+    user_id: str = Query(..., min_length=1, description="小红书用户 ID"),
+):
+    """根据用户收藏内容动态生成引导问题。收藏为空时返回默认问题。"""
+    DEFAULT = [
+        "面试经验有哪些总结？",
+        "有没有旅行攻略推荐？",
+        "求职简历怎么写？",
+        "好用的生产力工具？",
+    ]
+
+    # 查用户收藏
+    with metadata_store() as store:
+        total = store.sqlite.count(user_id=user_id)
+        if total == 0:
+            return {"suggestions": DEFAULT}
+        categories = store.sqlite.get_categories(user_id=user_id)
+        notes = store.sqlite.all_notes(user_id=user_id)
+        cat_count = {c['name']: c['count'] for c in categories}
+        sample_size = max(4, min(12, len(categories) * 2))
+        max_guarantee = sample_size // 2
+        # 保底 + 加权采样（保底不超过一半名额，确保大类永远有机会）
+        if len(notes) > sample_size:
+            by_cat: dict[str, list] = {}
+            for n in notes:
+                by_cat.setdefault(n.get('category', '其他'), []).append(n)
+            # 随机选 max_guarantee 个分类各保底 1 条
+            cat_names = list(by_cat.keys())
+            random.shuffle(cat_names)
+            guaranteed_cats = cat_names[:max_guarantee]
+            guaranteed = [random.choice(by_cat[c]) for c in guaranteed_cats]
+            guaranteed_ids = {n['note_id'] for n in guaranteed}
+            # 剩余名额从全量池加权采样（含所有分类）
+            remaining = sample_size - len(guaranteed)
+            pool = [n for n in notes if n['note_id'] not in guaranteed_ids]
+            if remaining > 0:
+                weights = [cat_count.get(n.get('category', ''), 1) for n in pool]
+                scored = [(random.random() ** (1.0 / w), n) for n, w in zip(pool, weights)]
+                scored.sort(key=lambda x: x[0], reverse=True)
+                notes = guaranteed + [n for _, n in scored[:remaining]]
+            else:
+                notes = guaranteed
+            random.shuffle(notes)
+        random.shuffle(categories)
+
+    # 拼分类和标题
+    cats_str = ", ".join(f"{c['name']}({c['count']})" for c in categories[:8]) if categories else "暂无分类"
+    titles_str = "\n".join(f"- {n.get('title', '无标题')[:40]}" for n in notes)
+
+    from rag.llm_config import zhipu_client
+    if zhipu_client is None:
+        return {"suggestions": DEFAULT}
+
+    hints = [
+        "这次多关注用户收藏量最多的分类。",
+        "这次尝试跨分类组合提问。",
+        "这次从实用角度出发，问一些能立刻行动的问题。",
+        "这次从好奇心角度出发，问一些能引发探索的问题。",
+        "这次关注冷门或小众的分类方向。",
+    ]
+
+    try:
+        resp = zhipu_client.chat.completions.create(
+            model="glm-4.6",
+            messages=[
+                {"role": "system", "content": (
+                    "你是一个对话引导助手。根据用户收藏中实际存在的笔记，"
+                    "生成 4 个该用户一定能在收藏中找到相关内容的问题。"
+                    "每个问题都必须有至少一篇笔记能回答。"
+                    "只返回问题列表，每行一个问题，以 '- ' 开头。"
+                    "问题应该覆盖不同分类，每个问题 10-20 字，中文口语风格。"
+                    + random.choice(hints)
+                )},
+                {"role": "user", "content": (
+                    f"该用户收藏了 {total} 篇笔记，请从以下笔记中提炼出可回答的问题：\n"
+                    f"分类分布：{cats_str}\n"
+                    f"部分笔记标题：\n{titles_str}"
+                )},
+            ],
+            temperature=1.0,
+            max_tokens=200,
+            extra_body={"thinking": {"type": "disabled"}},
+        )
+        raw = resp.choices[0].message.content or ""
+        suggestions = [line.lstrip("- ").strip() for line in raw.split("\n") if line.strip().startswith("-")]
+        suggestions = suggestions[:4]
+        if len(suggestions) < 2:
+            suggestions = DEFAULT
+    except Exception:
+        logger.warning("[suggestions] LLM 生成失败，使用默认问题")
+        suggestions = DEFAULT
+
+    return {"suggestions": suggestions}
 
 
 class ClassifyRequest(BaseModel):
