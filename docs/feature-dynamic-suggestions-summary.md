@@ -1,7 +1,7 @@
 # 动态建议问题 — 总结报告
 
-**分支**: `feature-dynamic-suggestions`  
-**日期**: 2026-06-05  
+**分支**: `feature-dynamic-suggestions`
+**日期**: 2026-06-05
 **负责人**: 曾君毅
 
 ---
